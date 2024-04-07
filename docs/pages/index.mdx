@@ -1,15 +1,48 @@
 ---
 layout: landing
+content: 
+  width: 60rem
 ---
 
 import { HomePage } from 'vocs/components'
+import { KeyPoint } from './KeyPoint';
 
-<HomePage.Root>
-  <HomePage.Logo />
-  <HomePage.InstallPackage name="papee" type="i" />
-  <HomePage.Description>Typescript API to interact with polkadot chains.</HomePage.Description>
-  <HomePage.Buttons>
-    <HomePage.Button href="/getting-started" variant="accent">Get started</HomePage.Button>
-    <HomePage.Button href="https://github.com/polkadot-api/polkadot-api">GitHub</HomePage.Button>
-  </HomePage.Buttons>
+<HomePage.Root style={{}}>
+  <div className="flex justify-between w-full flex-col md:flex-row gap-4">
+    <div className="flex flex-col text-left">
+      <HomePage.Logo />
+      <HomePage.Description>Typescript API to interact with polkadot chains.</HomePage.Description>
+      <HomePage.Buttons className="py-2">
+        <HomePage.Button href="/getting-started" variant="accent">Get started</HomePage.Button>
+        <HomePage.Button href="https://github.com/polkadot-api/polkadot-api">GitHub</HomePage.Button>
+      </HomePage.Buttons>
+    </div>
+
+    <HomePage.InstallPackage name="papee" type="i" />
+  </div>
+  
+  <div className="flex gap-2 flex-col md:flex-row mt-8">
+    <KeyPoint title="Light client first">
+      Built from the ground up for the light client, allowing running a node from the browser.
+    </KeyPoint>
+    <KeyPoint title="Full typed API">
+      IDEs show all the type information for every operation of a chain.
+    </KeyPoint>
+    <KeyPoint title="Lightweight">
+      Minimal impact on the main bundle (under 50kB)
+    </KeyPoint>
+  </div>
+
+  <div className="text-left w-full max-w-2xl p-2">
+    <h2 className="text-[--vocs-color_heading] text-3xl py-4 border-b border-gray-500 mb-4">Features</h2>
+    <ul className="list-disc pl-5">
+      <li>Connect to the chain through a light client or a WebSocket connection</li>
+      <li>Perform storage queries or runtime calls</li>
+      <li>Generate the types of a chain through its current metadata</li>
+      <li>Compatibility checks</li>
+      <li>Multiple connections to different chains</li>
+      <li>Transaction API in read-only and read/write mode</li>
+      <li>Promise-based or Observable-based API for your needs</li>
+    </ul>
+  </div>
 </HomePage.Root>
