@@ -1,3 +1,72 @@
 # Get started
 
-Hello world!
+Start by installing papee, and a chain provider of your choice.
+
+In this guide we will use `@substrate/connect` provider, which tries to connect through the
+extension or it fallbacks to a light client. More info about providers can be found on the next page.
+
+```sh
+npm i papee @substrate/connect
+```
+
+:::warning
+`papee` is a tentative package name while it's in beta. The package name might change, but the API
+is expected to be fairly stable.
+:::
+
+Next, download the latest metadata from the chain you want to connect to and generate the types:
+
+```sh
+# `papi add` is the command
+# `dot` is the name we're giving to this chain (can be any JS variable name)
+# `-n polkadot` specifies to download the metadata from the well-known chain polkadot
+npx papi add dot -n polkadot
+# Wait for latest metadata to download, then generate types:
+npx papi
+```
+
+:::info
+It's a really good idea to add `papi` to the "postinstall" script in package.json, to automate
+generating the types after install.
+:::
+
+Now you can create a PolkadotClient with that provider:
+
+```ts filename="createClient.ts"
+import { WellKnownChain, createClient } from "papee";
+import { getScProvider } from "papee/sc-provider";
+import { createScClient } from "@substrate/connect";
+
+const scProvider = getScProvider(createScClient());
+
+// Connect to the polkadot relay chain.
+const client = createClient(
+  scProvider(WellKnownChain.polkadot).relayChain
+);
+```
+
+With the `client` you can get information such as subscribing to the last block to get the latest
+hash:
+
+```ts
+client.finalized$.subscribe(
+  finalizedBlock => console.log(finalizedBlock.number, finalizedBlock.hash)
+)
+```
+
+To interact with the chain, you need to get the `TypedApi`, which includes all the types for every
+call in that chain:
+
+```ts
+// `dot` is the name we gave to `npx papi add`
+import { dot } from 'papee/descriptors';
+// [!include createClient.ts]
+
+const dotApi = client.getTypedApi(dot);
+
+// get the value for an account
+const accountInfo = await dotApi.query.System.Account.getValue(
+  "16JGzEsi8gcySKjpmxHVrkLTHdFHodRepEz8n244gNZpr9J"
+)
+```
+
