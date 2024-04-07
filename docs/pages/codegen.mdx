@@ -1,3 +1,38 @@
 # Codegen
 
-codegen
+Technically, to connect to a chain all you need is just the provider. But to interact with it you
+need to know the list of storage, runtime and transaction calls and their types.
+
+During runtime, the library can request the metadata for the chain it's connected to, and from this
+it generates all the codecs to interact with it, but as a developer you need to get that information
+beforehand.
+
+Polkadot-API has a CLI that downloads the metadata for a chain, and then uses that metadata to
+generate all the type descriptors.
+
+`papi add` registers a new chain. It needs a source, where it should get the metadata from, and a
+key. The command stores the source+key of that chain into a configuration file `polkadot-api.json`
+and then downloads a fresh metadata into a file `${key}.scale`.
+
+```
+$ npx papi add --help
+
+Usage: polkadot-api add [options] <key>
+
+Add a new chain spec to the list
+
+Arguments:
+  key                         Key identifier for the chain spec
+
+Options:
+  --config <filename>         Source for the config file
+  -f, --file <filename>       Source from metadata encoded file
+  -w, --wsUrl <URL>           Source from websocket url
+  -c, --chainSpec <filename>  Source from chain spec file
+  -n, --name <name>           Source from a well-known chain (choices: "polkadot", "ksmcc3", "rococo_v2_2", "westend2")
+  --no-persist                Do not persist the metadata as a file
+  -h, --help                  display help for command
+```
+
+The CLI can then be used to generate the type descriptors for all of the added chains. [WIP]
+
