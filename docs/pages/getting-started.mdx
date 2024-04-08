@@ -1,8 +1,8 @@
-# Get started
+# Getting Started
 
-Start by installing papee, and a chain provider of your choice.
+Start by installing papee and a chain provider of your choice.
 
-In this guide we will use `@substrate/connect` provider, which tries to connect through the extension or it fallbacks to a light client. More info about providers can be found on the next  age.
+In this guide, we will use the `@substrate/connect` provider, which attempts to connect through the extension or falls back to a light client. More information about providers can be found on the next page.
 
 ```sh
 npm i papee @substrate/connect
@@ -19,12 +19,12 @@ Next, download the latest metadata from the chain you want to connect to and gen
 # `dot` is the name we're giving to this chain (can be any JS variable name)
 # `-n polkadot` specifies to download the metadata from the well-known chain polkadot
 npx papi add dot -n polkadot
-# Wait for latest metadata to download, then generate types:
+# Wait for the latest metadata to download, then generate the types:
 npx papi
 ```
 
 :::info
-It's a really good idea to add `papi` to the "postinstall" script in package.json, to automate generating the types after install.
+It's a really good idea to add papi to the "postinstall" script in package.json to automate generating the types after installation.
 :::
 
 Now you can create a PolkadotClient with that provider:
@@ -42,7 +42,7 @@ const client = createClient(
 );
 ```
 
-With the `client` you can get information such as subscribing to the last block to get the latest hash:
+With the `client`, you can get information such as subscribing to the last block to get the latest hash:
 
 ```ts
 client.finalized$.subscribe(
