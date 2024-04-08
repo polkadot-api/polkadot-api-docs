@@ -8,6 +8,7 @@
     "preview": "vocs preview"
   },
   "dependencies": {
+    "@radix-ui/react-tabs": "^1.0.4",
     "@types/react": "latest",
     "react": "latest",
     "react-dom": "latest",

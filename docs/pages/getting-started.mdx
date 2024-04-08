@@ -1,12 +1,30 @@
+import * as Tabs from '../components/Tabs';
+
 # Getting Started
 
-Start by installing papee and a chain provider of your choice.
+Start by installing papee and a JSON RPC provider of your choice.
 
-In this guide, we will use the `@substrate/connect` provider, which attempts to connect through the extension or falls back to a light client. More information about providers can be found on the next page.
-
-```sh
-npm i papee @substrate/connect
-```
+<Tabs.Root options={{
+  web: 'WebSocket',
+  sc: '@substrate/connect',
+  sm: 'Smoldot'
+}}>
+  <Tabs.Content value="web">
+    ```sh
+    npm i papee
+    ```
+  </Tabs.Content>
+  <Tabs.Content value="sc">
+    ```sh
+    npm i papee @substrate/connect
+    ```
+  </Tabs.Content>
+  <Tabs.Content value="sm">
+    ```sh
+    npm i papee smoldot @substrate/connect-known-chains
+    ```
+  </Tabs.Content>
+</Tabs.Root>
 
 :::warning
 `papee` is a tentative package name while it's in beta. The package name might change, but the API is expected to be fairly stable.
@@ -27,41 +45,72 @@ npx papi
 It's a really good idea to add papi to the "postinstall" script in package.json to automate generating the types after installation.
 :::
 
-Now you can create a PolkadotClient with that provider:
+Now you can create a PolkadotClient with that provider and start interacting with the API:
+ 
+<Tabs.Root options={{
+  web: 'WebSocket',
+  node: 'NodeJS Socket',
+  sc: '@substrate/connect',
+  sm: 'Smoldot'
+}}>
+  <Tabs.Content value="web">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { WebSocketProvider } from "papee/ws-provider-web";
 
-```ts filename="createClient.ts"
-import { WellKnownChain, createClient } from "papee";
-import { getScProvider } from "papee/sc-provider";
-import { createScClient } from "@substrate/connect";
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      WebSocketProvider("wss://dot-rpc.stakeworld.io")
+    );
 
-const scProvider = getScProvider(createScClient());
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
+  <Tabs.Content value="node">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { WebSocketProvider } from "papee/ws-provider-node";
 
-// Connect to the polkadot relay chain.
-const client = createClient(
-  scProvider(WellKnownChain.polkadot).relayChain
-);
-```
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      WebSocketProvider("wss://dot-rpc.stakeworld.io")
+    );
 
-With the `client`, you can get information such as subscribing to the last block to get the latest hash:
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
+  <Tabs.Content value="sc">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { getScProvider } from "papee/sc-provider";
+    import { createScClient } from "@substrate/connect";
 
-```ts
-client.finalized$.subscribe(
-  finalizedBlock => console.log(finalizedBlock.number, finalizedBlock.hash)
-)
-```
+    const scProvider = getScProvider(createScClient());
 
-To interact with the chain, you need to get the `TypedApi`, which includes all the types for every call in that chain:
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      scProvider(WellKnownChain.polkadot).relayChain
+    );
 
-```ts
-// `dot` is the name we gave to `npx papi add`
-import { dot } from 'papee/descriptors';
-// [!include createClient.ts]
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
+  <Tabs.Content value="sm">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { getSmProvider } from "papee/sm-provider";
+    import { polkadot } from "@substrate/connect-known-chains";
+    import { start } from "smoldot";
 
-const dotApi = client.getTypedApi(dot);
+    const smoldot = start();
+    const chain = await smoldot.addChain({ chainSpec: polkadot });
 
-// get the value for an account
-const accountInfo = await dotApi.query.System.Account.getValue(
-  "16JGzEsi8gcySKjpmxHVrkLTHdFHodRepEz8n244gNZpr9J"
-)
-```
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      getSmProvider(chain)
+    );
 
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
+</Tabs.Root>
