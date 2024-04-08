@@ -10,13 +10,8 @@ beforehand.
 Polkadot-API has a CLI that downloads the metadata for a chain, and then uses that metadata to
 generate all the type descriptors.
 
-`papi add` registers a new chain. It needs a source, where it should get the metadata from, and a
-key. The command stores the source+key of that chain into a configuration file `polkadot-api.json`
-and then downloads a fresh metadata into a file `${key}.scale`.
-
-```
-$ npx papi add --help
-
+```sh
+> npx papi add --help
 Usage: polkadot-api add [options] <key>
 
 Add a new chain spec to the list
@@ -34,5 +29,100 @@ Options:
   -h, --help                  display help for command
 ```
 
-The CLI can then be used to generate the type descriptors for all of the added chains. [WIP]
+`papi add` registers a new chain. It requires a key, which is the JS variable name the codegen will
+create, and a source (`-f`, `-w`, `-c` or `-n`). The command stores this information for later use
+into a configuration file `polkadot-api.json`, and then downloads a fresh metadata into a file
+`${key}.scale`.
 
+You can add as many chains as you want, but each has to have a unique `key` (which must be a valid JS variable name)
+
+The CLI can then be used to generate the type descriptors for all of the added chains through the
+`generate` command.
+
+```sh
+npx papi generate
+# `generate` is the default command, so you can just run
+npx papi
+```
+
+It's recommended to add `papi` to the `postinstall` script in package.json to have it automatically generate the code after installing:
+
+```js
+{
+  // ...
+  "scripts": {
+    // ...
+    "postinstall": "papi"
+  }
+}
+```
+
+The code is generated into a new node_modules package `@polkadot-api/descriptors`, but it's always
+re-exported from `papee/descriptors`.
+
+:::info
+Some package managers clean the `node_modules` folder after installing or removing dependencies. When that happens, run the codegen again.
+:::
+
+## Contents
+
+The generated code contains all of the types extracted from the metadata of all chains:
+
+- For every pallet:
+  - Storage queries
+  - Transactions
+  - Events
+  - Errors
+  - Constants
+- Every runtime call
+
+These are consumed by `getTypedApi()`, which allows the IDE to reference any of these calls with autocompletion, etc. On runtime, it also contains the checksum of each of these calls, so that it can detect incompatibilities with the chain it's connected to.
+
+The types are anonymous (they don't have a name in the metadata), but PolkadotAPI has a directory of well-known types for some of the most widely used Enums. If a chain is using one of these well-known types, it's also generated and exported.
+
+In the event that there are two chains with the two well-known type that have the same name but they are different, then the key is appended at the beginning of the type. For instance, if two chains `dot` and `ksm` might have a slightly different `PreimageRequestStatus`, in that case the codegen exports `DotPreimageRequestStatus` and `KsmPreimageRequestStatus`.
+
+## Usage
+
+Import from `pappe/descriptors` every chain and type that you need, then use it through `getTypedApi()`.
+
+```ts
+import {
+  dot,
+  ksm,
+  XcmVersionedMultiLocation,
+  XcmVersionedXcm,
+  XcmV2Instruction,
+  XcmV2MultilocationJunctions,
+} from 'papee/descriptors';
+
+// ...
+
+const dotClient = createClient(
+    scProvider(WellKnownChain.polkadot).relayChain
+)
+const ksmClient = createClient(
+    scProvider(WellKnownChain.ksmcc3).relayChain
+)
+
+const dotApi = dotClient.getTypedApi(dot);
+const ksmApi = ksmClient.getTypedApi(ksm);
+
+const xcmSendTx = dotApi.tx.XcmPallet.send({
+  dest: XcmVersionedMultiLocation.V2({
+    parents: 0,
+    interior: XcmV2MultilocationJunctions.Here(),
+  }),
+  message: XcmVersionedXcm.V2([
+    XcmV2Instruction.ClearOrigin()
+  ]),
+});
+
+const encodedData = await xcmSendTx.getEncodedData();
+
+const finalizedCall = await xcmSendTx.signAndSubmit(signer);
+```
+
+:::info
+`getTypedApi` has nearly no cost in runtime, so it can be safely called many times.
+:::
