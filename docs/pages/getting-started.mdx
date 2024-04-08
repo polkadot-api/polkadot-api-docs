@@ -83,7 +83,7 @@ Now you can create a PolkadotClient with that provider and start interacting wit
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
     import { getScProvider } from "papee/sc-provider";
-    import { createScClient } from "@substrate/connect";
+    import { WellKnownChain, createScClient } from "@substrate/connect";
 
     const scProvider = getScProvider(createScClient());
 

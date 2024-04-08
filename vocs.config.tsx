@@ -17,6 +17,10 @@ export default defineConfig({
       link: "/codegen",
     },
     {
+      text: "Types",
+      link: "/types",
+    },
+    {
       text: "Signers",
       link: "/signers",
     },

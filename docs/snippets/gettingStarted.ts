@@ -1,7 +1,7 @@
 // [!region import]
 // `dot` is the name we gave to `npx papi add`
 import { dot } from "papee/descriptors";
-import { WellKnownChain, createClient } from "papee";
+import { createClient } from "papee";
 // [!endregion import]
 
 // [!region usage]

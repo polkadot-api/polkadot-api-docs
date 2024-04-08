@@ -1,0 +1,107 @@
+# Types
+
+All the types defined in the metadata of a chain are anonymous: They represent the structure of the data, down to the primitive types.
+
+Polkadot-API has some types defined that make it easier working with chain data.
+
+## SS58String
+
+Binary values tagged as a accounts are abstracted as `SS58String`. The type `SS58String` exported by Polkadot-API is an alias of `string`, but it's indicative that the string that it expects is an SS58-formatted string. The value will be encoded to the public address in binary.
+
+When PolkadotAPI receives an `SS58String` as a parameter, it can be in any valid format. But the `SS58String` returned from any of the methods will always be in the format declared by the chain's metadata.
+
+```ts
+const dotApi = client.getTypedApi(dot);
+
+const [proxies, deposit] = await dotApi.query.Proxy.Proxies.getValue(
+  // HDX format (for demo purposes that it accepts any SS58 string, regardless of the chain)
+  "7LE64AxmGixNsxFs1rdsDkER5nuuQ28MbrSS7JtHwRmdcdam"
+);
+
+console.log(proxies[0].delegate);
+// "12R1XCdgkHysv8Y4ntiXguo4eUYHXjQTmfRjL8FbmezsG71j", which is polkadot's format
+```
+
+## HexString
+
+Another alias of `string`, but indicates that the value is a valid hexadecimal string. It accepts the string with or without the `0x` prefix, but `HexString` returned from methods always have `0x`.
+
+
+## Enum
+
+
+## Binary
+
+Any array of u8's is represented as Binary. This is a utility type that has a few functions to easily create binary data:
+
+```ts
+Binary.fromBytes(new Uint8Array())
+Binary.fromHex("0b187a23c4f65d86c9a324b56f7e81aa")
+const binary = Binary.fromText("Text that will be turned into binary")
+
+binary.asBytes(); // Uint8Array
+binary.asHex(); // "0x5465787420746861742077696c6c206265207475726e656420696e746f2062696e617279"
+binary.asText(); // "Text that will be turned into binary"
+
+```
+
+## FixedSizeBinary&lt;L&gt;
+
+Same as `Binary`, but when the chain metadata specifies a length. The length is shown as a type parameter, for reference.
+
+## FixedSizeArray&lt;L, T&gt;
+
+When the metadata has a type that's an array of a specific length, that's also shown as a `FixedSizeArray&lt;L, T&gt;`, which is a superset of `Array&lt;T&gt;>`, except that it checks that the length must be `L`.
+
+## Interface types
+
+The types returned from any call are available through the top-level exports
+
+```ts
+import {
+  dot,
+  DotQueries,
+  DotCalls,
+  DotConstants,
+  DotErrors,
+  DotEvents,
+} from "@polkadot-api/descriptors";
+
+// Storage queries
+function processAccount(account: DotQueries["System"]["Account"]["Value"]) {
+  // ...
+}
+processAccount(await dotApi.query.System.Account.getValue("SS58Account"));
+
+// Constants
+function formatSS58Account(
+  value: DotConstants["System"]["SS58Prefix"],
+  account: Uint8Array
+) {
+  // ...
+}
+formatSS58Account(await dotApi.constants.System.SS58Prefix(), new Uint8Array());
+
+// Transactions
+function performTransfer(
+  transfer: DotCalls["Balances"]["transfer_allow_death"]
+) {
+  return dotApi.tx.Balances.transfer_allow_death(transfer).signAndSubmit(
+    signer
+  );
+}
+performTransfer({
+  dest: MultiAddress.Id("SS58Account"),
+  value: 100n,
+});
+
+// Events
+function reactToNewAccount(event: DotEvents['System']['NewAccount']) {
+  // ...
+}
+
+// Errors
+function logError(error: DotErrors['System']['InvalidSpecName']) {
+  // ...
+}
+```
