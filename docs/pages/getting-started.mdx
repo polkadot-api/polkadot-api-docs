@@ -2,16 +2,14 @@
 
 Start by installing papee, and a chain provider of your choice.
 
-In this guide we will use `@substrate/connect` provider, which tries to connect through the
-extension or it fallbacks to a light client. More info about providers can be found on the next page.
+In this guide we will use `@substrate/connect` provider, which tries to connect through the extension or it fallbacks to a light client. More info about providers can be found on the next  age.
 
 ```sh
 npm i papee @substrate/connect
 ```
 
 :::warning
-`papee` is a tentative package name while it's in beta. The package name might change, but the API
-is expected to be fairly stable.
+`papee` is a tentative package name while it's in beta. The package name might change, but the API is expected to be fairly stable.
 :::
 
 Next, download the latest metadata from the chain you want to connect to and generate the types:
@@ -26,8 +24,7 @@ npx papi
 ```
 
 :::info
-It's a really good idea to add `papi` to the "postinstall" script in package.json, to automate
-generating the types after install.
+It's a really good idea to add `papi` to the "postinstall" script in package.json, to automate generating the types after install.
 :::
 
 Now you can create a PolkadotClient with that provider:
@@ -45,8 +42,7 @@ const client = createClient(
 );
 ```
 
-With the `client` you can get information such as subscribing to the last block to get the latest
-hash:
+With the `client` you can get information such as subscribing to the last block to get the latest hash:
 
 ```ts
 client.finalized$.subscribe(
@@ -54,8 +50,7 @@ client.finalized$.subscribe(
 )
 ```
 
-To interact with the chain, you need to get the `TypedApi`, which includes all the types for every
-call in that chain:
+To interact with the chain, you need to get the `TypedApi`, which includes all the types for every call in that chain:
 
 ```ts
 // `dot` is the name we gave to `npx papi add`

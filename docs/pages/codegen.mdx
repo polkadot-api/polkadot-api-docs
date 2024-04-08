@@ -1,14 +1,10 @@
 # Codegen
 
-Technically, to connect to a chain all you need is just the provider. But to interact with it you
-need to know the list of storage, runtime and transaction calls and their types.
+Technically, to connect to a chain all you need is just the provider. But to interact with it you need to know the list of storage, runtime and transaction calls and their types.
 
-During runtime, the library can request the metadata for the chain it's connected to, and from this
-it generates all the codecs to interact with it, but as a developer you need to get that information
-beforehand.
+During runtime, the library can request the metadata for the chain it's connected to, and from this it generates all the codecs to interact with it, but as a developer you need to get that information beforehand.
 
-Polkadot-API has a CLI that downloads the metadata for a chain, and then uses that metadata to
-generate all the type descriptors.
+Polkadot-API has a CLI that downloads the metadata for a chain, and then uses that metadata to generate all the type descriptors.
 
 ```sh
 > npx papi add --help
@@ -29,15 +25,11 @@ Options:
   -h, --help                  display help for command
 ```
 
-`papi add` registers a new chain. It requires a key, which is the JS variable name the codegen will
-create, and a source (`-f`, `-w`, `-c` or `-n`). The command stores this information for later use
-into a configuration file `polkadot-api.json`, and then downloads a fresh metadata into a file
-`${key}.scale`.
+`papi add` registers a new chain. It requires a key, which is the JS variable name the codegen will create, and a source (`-f`, `-w`, `-c` or `-n`). The command stores this information for later use into a configuration file `polkadot-api.json`, and then downloads a fresh metadata into a file `${key}.scale`.
 
 You can add as many chains as you want, but each has to have a unique `key` (which must be a valid JS variable name)
 
-The CLI can then be used to generate the type descriptors for all of the added chains through the
-`generate` command.
+The CLI can then be used to generate the type descriptors for all of the added chains through the `generate` command.
 
 ```sh
 npx papi generate
@@ -57,8 +49,7 @@ It's recommended to add `papi` to the `postinstall` script in package.json to ha
 }
 ```
 
-The code is generated into a new node_modules package `@polkadot-api/descriptors`, but it's always
-re-exported from `papee/descriptors`.
+The code is generated into a new node_modules package `@polkadot-api/descriptors`, but it's always re-exported from `papee/descriptors`.
 
 :::info
 Some package managers clean the `node_modules` folder after installing or removing dependencies. When that happens, run the codegen again.
