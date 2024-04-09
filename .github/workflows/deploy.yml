@@ -1,0 +1,50 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm i
+      - name: Build
+        run: npm run build
+      - name: Setup git credentials
+        run: |
+          mkdir --parents ~/.ssh
+          DEPLOY_KEY_FILE=~/.ssh/deploy_key
+          echo "${{ secrets.SSH_DEPLOY_KEY }}" > "$DEPLOY_KEY_FILE"
+          chmod 600 "$DEPLOY_KEY_FILE"
+
+          SSH_KNOWN_HOSTS_FILE="$HOME/.ssh/known_hosts"
+          ssh-keyscan -H "github.com" > "$SSH_KNOWN_HOSTS_FILE"
+
+      - name: Clone deploy repo
+        run: |
+          DEPLOY_KEY_FILE=~/.ssh/deploy_key
+          SSH_KNOWN_HOSTS_FILE="$HOME/.ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i "$DEPLOY_KEY_FILE" -o UserKnownHostsFile=$SSH_KNOWN_HOSTS_FILE"
+          mkdir deploy
+          cd deploy
+          git clone git@github.com:polkadot-api/polkadot-api-docs.git ./
+          git checkout --track origin/gh-pages
+          /bin/rm -rf *
+          cd ..
+      - name: Move new release
+        run: cp -R docs/dist/* deploy/
+      - name: Commit and push
+        run: |
+          DEPLOY_KEY_FILE=~/.ssh/deploy_key
+          SSH_KNOWN_HOSTS_FILE="$HOME/.ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i "$DEPLOY_KEY_FILE" -o UserKnownHostsFile=$SSH_KNOWN_HOSTS_FILE"
+          cd deploy
+          git config --global user.email "deployment@github.com"
+          git config --global user.name "Github Deployment"
+          git add .
+          git commit -m "deploy latest main"
+          git push origin gh-pages

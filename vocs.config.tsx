@@ -3,6 +3,7 @@ import { defineConfig } from "vocs";
 export default defineConfig({
   title: "Polkadot-API",
   description: "Typescript API to interact with polkadot chains",
+  basePath: "/polkadot-api-docs",
   sidebar: [
     {
       text: "Getting Started",
