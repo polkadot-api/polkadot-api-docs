@@ -29,6 +29,13 @@ Another alias of `string`, but indicates that the value is a valid hexadecimal s
 
 ## Enum
 
+Enums in the chain are represented as `{ type: string, value: T }`. As many of the types have nested enums that would make it hard to work with (both creating these types and also reading them), Polkadot-API helps through a set of utilites.
+
+First of all, the Enums that are widely used across multiple chains are in a directory of well-known types, and they are represented with a descriptive name. A few examples: `MultiAddress`, `BalanceStatus`, `IdentityJudgement`, and many of the XCM pallet types: `XcmV3Junction`, `XcmV3MultiassetFungibility`, etc.
+
+For these types, you can import them directly from the generated code and use them by calling their type:
+
+<video src="enums.mp4" controls />
 
 ## Binary
 
@@ -51,7 +58,7 @@ Same as `Binary`, but when the chain metadata specifies a length. The length is 
 
 ## FixedSizeArray&lt;L, T&gt;
 
-When the metadata has a type that's an array of a specific length, that's also shown as a `FixedSizeArray&lt;L, T&gt;`, which is a superset of `Array&lt;T&gt;>`, except that it checks that the length must be `L`.
+When the metadata has a type that's an array of a specific length, that's also shown as a `FixedSizeArray<L, T>`, which is a superset of `Array<T>`, except that it checks that the length must be `L`.
 
 ## Interface types
 
