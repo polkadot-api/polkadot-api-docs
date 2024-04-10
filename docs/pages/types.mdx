@@ -33,9 +33,44 @@ Enums in the chain are represented as `{ type: string, value: T }`. As many of t
 
 First of all, the Enums that are widely used across multiple chains are in a directory of well-known types, and they are represented with a descriptive name. A few examples: `MultiAddress`, `BalanceStatus`, `IdentityJudgement`, and many of the XCM pallet types: `XcmV3Junction`, `XcmV3MultiassetFungibility`, etc.
 
-For these types, you can import them directly from the generated code and use them by calling their type:
+For these types, you can import them directly from the generated code and use them by calling their type. The call signature shown by an IDE will tell you exactly which enum types you should use to write your value. The following video shows how it might look like:
 
 <video src="enums.mp4" controls />
+
+The enums that are not well-known types, they are anonymous. In that case, you will find something like the following in the call signature:
+
+```ts
+(value: IEnum<{
+    transfer_allow_death: {
+        dest: MultiAddress;
+        value: bigint;
+    };
+    force_transfer: {
+        dest: MultiAddress;
+        value: bigint;
+        source: MultiAddress;
+    };
+    ... 4 more ...;
+    force_set_balance: {
+        ...;
+    };
+}>) => PolkadotRuntimeRuntimeCall
+```
+
+This indicates that the parameter value is an enum, whose key will be either one of the keys of the object type (i.e. `transfer_allow_death`, `force_transfer`, ..., `force_set_balance`), and the type will be the value for that particular key.
+
+For these cases, you should use the function `Enum(type, value)`, imported from `@polkadot-api/client`. This has full type inference support, and creates an Enum object that can be used as a parameter of a call:
+
+```ts
+dotApi.apis.TransactionPaymentCallApi.query_call_info(
+  PolkadotRuntimeRuntimeCall.Balances(
+    Enum("transfer_allow_death", { dest: MultiAddress.Id(address), value: 3n })
+  ),
+  10
+);
+```
+
+When reading from Enums, these are objects with `{ type: string, value: unknown }` with discriminated types based on the `type` (so if you do `switch (enum.type) {` you will have the correct value for the `type`).
 
 ## Binary
 
