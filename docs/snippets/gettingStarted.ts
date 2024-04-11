@@ -1,7 +1,7 @@
 // [!region import]
 // `dot` is the name we gave to `npx papi add`
-import { dot } from "papee/descriptors";
-import { createClient } from "papee";
+import { dot } from "@polkadot-api/descriptors";
+import { createClient } from "polkadot-api";
 // [!endregion import]
 
 // [!region usage]

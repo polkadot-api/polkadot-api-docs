@@ -30,8 +30,8 @@ export default defineConfig({
       collapsed: true,
       items: [
         {
-          text: "Papee",
-          link: "/api/papee",
+          text: "Polkadot-API",
+          link: "/api/polkadot_api",
         },
       ],
     },
@@ -41,7 +41,7 @@ export default defineConfig({
       items: [
         {
           text: "Example",
-          link: "/api/example",
+          link: "/examples/example",
         },
       ],
     },

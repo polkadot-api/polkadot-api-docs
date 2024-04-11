@@ -59,7 +59,7 @@ The enums that are not well-known types, they are anonymous. In that case, you w
 
 This indicates that the parameter value is an enum, whose key will be either one of the keys of the object type (i.e. `transfer_allow_death`, `force_transfer`, ..., `force_set_balance`), and the type will be the value for that particular key.
 
-For these cases, you should use the function `Enum(type, value)`, imported from `@polkadot-api/client`. This has full type inference support, and creates an Enum object that can be used as a parameter of a call:
+For these cases, you should use the function `Enum(type, value)`, imported from `polkadot-api`. This has full type inference support, and creates an Enum object that can be used as a parameter of a call:
 
 ```ts
 dotApi.apis.TransactionPaymentCallApi.query_call_info(

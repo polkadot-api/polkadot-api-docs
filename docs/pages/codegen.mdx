@@ -49,7 +49,7 @@ It's recommended to add `papi` to the `postinstall` script in package.json to ha
 }
 ```
 
-The code is generated into a new `node_modules` package `@polkadot-api/descriptors`, but it's always re-exported from `papee/descriptors`.
+The code is generated into the `@polkadot-api/descriptors` node modules package
 
 :::info
 Some package managers clean the `node_modules` folder after installing or removing dependencies. When that happens, run the codegen again.
@@ -75,7 +75,7 @@ In the event that there are two chains with the two well-known types that have t
 
 ## Usage
 
-Import from `papee/descriptors` every chain and type that you need, then use it through `getTypedApi()`.
+Import from `@polkadot-api/descriptors` every chain and type that you need, then use it through `getTypedApi()`.
 
 ```ts
 import {
@@ -85,7 +85,7 @@ import {
   XcmVersionedXcm,
   XcmV2Instruction,
   XcmV2MultilocationJunctions,
-} from 'papee/descriptors';
+} from '@polkadot-api/descriptors';
 
 // ...
 

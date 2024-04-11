@@ -2,33 +2,11 @@ import * as Tabs from '../components/Tabs';
 
 # Getting Started
 
-Start by installing papee and a JSON RPC provider of your choice.
+Start by installing `polkadot-api` and `@polkadot-api/descriptors`
 
-<Tabs.Root options={{
-  web: 'WebSocket',
-  sc: '@substrate/connect',
-  sm: 'Smoldot'
-}}>
-  <Tabs.Content value="web">
-    ```sh
-    npm i papee
-    ```
-  </Tabs.Content>
-  <Tabs.Content value="sc">
-    ```sh
-    npm i papee @substrate/connect
-    ```
-  </Tabs.Content>
-  <Tabs.Content value="sm">
-    ```sh
-    npm i papee smoldot @substrate/connect-known-chains
-    ```
-  </Tabs.Content>
-</Tabs.Root>
-
-:::warning
-`papee` is a tentative package name while it's in beta. The package name might change, but the API is expected to be fairly stable.
-:::
+```sh
+npm i polkadot-api @polkadot-api/descriptors
+```
 
 Next, download the latest metadata from the chain you want to connect to and generate the types:
 
@@ -45,18 +23,35 @@ npx papi
 It's a really good idea to add papi to the "postinstall" script in package.json to automate generating the types after installation.
 :::
 
-Now you can create a PolkadotClient with that provider and start interacting with the API:
- 
+Now you can create a PolkadotClient with a provider of your choice and start interacting with the API:
+
 <Tabs.Root options={{
+  sm: 'Smoldot',
   web: 'WebSocket',
   node: 'NodeJS Socket',
-  sc: '@substrate/connect',
-  sm: 'Smoldot'
 }}>
+  <Tabs.Content value="sm">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { getSmProvider } from "polkadot-api/sm-provider";
+    import { chainSpec } from "polkadot-api/chains/polkadot";
+    import { start } from "polkadot-api/smoldot";
+
+    const smoldot = start();
+    const chain = await smoldot.addChain({ chainSpec });
+
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      getSmProvider(chain)
+    );
+
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
   <Tabs.Content value="web">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
-    import { WebSocketProvider } from "papee/ws-provider-web";
+    import { WebSocketProvider } from "polkadot-api/ws-provider/web";
 
     // Connect to the polkadot relay chain.
     const client = createClient(
@@ -69,45 +64,11 @@ Now you can create a PolkadotClient with that provider and start interacting wit
   <Tabs.Content value="node">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
-    import { WebSocketProvider } from "papee/ws-provider-node";
+    import { WebSocketProvider } from "polkadot-api/ws-provider/node";
 
     // Connect to the polkadot relay chain.
     const client = createClient(
       WebSocketProvider("wss://dot-rpc.stakeworld.io")
-    );
-
-    // [!include ~/snippets/gettingStarted.ts:usage]
-    ```
-  </Tabs.Content>
-  <Tabs.Content value="sc">
-    ```ts
-    // [!include ~/snippets/gettingStarted.ts:import]
-    import { getScProvider } from "papee/sc-provider";
-    import { WellKnownChain, createScClient } from "@substrate/connect";
-
-    const scProvider = getScProvider(createScClient());
-
-    // Connect to the polkadot relay chain.
-    const client = createClient(
-      scProvider(WellKnownChain.polkadot).relayChain
-    );
-
-    // [!include ~/snippets/gettingStarted.ts:usage]
-    ```
-  </Tabs.Content>
-  <Tabs.Content value="sm">
-    ```ts
-    // [!include ~/snippets/gettingStarted.ts:import]
-    import { getSmProvider } from "papee/sm-provider";
-    import { polkadot } from "@substrate/connect-known-chains";
-    import { start } from "smoldot";
-
-    const smoldot = start();
-    const chain = await smoldot.addChain({ chainSpec: polkadot });
-
-    // Connect to the polkadot relay chain.
-    const client = createClient(
-      getSmProvider(chain)
     );
 
     // [!include ~/snippets/gettingStarted.ts:usage]
