@@ -4,6 +4,12 @@ export default defineConfig({
   title: "Polkadot-API",
   description: "Typescript API to interact with polkadot chains",
   basePath: "/polkadot-api-docs",
+  topNav: [
+    {
+      text: "Guide",
+      link: "/getting-started",
+    },
+  ],
   sidebar: [
     {
       text: "Getting Started",
@@ -26,22 +32,20 @@ export default defineConfig({
       link: "/signers",
     },
     {
-      text: "API",
-      collapsed: true,
+      text: "Recipes",
       items: [
         {
-          text: "Polkadot-API",
-          link: "/api/polkadot_api",
+          text: "Prepare for runtime upgrade",
+          link: "/recipes/upgrade",
         },
       ],
     },
     {
       text: "Examples",
-      collapsed: true,
       items: [
         {
-          text: "Example",
-          link: "/examples/example",
+          text: "Teleport across chains",
+          link: "https://github.com/polkadot-api/react-teleport-example",
         },
       ],
     },
