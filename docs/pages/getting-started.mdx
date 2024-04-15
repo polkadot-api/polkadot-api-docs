@@ -26,10 +26,30 @@ It's a really good idea to add papi to the "postinstall" script in package.json 
 Now you can create a PolkadotClient with a provider of your choice and start interacting with the API:
 
 <Tabs.Root options={{
+  smw: 'Smoldot (WebWorker)',
   sm: 'Smoldot',
   web: 'WebSocket',
   node: 'NodeJS Socket',
 }}>
+  <Tabs.Content value="smw">
+    ```ts
+    // [!include ~/snippets/gettingStarted.ts:import]
+    import { getSmProvider } from "polkadot-api/sm-provider";
+    import { chainSpec } from "polkadot-api/chains/polkadot";
+    import { startFromWorker } from "polkadot-api/smoldot/from-worker";
+    import SmWorker from "polkadot-api/smoldot/worker?worker";
+
+    const smoldot = startFromWorker(new SmWorker());
+    const chain = await smoldot.addChain({ chainSpec });
+
+    // Connect to the polkadot relay chain.
+    const client = createClient(
+      getSmProvider(chain)
+    );
+
+    // [!include ~/snippets/gettingStarted.ts:usage]
+    ```
+  </Tabs.Content>
   <Tabs.Content value="sm">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]

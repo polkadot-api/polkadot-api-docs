@@ -33,16 +33,19 @@ import { KeyPoint } from '../components/KeyPoint';
     </KeyPoint>
   </div>
 
-  <div className="text-left w-full max-w-2xl p-2">
+  <div className="text-left w-full max-w-5xl p-2">
     <h2 className="text-[--vocs-color_heading] text-3xl py-4 border-b border-gray-500 mb-4">Features</h2>
-    <ul className="list-disc pl-5">
-      <li>Connect to the chain through a light client, a WebSocket connection, or an extension.</li>
-      <li>Perform storage queries or runtime calls.</li>
-      <li>Generate the types of a chain through its current metadata.</li>
-      <li>Compatibility checks.</li>
-      <li>Multiple connections to different chains.</li>
-      <li>Transaction API in read-only and read/write mode.</li>
-      <li>Promise-based or Observable-based API for your needs.</li>
-    </ul>
+
+    - **Light client first**: built on top of the [new JSON-RPC spec](https://paritytech.github.io/json-rpc-interface-spec/) to fully leverage the potential of light-clients.
+    - Delightful **TypeScript support** with types and docs generated from on-chain metadata.
+    - First class support for **storage** reads, **constants**, **transactions**, **events** and **runtime calls**.
+    - Perform **multiple connections** to different chains simultaneously.
+    - Prepare for an upcoming **runtime updates** by generating multiple descriptors and performing **compatibility checks**.
+    - **Performant and lightweight**: ships with multiple subpaths, so dApps don't bundle unnecessary assets.
+    - Uses **native BigInt**, instead of large BigNumber libraries
+    - Leverages dynamic imports to favour **faster loading times**.
+    - **Promise-based and Observable-based APIs**: use the one that best suit your needs and/or coding style.
+    - Use **signers** from your browser extension, or from a private key.
+    - Easy integration with **PJS-based extensions**.
   </div>
 </HomePage.Root>
