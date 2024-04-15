@@ -36,7 +36,10 @@ jobs:
           /bin/rm -rf *
           cd ..
       - name: Move new release
-        run: cp -R docs/dist/* deploy/
+        run: |
+          cp -R docs/dist/* deploy/
+          # .vocs hidden folder also needs to be copied
+          cp -R docs/dist/.* deploy/
       - name: Commit and push
         run: |
           DEPLOY_KEY_FILE=~/.ssh/deploy_key
