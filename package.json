@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vocs dev",
     "build": "vocs build",
-    "preview": "vocs preview"
+    "preview": "vocs preview",
+    "format": "prettier --write README.md \"docs/**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.0.4",
@@ -14,6 +15,18 @@
     "react-dom": "latest",
     "typescript": "latest",
     "vocs": "1.0.0-alpha.47"
+  },
+  "devDependencies": {
+    "@homer0/prettier-plugin-jsdoc": "^9.0.0",
+    "prettier": "^3.2.5"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": false,
+    "trailingComma": "all",
+    "plugins": [
+      "@homer0/prettier-plugin-jsdoc"
+    ]
   },
   "packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394"
 }

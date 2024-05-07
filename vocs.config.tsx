@@ -1,4 +1,4 @@
-import { defineConfig } from "vocs";
+import { defineConfig } from "vocs"
 
 export default defineConfig({
   title: "Polkadot-API",
@@ -56,4 +56,4 @@ export default defineConfig({
       link: "https://github.com/polkadot-api/polkadot-api",
     },
   ],
-});
+})
