@@ -31,19 +31,24 @@ This interface is generic to signing transactions for the chain.
 If you want to use a compatible extension as a signer, Polkadot-API has a subpath with a couple of utilities to help with this: `polkadot-api/pjs-signer`.
 
 ```ts
-import { getInjectedExtensions, connectInjectedExtension } from 'polkadot-api/pjs-signer';
+import {
+  getInjectedExtensions,
+  connectInjectedExtension,
+} from "polkadot-api/pjs-signer"
 
 // Get the list of installed extensions
-const extensions: string[] = getInjectedExtensions();
+const extensions: string[] = getInjectedExtensions()
 
 // Connect to an extension
-const selectedExtension: InjectedExtension = await connectInjectedExtension(extensions[0]);
+const selectedExtension: InjectedExtension = await connectInjectedExtension(
+  extensions[0],
+)
 
 // Get accounts registered in the extension
-const accounts: InjectedPolkadotAccount[] = selectedExtension.getAccounts();
+const accounts: InjectedPolkadotAccount[] = selectedExtension.getAccounts()
 
 // The signer for each account is in the `polkadotSigner` property of `InjectedPolkadotAccount`
-const polkadotSigner = accounts[0].polkadotSigner;
+const polkadotSigner = accounts[0].polkadotSigner
 ```
 
 ## `PolkadotSigner` from generic signing function
@@ -75,11 +80,8 @@ const derive = sr25519CreateDerive(miniSecret)
 const keypair = derive("//Alice")
 
 const polkadotSigner = getPolkadotSigner(
-    hdkdKeyPair.publicKey,
-    "Sr25519",
-    hdkdKeyPair.sign
-);
+  hdkdKeyPair.publicKey,
+  "Sr25519",
+  hdkdKeyPair.sign,
+)
 ```
-
-
-

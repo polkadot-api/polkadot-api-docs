@@ -1,12 +1,12 @@
-import * as Tabs from "@radix-ui/react-tabs";
-import { PropsWithChildren } from "react";
-import "./Tabs.css";
+import * as Tabs from "@radix-ui/react-tabs"
+import { PropsWithChildren } from "react"
+import "./Tabs.css"
 
 export const Root = ({
   options,
   children,
 }: PropsWithChildren<{
-  options: Record<string, string>;
+  options: Record<string, string>
 }>) => (
   <Tabs.Root
     className="Tabs__root border rounded bg-[--vocs-color_codeBlockBackground] border-[--vocs-color_codeInlineBorder]"
@@ -25,7 +25,7 @@ export const Root = ({
     </Tabs.List>
     {children}
   </Tabs.Root>
-);
+)
 export const Content = (props: Tabs.TabsContentProps) => (
   <Tabs.Content {...props} />
-);
+)

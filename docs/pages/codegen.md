@@ -85,33 +85,27 @@ import {
   XcmVersionedXcm,
   XcmV2Instruction,
   XcmV2MultilocationJunctions,
-} from '@polkadot-api/descriptors';
+} from "@polkadot-api/descriptors"
 
 // ...
 
-const dotClient = createClient(
-    scProvider(WellKnownChain.polkadot).relayChain
-)
-const ksmClient = createClient(
-    scProvider(WellKnownChain.ksmcc3).relayChain
-)
+const dotClient = createClient(scProvider(WellKnownChain.polkadot).relayChain)
+const ksmClient = createClient(scProvider(WellKnownChain.ksmcc3).relayChain)
 
-const dotApi = dotClient.getTypedApi(dot);
-const ksmApi = ksmClient.getTypedApi(ksm);
+const dotApi = dotClient.getTypedApi(dot)
+const ksmApi = ksmClient.getTypedApi(ksm)
 
 const xcmSendTx = dotApi.tx.XcmPallet.send({
   dest: XcmVersionedMultiLocation.V2({
     parents: 0,
     interior: XcmV2MultilocationJunctions.Here(),
   }),
-  message: XcmVersionedXcm.V2([
-    XcmV2Instruction.ClearOrigin()
-  ]),
-});
+  message: XcmVersionedXcm.V2([XcmV2Instruction.ClearOrigin()]),
+})
 
-const encodedData = await xcmSendTx.getEncodedData();
+const encodedData = await xcmSendTx.getEncodedData()
 
-const finalizedCall = await xcmSendTx.signAndSubmit(signer);
+const finalizedCall = await xcmSendTx.signAndSubmit(signer)
 ```
 
 :::info

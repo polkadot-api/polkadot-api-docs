@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren } from "react"
 
 export const KeyPoint: FC<PropsWithChildren<{ title: string }>> = ({
   title,
@@ -10,4 +10,4 @@ export const KeyPoint: FC<PropsWithChildren<{ title: string }>> = ({
     </div>
     <div>{children}</div>
   </div>
-);
+)
