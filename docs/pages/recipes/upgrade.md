@@ -24,31 +24,31 @@ Now on the code you can create two typed APIs for the same chain, and then use t
 To make it clear, the `client` is connected to one chain that's using one specific version of the runtime. You can create multiple typedApis for that connection, which just give you the types for each possible version of the runtime. Then you can use runtime compatibility checks to perform the operation on the correct descriptor.
 
 ```ts
-import { createClient } from 'polkadot-api';
-import { dot, nextDot, MultiAddress } from '@polkadot-api/descriptors';
-import { chainSpec } from "polkadot-api/chains/polkadot";
-import { startFromWorker } from "polkadot-api/smoldot/from-worker";
-import SmWorker from "polkadot-api/smoldot/worker?worker";
+import { createClient } from "polkadot-api"
+import { dot, nextDot, MultiAddress } from "@polkadot-api/descriptors"
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { startFromWorker } from "polkadot-api/smoldot/from-worker"
+import SmWorker from "polkadot-api/smoldot/worker?worker"
 
-const smoldot = startFromWorker(new SmWorker());
-const chain = await smoldot.addChain({ chainSpec });
-const client = createClient(getSmProvider(chain));
+const smoldot = startFromWorker(new SmWorker())
+const chain = await smoldot.addChain({ chainSpec })
+const client = createClient(getSmProvider(chain))
 
-const dotApi = client.getTypedApi(dot);
-const nextApi = client.getTypedApi(nextDot);
+const dotApi = client.getTypedApi(dot)
+const nextApi = client.getTypedApi(nextDot)
 
 function performTransfer() {
   // check if we're running on the next version to run that first
   if (await nextApi.tx.Balances.new_fancy_transfer.isCompatible()) {
     nextApi.tx.Balances.new_fancy_transfer({
       dest: MultiAddress.Id("addr"),
-      value: 5n
+      value: 5n,
     })
   } else {
     // Otherwise perform the transfer the old way with the old descriptors
     dotApi.tx.Balances.transfer_keep_alive({
       dest: MultiAddress.Id("addr"),
-      value: 5n
+      value: 5n,
     })
   }
 }

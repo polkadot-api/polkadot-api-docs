@@ -28,25 +28,25 @@ Polkadot-API has a subpackage `polkadot-api/logs-provider` that can be used to c
 
 ```ts
 // 1. recording logs
-import { createClient } from 'polkadot-api';
-import { withLogsRecorder } from 'polkadot-api/logs-provider';
-import { WebSocketProvider } from 'polkadot-api/ws-provider/node';
+import { createClient } from "polkadot-api"
+import { withLogsRecorder } from "polkadot-api/logs-provider"
+import { WebSocketProvider } from "polkadot-api/ws-provider/node"
 
-const wsProvider = WebSocketProvider("wss://example.url");
+const wsProvider = WebSocketProvider("wss://example.url")
 // Using console.log to output each line, but you could e.g. write it directly to a
 // file or push into an array
-const provider = withLogsRecorder(line => console.log(line), wsProvider);
-const client = createClient(provider);
+const provider = withLogsRecorder((line) => console.log(line), wsProvider)
+const client = createClient(provider)
 ```
 
 ```ts
 // 2. replaying logs
-import { createClient } from 'polkadot-api';
-import { logsProvider } from 'polkadot-api/logs-provider';
-import logs from './readLogs';
+import { createClient } from "polkadot-api"
+import { logsProvider } from "polkadot-api/logs-provider"
+import logs from "./readLogs"
 
-const provider = logsProvider(logs);
-const client = createClient(provider);
+const provider = logsProvider(logs)
+const client = createClient(provider)
 ```
 
 This can be useful to debug specific scenarios without needing to depend on an external source.

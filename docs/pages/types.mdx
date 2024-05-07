@@ -11,21 +11,20 @@ Binary values tagged as a accounts are abstracted as `SS58String`. The type `SS5
 When PolkadotAPI receives an `SS58String` as a parameter, it can be in any valid format. But the `SS58String` returned from any of the methods will always be in the format declared by the chain's metadata.
 
 ```ts
-const dotApi = client.getTypedApi(dot);
+const dotApi = client.getTypedApi(dot)
 
 const [proxies, deposit] = await dotApi.query.Proxy.Proxies.getValue(
   // HDX format (for demo purposes that it accepts any SS58 string, regardless of the chain)
-  "7LE64AxmGixNsxFs1rdsDkER5nuuQ28MbrSS7JtHwRmdcdam"
-);
+  "7LE64AxmGixNsxFs1rdsDkER5nuuQ28MbrSS7JtHwRmdcdam",
+)
 
-console.log(proxies[0].delegate);
+console.log(proxies[0].delegate)
 // "12R1XCdgkHysv8Y4ntiXguo4eUYHXjQTmfRjL8FbmezsG71j", which is polkadot's format
 ```
 
 ## HexString
 
 Another alias of `string`, but indicates that the value is a valid hexadecimal string. It accepts the string with or without the `0x` prefix, but `HexString` returned from methods always have `0x`.
-
 
 ## Enum
 
@@ -64,10 +63,10 @@ For these cases, you should use the function `Enum(type, value)`, imported from 
 ```ts
 dotApi.apis.TransactionPaymentCallApi.query_call_info(
   PolkadotRuntimeRuntimeCall.Balances(
-    Enum("transfer_allow_death", { dest: MultiAddress.Id(address), value: 3n })
+    Enum("transfer_allow_death", { dest: MultiAddress.Id(address), value: 3n }),
   ),
-  10
-);
+  10,
+)
 ```
 
 When reading from Enums, these are objects with `{ type: string, value: unknown }` with discriminated types based on the `type` (so if you do `switch (enum.type) {` you will have the correct value for the `type`).
@@ -81,10 +80,9 @@ Binary.fromBytes(new Uint8Array())
 Binary.fromHex("0b187a23c4f65d86c9a324b56f7e81aa")
 const binary = Binary.fromText("Text that will be turned into binary")
 
-binary.asBytes(); // Uint8Array
-binary.asHex(); // "0x5465787420746861742077696c6c206265207475726e656420696e746f2062696e617279"
-binary.asText(); // "Text that will be turned into binary"
-
+binary.asBytes() // Uint8Array
+binary.asHex() // "0x5465787420746861742077696c6c206265207475726e656420696e746f2062696e617279"
+binary.asText() // "Text that will be turned into binary"
 ```
 
 ## FixedSizeBinary&lt;L&gt;
@@ -107,43 +105,41 @@ import {
   DotConstants,
   DotErrors,
   DotEvents,
-} from "@polkadot-api/descriptors";
+} from "@polkadot-api/descriptors"
 
 // Storage queries
 function processAccount(account: DotQueries["System"]["Account"]["Value"]) {
   // ...
 }
-processAccount(await dotApi.query.System.Account.getValue("SS58Account"));
+processAccount(await dotApi.query.System.Account.getValue("SS58Account"))
 
 // Constants
 function formatSS58Account(
   value: DotConstants["System"]["SS58Prefix"],
-  account: Uint8Array
+  account: Uint8Array,
 ) {
   // ...
 }
-formatSS58Account(await dotApi.constants.System.SS58Prefix(), new Uint8Array());
+formatSS58Account(await dotApi.constants.System.SS58Prefix(), new Uint8Array())
 
 // Transactions
 function performTransfer(
-  transfer: DotCalls["Balances"]["transfer_allow_death"]
+  transfer: DotCalls["Balances"]["transfer_allow_death"],
 ) {
-  return dotApi.tx.Balances.transfer_allow_death(transfer).signAndSubmit(
-    signer
-  );
+  return dotApi.tx.Balances.transfer_allow_death(transfer).signAndSubmit(signer)
 }
 performTransfer({
   dest: MultiAddress.Id("SS58Account"),
   value: 100n,
-});
+})
 
 // Events
-function reactToNewAccount(event: DotEvents['System']['NewAccount']) {
+function reactToNewAccount(event: DotEvents["System"]["NewAccount"]) {
   // ...
 }
 
 // Errors
-function logError(error: DotErrors['System']['InvalidSpecName']) {
+function logError(error: DotErrors["System"]["InvalidSpecName"]) {
   // ...
 }
 ```
