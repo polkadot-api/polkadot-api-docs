@@ -16,6 +16,25 @@ export default defineConfig({
       link: "/getting-started",
     },
     {
+      text: "Top-level client",
+      items: [
+        {
+          text: "PolkadotClient",
+          link: "/client",
+        },
+        {
+          text: "Typed API",
+          link: "/typed",
+          items: [
+            {
+              text: "Storage queries",
+              link: "/typed/queries",
+            },
+          ],
+        },
+      ],
+    },
+    {
       text: "Providers",
       link: "/providers",
     },
