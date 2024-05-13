@@ -27,6 +27,10 @@ export default defineConfig({
           link: "/typed",
           items: [
             {
+              text: "Constants",
+              link: "/typed/constants",
+            },
+            {
               text: "Storage queries",
               link: "/typed/queries",
             },
