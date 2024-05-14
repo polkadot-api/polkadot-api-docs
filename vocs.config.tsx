@@ -31,6 +31,10 @@ export default defineConfig({
               link: "/typed/constants",
             },
             {
+              text: "Runtime APIs",
+              link: "/typed/apis",
+            },
+            {
               text: "Storage queries",
               link: "/typed/queries",
             },
