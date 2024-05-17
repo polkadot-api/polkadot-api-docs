@@ -8,10 +8,10 @@ As an example, let's imagine we have already set up the polkadot relay chain for
 npx papi add dot -n polkadot
 ```
 
-If you know of a node available through a websocket that has the runtime upgrade, you can download that metadata with the CLI:
+You can directly compile (or download from a GitHub CI, for example) your WASM runtime and PAPI will get the metadata from it and will be able to generate the descriptors.
 
 ```sh
-npx papi add nextDot -w wss://rpc-polkadot.exampleupdate.io/
+npx papi add nextDot --wasm polkadot_next_runtime.compressed.wasm
 npx papi generate
 ```
 
