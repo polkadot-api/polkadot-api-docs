@@ -7,7 +7,7 @@ import { createClient } from "polkadot-api"
 // [!region usage]
 // With the `client`, you can get information such as subscribing to the last
 // block to get the latest hash:
-client.finalized$.subscribe((finalizedBlock) =>
+client.finalizedBlock$.subscribe((finalizedBlock) =>
   console.log(finalizedBlock.number, finalizedBlock.hash),
 )
 
