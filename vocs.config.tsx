@@ -41,6 +41,10 @@ export default defineConfig({
               text: "Storage queries",
               link: "/typed/queries",
             },
+            {
+              text: "Events",
+              link: "/typed/events",
+            },
           ],
         },
       ],
