@@ -45,6 +45,10 @@ export default defineConfig({
               text: "Events",
               link: "/typed/events",
             },
+            {
+              text: "Transactions",
+              link: "/typed/tx",
+            },
           ],
         },
       ],
