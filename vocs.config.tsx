@@ -24,8 +24,11 @@ export default defineConfig({
         },
         {
           text: "Typed API",
-          link: "/typed",
           items: [
+            {
+              text: "API",
+              link: "/typed",
+            },
             {
               text: "Constants",
               link: "/typed/constants",
@@ -37,6 +40,14 @@ export default defineConfig({
             {
               text: "Storage queries",
               link: "/typed/queries",
+            },
+            {
+              text: "Events",
+              link: "/typed/events",
+            },
+            {
+              text: "Transactions",
+              link: "/typed/tx",
             },
           ],
         },

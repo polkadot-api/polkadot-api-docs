@@ -25,7 +25,7 @@ On the other hand, `watchValue` function returns an Observable allows you to che
 
 ## Entries with keys
 
-Similarely, we'll use the example of `System.Account` query (it returns the information of a particular `Account`). In this case, this storage query has a key to index it with, and therefore we find the following structure:
+Similarly, we'll use the example of `System.Account` query (it returns the information of a particular `Account`). In this case, this storage query has a key to index it with, and therefore we find the following structure:
 
 ```ts
 type StorageEntryWithKeys<Args, Payload> = {
