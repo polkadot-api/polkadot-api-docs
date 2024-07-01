@@ -1,6 +1,6 @@
 # Events
 
-Let's, first of all, understand the interface of an `Event` in polkadot-api. The main idea is to give the developer as much information as possible:
+Let's, first of all, understand the interface of an `Event` in polkadot-api. This interface will be common for every section after this one. The main idea is to give the developer as much information as possible:
 
 ```ts
 type BlockInfo = {
@@ -23,7 +23,7 @@ type Event<T> = {
 }
 ```
 
-As one could notice, the structure directly comes from how events are shaped in Substrate.
+As one could notice, the structure directly comes from how events are shaped in Substrate. Fairly straight-forward, the `phase` comes directly from the structure of events in the node, `blockInfo` holds the information about the block in which the event is found, and the `payload` depends on which kind of event we're querying. Let's see the three methods:
 
 As seen in previous sections, we can access each event by `typedApi.event.<pallet>.<event>`. For example, we could have `typedApi.event.Balances.Burned` or `typedApi.event.Proxy.PureCreated` as examples. Every event has the following EvClient interface:
 
@@ -36,30 +36,7 @@ type EvClient<T> = {
 }
 ```
 
-We already learnt about `isCompatible`, let's see step by step the other methods. We'll, first of all, define a common type among all of them:
-
-```ts
-type Event<T> = {
-  meta: {
-    block: BlockInfo
-    phase: EventPhase
-  }
-  payload: T
-}
-
-type EventPhase =
-  | { type: "ApplyExtrinsic"; value: number }
-  | { type: "Finalization" }
-  | { type: "Initialization" }
-
-type BlockInfo = {
-  hash: string
-  number: number
-  parent: string
-}
-```
-
-Fairly straight-forward, the `phase` comes directly from the structure of events in the node, `blockInfo` holds the information about the block in which the event is found, and the `payload` depends on which kind of event we're querying. Let's see the three methods:
+We already learnt about `isCompatible`, let's see step by step the other methods:
 
 ## Pull
 
