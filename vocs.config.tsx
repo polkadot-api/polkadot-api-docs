@@ -16,6 +16,31 @@ export default defineConfig({
       link: "/getting-started",
     },
     {
+      text: "Providers",
+      link: "/providers",
+    },
+    {
+      text: "Codegen",
+      link: "/codegen",
+    },
+    {
+      text: "Types",
+      link: "/types",
+    },
+    {
+      text: "Signers",
+      link: "/signers",
+    },
+    {
+      text: "Recipes",
+      items: [
+        {
+          text: "Prepare for runtime upgrade",
+          link: "/recipes/upgrade",
+        },
+      ],
+    },
+    {
       text: "Top-level client",
       items: [
         {
@@ -50,31 +75,6 @@ export default defineConfig({
               link: "/typed/tx",
             },
           ],
-        },
-      ],
-    },
-    {
-      text: "Providers",
-      link: "/providers",
-    },
-    {
-      text: "Codegen",
-      link: "/codegen",
-    },
-    {
-      text: "Types",
-      link: "/types",
-    },
-    {
-      text: "Signers",
-      link: "/signers",
-    },
-    {
-      text: "Recipes",
-      items: [
-        {
-          text: "Prepare for runtime upgrade",
-          link: "/recipes/upgrade",
         },
       ],
     },

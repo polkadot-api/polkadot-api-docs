@@ -5,7 +5,7 @@ Preparing, signing, and broadcasting extrinsics is one of the main purposes of p
 ```ts
 interface TxEntry<Arg> {
   (data: Arg): Transaction
-  isCompatible: IsCompatible
+  getCompatibilityLevel: GetCompatibilityLevel
 }
 
 type Transaction = {
@@ -21,7 +21,7 @@ type Transaction = {
 }
 ```
 
-[We already know how `isCompatible` works](/typed#iscompatible). In order to get a `Transaction` object, we need to pass all arguments required by the extrinsic. Let's see two examples, `Balances.transfer_keep_alive` and `NominationPools.claim_payout`.
+[We already know how `getCompatibilityLevel` works](/typed#getcompatibilitylevel). In order to get a `Transaction` object, we need to pass all arguments required by the extrinsic. Let's see two examples, `Balances.transfer_keep_alive` and `NominationPools.claim_payout`.
 
 The case of `claim_payout` is the simplest one, since it doesn't take any arguments. Simply as
 
@@ -65,7 +65,7 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 
 ## `getEncodedData`
 
-`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It requires a `Runtime` field (like `isCompatible`). You can call without it, and it'll be a `Promise`-based call, or pass the runtime and it'll answer synchronously. Let's see an example:
+`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It requires a `Runtime` field (like `getCompatibilityLevel`). You can call without it, and it'll be a `Promise`-based call, or pass the runtime and it'll answer synchronously. Let's see an example:
 
 ```ts
 // `getEncodedData` has this interface
