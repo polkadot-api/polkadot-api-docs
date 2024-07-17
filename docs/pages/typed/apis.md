@@ -9,7 +9,7 @@ type CallOptions = Partial<{
 }>
 interface RuntimeCall<Args, Payload> {
   (...args: [...Args, options?: CallOptions]): Promise<Payload>
-  isCompatible: IsCompatible
+  getCompatibilityLevel: GetCompatibilityLevel
 }
 ```
 

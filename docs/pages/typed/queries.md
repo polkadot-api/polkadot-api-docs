@@ -13,7 +13,7 @@ type CallOptions = Partial<{
 }>
 
 type StorageEntryWithoutKeys<Payload> = {
-  isCompatible: IsCompatible
+  getCompatibilityLevel: GetCompatibilityLevel
   getValue: (options?: CallOptions) => Promise<Payload>
   watchValue: (bestOrFinalized?: "best" | "finalized") => Observable<Payload>
 }
@@ -29,7 +29,7 @@ Similarly, we'll use the example of `System.Account` query (it returns the infor
 
 ```ts
 type StorageEntryWithKeys<Args, Payload> = {
-  isCompatible: IsCompatible
+  getCompatibilityLevel: GetCompatibilityLevel
   getValue: (...args: [...Args, options?: CallOptions]) => Promise<Payload>
   watchValue: (
     ...args: [...Args, bestOrFinalized?: "best" | "finalized"]

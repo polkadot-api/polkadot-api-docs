@@ -1,6 +1,6 @@
 # Constants
 
-Constants are the simplest structure that we find inside the `TypedApi`. Constants are hard-coded key-value pairs that are embedded in the runtime metadata. In PAPI their structure is just a simple function that return its decoded value, with two alternatives. As explained in [the previous section](/typed) for `isCompatible`, we have two options to get the value:
+Constants are the simplest structure that we find inside the `TypedApi`. Constants are hard-coded key-value pairs that are embedded in the runtime metadata. In PAPI their structure is just a simple function that return its decoded value, with two alternatives. As explained in [the previous section](/typed#getcompatibilitylevel) for `getCompatibility Level`, we have two options to get the value:
 
 - Promise-based call, without passing the runtime
 - Synchronous return, passing the runtime previously awaited for

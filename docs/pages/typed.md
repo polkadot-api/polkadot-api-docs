@@ -25,27 +25,50 @@ It's an observable that holds the current runtime information for that specific 
 
 All the other fields are a `Record<string, Record<string, ???>>`. The first index defines the pallet that we're looking for, and the second one defines which query/tx/event/api/constant are we looking for inside that pallet. Let's see, one by one, what do we find inside of it!
 
-## isCompatible
+## getCompatibilityLevel
 
-First of all, let's understand `isCompatible` field. It's under each query/tx/event/api/constant in any runtime. After generating the descriptors (see [Codegen](/codegen) section), we have a typed interface to every interaction with the chain. Nevertheless, breaking runtime upgrades might hit the runtime between developing and the runtime execution of your app. `isCompatible` enables you to check on runtime if there was a breaking upgrade that hit your particular method.
+First of all, let's understand `getCompatibilityLevel` field. It's under each query/tx/event/api/constant in any runtime. After generating the descriptors (see [Codegen](/codegen) section), we have a typed interface to every interaction with the chain. Nevertheless, breaking runtime upgrades might hit the runtime between developing and the runtime execution of your app. `getCompatibilityLevel` enables you to check on runtime if there was a breaking upgrade that hit your particular method.
 
-Let's see its interface, and an example.
+The enum `CompatibilityLevel` defines 4 levels of compatibility:
 
 ```ts
-interface IsCompatible {
-  (): Promise<boolean>
-  (runtime: Runtime): boolean
+enum CompatibilityLevel {
+  // No possible value from origin will be compatible with dest
+  Incompatible,
+  // Some values of origin will be compatible with dest
+  Partial,
+  // Every value from origin will be compatible with dest
+  BackwardsCompatible,
+  // Types are identical
+  Identical,
 }
 ```
 
-For example, let's use `typedApi.query.System.Number`. It's a simple query, we'll see in the next pages how to interact with it. We're only interested on `isCompatible`.
+A `CompatibilityLevel.Partial` means that the operation might be compatible depending on the actual values being sent or received. For instance, `getCompatibilityLevel` for the transaction `utility.batch_all` might return a `CompatibilityLevel.Partial` if one of the transactions it takes as input was removed. In this case, the call will be compatible as long as you don't send the transaction that was removed as one of its inputs.
+
+Another instance of a partial compatibility case could be for instance if an optional property on a struct that's an input was made mandatory. In this case, if your dApp was always populating that field, it will still work properly, but if you had cases where you weren't setting it, then it will be incompatible.
+
+On the other hand, a `CompatibilityLevel.BackwardsCompatible`, means that the operation had some changes, but they are backwards compatible with the descriptors generated on dev time. In the case of `utility.batch_all`, this might happen when a new transaction is added as a possible input. In this case, there was a change, and PAPI lets you know about it with this level, but you can be sure that any transaction that you pass in as an input will still work.
+
+A backwards-compatible change also happens in structs. For instance, if an input struct removes one of their properties, those operations are still compatible.
+
+It needs the runtime and the descriptors to be loaded, so it has two overloads, one where it will wait for them to be loaded, returning a promise, or another that returns synchronously if you already have a reference to the `Runtime` object from `typedApi.runtime.latest()`.
+
+```ts
+interface GetCompatibilityLevel {
+  (): Promise<CompatibilityLevel>
+  (runtime: Runtime): CompatibilityLevel
+}
+```
+
+For example, let's use `typedApi.query.System.Number`. It's a simple query, we'll see in the next pages how to interact with it. We're only interested on `getCompatibilityLevel`.
 
 ```ts
 const query = typedApi.query.System.Number
 const runtime = await typedApi.runtime.latest() // we already learnt about it!
 
-// in this case `isCompatible` returns a Promise<boolean>
-if (await query.isCompatible()) {
+// in this case `getCompatibilityLevel` returns a Promise<boolean>
+if ((await query.getCompatibilityLevel()) >= CompatibilityLevel.BackwardsCompatible) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
@@ -53,8 +76,8 @@ if (await query.isCompatible()) {
 }
 
 // another option would be to use the already loaded runtime
-// in this case, `isCompatible` is sync, and returns a boolean
-if (query.isCompatible(runtime)) {
+// in this case, `getCompatibilityLevel` is sync, and returns a boolean
+if (query.getCompatibilityLevel(runtime) >= CompatibilityLevel.BackwardsCompatible) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
@@ -62,6 +85,6 @@ if (query.isCompatible(runtime)) {
 }
 ```
 
-As you can see, `isCompatible` is really powerful since we can prepare for runtime upgrades seamlessly using PAPI. See [this recipe](/recipes/upgrade) for an example!
+As you can see, `getCompatibilityLevel` is really powerful since we can prepare for runtime upgrades seamlessly using PAPI. See [this recipe](/recipes/upgrade) for an example!
 
 Let's continue with the rest of the fields!

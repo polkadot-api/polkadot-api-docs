@@ -32,11 +32,11 @@ type EvClient<T> = {
   pull: EvPull<T>
   watch: EvWatch<T>
   filter: EvFilter<T>
-  isCompatible: IsCompatible
+  getCompatibilityLevel: GetCompatibilityLevel
 }
 ```
 
-We already learnt about `isCompatible`, let's see step by step the other methods:
+We already learnt about `getCompatibilityLevel`, let's see step by step the other methods:
 
 ## Pull
 
