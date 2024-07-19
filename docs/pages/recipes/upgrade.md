@@ -61,4 +61,4 @@ Furthermore, the runtime upgrade might happen while the dApp is running, and thi
 
 As a note, `getCompatibilityLevel` is a function available on every interaction on the typedApi (queries, apis, constants, events, transactions). If used without any parameter it will return a `Promise<CompatibilityLevel>`, because it needs to wait for the runtime to be loaded before it can tell whether it's compatible or not.
 
-If you have multiple `getCompatibilityLevel` checks that you don't want to wait for each one of them, you can first wait for the runtime to be loaded with `await dotApi.runtime.latest()`, and then pass this to `getCompatibilityLevel` as a paramter. This will make `getCompatibilityLevel` return synchronously.
+If you have multiple `getCompatibilityLevel` checks and don't want to wait for each one individually, you can first wait for the descriptors to be loaded with `await dotApi.compatibilityToken`, and then pass this result to `getCompatibilityLevel` as a parameter, allowing it to return synchronously. See [TypedApi getCompatibilityLevel](/typed#getcompatibilitylevel) for a deeper explanation.

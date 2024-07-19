@@ -65,13 +65,13 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 
 ## `getEncodedData`
 
-`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It requires a `Runtime` field (like `getCompatibilityLevel`). You can call without it, and it'll be a `Promise`-based call, or pass the runtime and it'll answer synchronously. Let's see an example:
+`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It also runs the compatibility check, so it needs the runtime and descriptors loaded. As we've seen with `getCompatibilityLevel`, if you call it directly it'll be a `Promise`-based call, or you can pass in a `compatibilityToken` you've previously awaited for and it'll answer synchronously. Let's see an example:
 
 ```ts
 // `getEncodedData` has this interface
 interface TxCall {
   (): Promise<Binary>
-  (runtime: Runtime): Binary
+  (compatibilityToken: CompatibilityToken): Binary
 }
 
 import { MultiAddress } from "@polkadot-api/descriptors"
@@ -84,9 +84,9 @@ const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
 // without argument it's async!
 const encodedTx = await tx.getEncodedData()
 
-// with runtime argument it's sync!
-const runtime = await typedApi.runtime.latest()
-const encodedTx = tx.getEncodedData(runtime)
+// with compatibilityToken argument it's sync!
+const compatibilityToken = await typedApi.compatibilityToken
+const encodedTx = tx.getEncodedData(compatibilityToken)
 ```
 
 ## `TxOptions`
