@@ -68,7 +68,10 @@ const query = typedApi.query.System.Number
 const runtime = await typedApi.runtime.latest() // we already learnt about it!
 
 // in this case `getCompatibilityLevel` returns a Promise<boolean>
-if ((await query.getCompatibilityLevel()) >= CompatibilityLevel.BackwardsCompatible) {
+if (
+  (await query.getCompatibilityLevel()) >=
+  CompatibilityLevel.BackwardsCompatible
+) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
@@ -77,7 +80,9 @@ if ((await query.getCompatibilityLevel()) >= CompatibilityLevel.BackwardsCompati
 
 // another option would be to use the already loaded runtime
 // in this case, `getCompatibilityLevel` is sync, and returns a boolean
-if (query.getCompatibilityLevel(runtime) >= CompatibilityLevel.BackwardsCompatible) {
+if (
+  query.getCompatibilityLevel(runtime) >= CompatibilityLevel.BackwardsCompatible
+) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!

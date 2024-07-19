@@ -39,7 +39,10 @@ const nextApi = client.getTypedApi(nextDot)
 
 function performTransfer() {
   // check if we're running on the next version to run that first
-  if (await nextApi.tx.Balances.new_fancy_transfer.getCompatibilityLevel() >= CompatibilityLevel.BackwardsCompatible) {
+  if (
+    (await nextApi.tx.Balances.new_fancy_transfer.getCompatibilityLevel()) >=
+    CompatibilityLevel.BackwardsCompatible
+  ) {
     nextApi.tx.Balances.new_fancy_transfer({
       dest: MultiAddress.Id("addr"),
       value: 5n,
