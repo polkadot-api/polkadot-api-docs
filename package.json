@@ -9,16 +9,16 @@
     "format": "prettier --write README.md \"docs/**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {
-    "@radix-ui/react-tabs": "^1.0.4",
-    "@types/react": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "typescript": "latest",
-    "vocs": "1.0.0-alpha.52"
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@types/react": "^18.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.3",
+    "vocs": "1.0.0-alpha.55"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^9.0.2",
-    "prettier": "^3.3.2"
+    "prettier": "^3.3.3"
   },
   "prettier": {
     "printWidth": 80,

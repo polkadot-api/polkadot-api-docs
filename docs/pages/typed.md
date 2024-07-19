@@ -9,25 +9,15 @@ type TypedApi = {
   event: EvApi
   apis: RuntimeCallsApi
   constants: ConstApi
-  runtime: RuntimeApi
+  compatibilityToken: Promise<CompatibilityToken>
 }
 ```
 
-Let's start with the simplest one, `runtime` field. It's just:
-
-```ts
-type RuntimeApi = Observable<Runtime> & {
-  latest: () => Promise<Runtime>
-}
-```
-
-It's an observable that holds the current runtime information for that specific client, with a `latest` function to be able to wait for the runtime to load (it'll be helpful for some functions that need a `Runtime`, see [this recipe](/recipes/upgrade)).
-
-All the other fields are a `Record<string, Record<string, ???>>`. The first index defines the pallet that we're looking for, and the second one defines which query/tx/event/api/constant are we looking for inside that pallet. Let's see, one by one, what do we find inside of it!
+Every field except for `compatibilityToken` is a `Record<string, Record<string, ???>>`. The first index defines the pallet, and the second one defines which query/tx/event/api/constant within that pallet. Each one of them will be described in the following pages, but let's focus on the compatibility check, which is common for all of them.
 
 ## getCompatibilityLevel
 
-First of all, let's understand `getCompatibilityLevel` field. It's under each query/tx/event/api/constant in any runtime. After generating the descriptors (see [Codegen](/codegen) section), we have a typed interface to every interaction with the chain. Nevertheless, breaking runtime upgrades might hit the runtime between developing and the runtime execution of your app. `getCompatibilityLevel` enables you to check on runtime if there was a breaking upgrade that hit your particular method.
+The `getCompatibilityLevel` is under each query/tx/event/api/constant. After generating the descriptors (see [Codegen](/codegen) section), we have a typed interface to every interaction with the chain. Nevertheless, breaking runtime upgrades might hit the runtime between developing and the runtime execution of your app. `getCompatibilityLevel` enables you to check on runtime if there was a breaking upgrade that hit your particular method.
 
 The enum `CompatibilityLevel` defines 4 levels of compatibility:
 
@@ -52,32 +42,39 @@ On the other hand, a `CompatibilityLevel.BackwardsCompatible`, means that the op
 
 A backwards-compatible change also happens in structs. For instance, if an input struct removes one of their properties, those operations are still compatible.
 
-It needs the runtime and the descriptors to be loaded, so it has two overloads, one where it will wait for them to be loaded, returning a promise, or another that returns synchronously if you already have a reference to the `Runtime` object from `typedApi.runtime.latest()`.
+This compatibility check needs to have the runtime from the current connection, but also the descriptors that were generated from the CLI and are lazy loaded. This means that by default, `getCompatibilityLevel` is asynchronous, because it potentially needs to wait until that is loaded before it can run the check.
+
+This is where `compatibilityToken` comes into play. This is a promise that will resolve when both the connection to the current runtime and the descriptors have fully loaded. So if you want `getCompatibilityLevel` to be synchronous, then you can `await` the compatibilityToken just once (e.g. on dApp initialization), and then pass it as a parameter to `getCompatibilityLevel` to have it synchronously. This is because the token internally has all the information needed to run the compatibility check.
 
 ```ts
 interface GetCompatibilityLevel {
   (): Promise<CompatibilityLevel>
-  (runtime: Runtime): CompatibilityLevel
+  (compatibilityToken: CompatibilityToken): CompatibilityLevel
 }
 ```
 
-For example, let's use `typedApi.query.System.Number`. It's a simple query, we'll see in the next pages how to interact with it. We're only interested on `getCompatibilityLevel`.
+For example, let's use `typedApi.query.System.Number`. It's a simple query, we'll see in the next pages how to interact with it. In this example we'll focus on `getCompatibilityLevel`.
 
 ```ts
 const query = typedApi.query.System.Number
-const runtime = await typedApi.runtime.latest() // we already learnt about it!
+
+// Set our threshold for compatibility
+const isCompatible = (level: CompatibilityLevel) =>
+  level >= CompatibilityLevel.BackwardsCompatible
 
 // in this case `getCompatibilityLevel` returns a Promise<boolean>
-if ((await query.getCompatibilityLevel()) >= CompatibilityLevel.BackwardsCompatible) {
+if (isCompatible(await query.getCompatibilityLevel())) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
   // keep an eye on what you do
 }
 
-// another option would be to use the already loaded runtime
-// in this case, `getCompatibilityLevel` is sync, and returns a boolean
-if (query.getCompatibilityLevel(runtime) >= CompatibilityLevel.BackwardsCompatible) {
+// Alternatively, we can await just once the compatibilityToken
+const compatibilityToken = await typedApi.compatibilityToken
+
+// And later on we can use it, so that `getCompatibilityLevel` is sync
+if (isCompatible(query.getCompatibilityLevel(compatibilityToken))) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
