@@ -8,6 +8,10 @@ PAPI is designed to work flawlessly with almost any Polkadot-like chain. Even th
 
 PAPI is developed using the latest NodeJS LTS (currently `20.x`). The minimum required version is `20.6.0`, while we recommend the latest available release.
 
+### Bun
+
+In case you are using `bun` as your Javascript runtime, then Papi will work flawlessly with it! Just a small detail, if using a WebSocket provider, make sure you import it from `polkadot-api/ws-provider/web`!
+
 ### Browser
 
 There is no specific required version, Polkadot-API works as expected in any modern browser.
@@ -56,7 +60,7 @@ The most important thing to take into account is that the runtime needs to have 
 Besides that, Polkadot-API requires runtimes to implement some basic runtime calls. They are generally implemented in all chains developed using FRAME:
 
 - In order to get the metadata, it needs `Metadata_metadata_versions` and `Metadata_metadata_at_version`. If they are not present, then `Metadata_metadata` needs to be there and answer a `v14` Metadata.
-- To create and broadcast transactions, Polkadot-API needs `AccountNonceApi_account_nonce` and `TransactionPaymentApi_query_info` and `TaggedTransactionQueue_validate_transaction`.
+- To create and broadcast transactions, Polkadot-API needs `AccountNonceApi_account_nonce` and `TaggedTransactionQueue_validate_transaction`. To estimate the fees, it also requires `TransactionPaymentApi_query_info`.
 
 In order to create transactions as well, the following storage entry is required for obtaining the genesis block-hash:
 
