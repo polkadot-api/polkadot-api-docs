@@ -162,6 +162,32 @@ type TxFinalized = {
 
 You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [this section]("/typed/events") to see what to do with them); `ok` which simply tells if the extrinsic was successful (i.e. event `System.ExtrinsicSuccess` is found) and the `block` information where the tx is found.
 
+### `InvalidError`
+
+When a transaction fails on chain (due to, for example, wrong nonce, expired mortality, etc) we provide a strongly typed error. It can be used as follows:
+
+```ts
+import { InvalidTxError, TransactionValidityError } from "polkadot-api"
+import { myChain } from "@polkadot-api/descriptors"
+
+tx.signAndSubmit(signer)
+  .then(() => "tx went well")
+  .catch((err) => {
+    if (err instanceof InvalidTxError) {
+      const typedErr: TransactionValidityError<typeof myChain> = err.error
+      console.log(typedErr)
+    }
+  })
+```
+
+This `typedErr` will be, then, strongly typed as any other type coming from PAPI. Its content might differ per chain, but it enables the developer to get the information required and act accordingly.
+
+:::info
+This error will only be available for chains with Runtime Metadata `v15` or greater.
+
+In case you are using the whitelist feature of the codegen, remember to add `"api.TaggedTransactionQueue.validate_transaction"` to the list of whitelisted interactions.
+:::
+
 ## `signSubmitAndWatch`
 
 `signSubmitAndWatch` is the Observable-based version of `signAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized. Let's see its interface:
