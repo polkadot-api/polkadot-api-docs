@@ -58,7 +58,7 @@ Besides that, Polkadot-API requires runtimes to implement some basic runtime cal
 - In order to get the metadata, it needs `Metadata_metadata_versions` and `Metadata_metadata_at_version`. If they are not present, then `Metadata_metadata` needs to be there and answer a `v14` Metadata.
 - To create and broadcast transactions, Polkadot-API needs `AccountNonceApi_account_nonce` and `TransactionPaymentApi_query_info` and `TaggedTransactionQueue_validate_transaction`.
 
-In order to create transactions as well, the following storage entries are required:
+In order to create transactions as well, the following storage entry is required for obtaining the genesis block-hash:
 
 - `System.BlockHash`
 
