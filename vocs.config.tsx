@@ -16,6 +16,10 @@ export default defineConfig({
       link: "/getting-started",
     },
     {
+      text: "Requirements",
+      link: "/requirements",
+    },
+    {
       text: "Providers",
       link: "/providers",
     },
