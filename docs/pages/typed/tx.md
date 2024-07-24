@@ -164,7 +164,7 @@ You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [th
 
 ### `InvalidError`
 
-When a transaction fails on chain (due to, for example, wrong nonce, expired mortality, etc) we provide a strongly typed error. It can be used as follows:
+When a transaction is deemed as invalid (due to, for example, wrong nonce, expired mortality, not enough balance to pay the fees, etc) we provide a strongly typed error. It can be used as follows:
 
 ```ts
 import { InvalidTxError, TransactionValidityError } from "polkadot-api"
