@@ -53,17 +53,27 @@ interface GetCompatibilityLevel {
 }
 ```
 
+There's also a small utility next to `.getCompatibilityLevel()` to directly check for compatibility called `.isCompatible(threshold): boolean`. The threshold sets the level you want to set for the result to be `true`, inclusive. So passing in `CompatibilityLevel.BackwardsCompatible`, will return true for both identical and backwards compatible, but not for patial compatibility.
+
+```ts
+interface IsCompatible {
+  (threshold: CompatibilityLevel): Promise<boolean>
+  (threshold: CompatibilityLevel, compatibilityToken: CompatibilityToken): boolean
+}
+
+// Possible "pseudocode" implementation, to show the equivalence
+function isCompatible(threshold, token) {
+  return getCompatibilityLevel(token) >= threshold;
+}
+```
+
 For example, let's use `typedApi.query.System.Number`. It's a simple query, we'll see in the next pages how to interact with it. In this example we'll focus on `getCompatibilityLevel`.
 
 ```ts
 const query = typedApi.query.System.Number
 
-// Set our threshold for compatibility
-const isCompatible = (level: CompatibilityLevel) =>
-  level >= CompatibilityLevel.BackwardsCompatible
-
 // in this case `getCompatibilityLevel` returns a Promise<boolean>
-if (isCompatible(await query.getCompatibilityLevel())) {
+if (await query.isCompatible(CompatibilityLevel.BackwardsCompatible)) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
@@ -74,7 +84,7 @@ if (isCompatible(await query.getCompatibilityLevel())) {
 const compatibilityToken = await typedApi.compatibilityToken
 
 // And later on we can use it, so that `getCompatibilityLevel` is sync
-if (isCompatible(query.getCompatibilityLevel(compatibilityToken))) {
+if (query.isCompatible(CompatibilityLevel.BackwardsCompatible, compatibilityToken)) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
@@ -82,6 +92,6 @@ if (isCompatible(query.getCompatibilityLevel(compatibilityToken))) {
 }
 ```
 
-As you can see, `getCompatibilityLevel` is really powerful since we can prepare for runtime upgrades seamlessly using PAPI. See [this recipe](/recipes/upgrade) for an example!
+As you can see, `isCompatible` and `getCompatibilityLevel` are really powerful since we can prepare for runtime upgrades seamlessly using PAPI. See [this recipe](/recipes/upgrade) for an example!
 
 Let's continue with the rest of the fields!
