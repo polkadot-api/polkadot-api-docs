@@ -40,8 +40,9 @@ const nextApi = client.getTypedApi(nextDot)
 function performTransfer() {
   // check if we're running on the next version to run that first
   if (
-    (await nextApi.tx.Balances.new_fancy_transfer.getCompatibilityLevel()) >=
-    CompatibilityLevel.BackwardsCompatible
+    await nextApi.tx.Balances.new_fancy_transfer.isCompatible(
+      CompatibilityLevel.Partial
+    )
   ) {
     nextApi.tx.Balances.new_fancy_transfer({
       dest: MultiAddress.Id("addr"),
@@ -59,6 +60,6 @@ function performTransfer() {
 
 Furthermore, the runtime upgrade might happen while the dApp is running, and this will still work without needing to redo the connection. As soon as the upgrade is received, the compatible check will work as expected and the dApp will start using the next runtime.
 
-As a note, `getCompatibilityLevel` is a function available on every interaction on the typedApi (queries, apis, constants, events, transactions). If used without any parameter it will return a `Promise<CompatibilityLevel>`, because it needs to wait for the runtime to be loaded before it can tell whether it's compatible or not.
+As a note, `isCompatible` is a function available on every interaction on the typedApi (queries, apis, constants, events, transactions). It needs a compatibility threshold. If used without any other parameter it will return a `Promise<boolean>`, because it needs to wait for the runtime to be loaded before it can tell whether it's compatible or not.
 
-If you have multiple `getCompatibilityLevel` checks and don't want to wait for each one individually, you can first wait for the descriptors to be loaded with `await dotApi.compatibilityToken`, and then pass this result to `getCompatibilityLevel` as a parameter, allowing it to return synchronously. See [TypedApi getCompatibilityLevel](/typed#getcompatibilitylevel) for a deeper explanation.
+If you have multiple `isCompatible` checks and don't want to wait for each one individually, you can first wait for the descriptors to be loaded with `await dotApi.compatibilityToken`, and then pass this result to `isCompatible` as the second parameter, allowing it to return synchronously. See [TypedApi getCompatibilityLevel](/typed#getcompatibilitylevel) for a deeper explanation.
