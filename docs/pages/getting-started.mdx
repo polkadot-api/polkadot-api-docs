@@ -37,9 +37,17 @@ Now you can create a PolkadotClient with a provider of your choice and start int
     import { getSmProvider } from "polkadot-api/sm-provider";
     import { chainSpec } from "polkadot-api/chains/polkadot";
     import { startFromWorker } from "polkadot-api/smoldot/from-worker";
-    import SmWorker from "polkadot-api/smoldot/worker?worker";
 
-    const smoldot = startFromWorker(new SmWorker());
+    // Using vite
+    import SmWorker from "polkadot-api/smoldot/worker?worker";
+    const worker = new SmWorker();
+
+    // Using Webpack
+    // const worker = new Worker(
+    //   new URL("polkadot-api/smoldot/worker", import.meta.url)
+    // );
+
+    const smoldot = startFromWorker(worker);
     const chain = await smoldot.addChain({ chainSpec });
 
     // Connect to the polkadot relay chain.
