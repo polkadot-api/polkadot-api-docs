@@ -82,11 +82,15 @@ export default defineConfig({
       ],
     },
     {
-      text: "Examples",
+      text: "Built with PAPI",
       items: [
         {
           text: "Teleport across chains",
           link: "https://github.com/polkadot-api/react-teleport-example",
+        },
+        {
+          text: "Kheopswap. Swap portal for AssetHub",
+          link: "https://github.com/kheopswap/kheopswap",
         },
       ],
     },
