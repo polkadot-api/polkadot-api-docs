@@ -30,9 +30,9 @@ Polkadot-API will work without any issues. The WebSocket provider could be used 
 
 ```ts
 import { createClient } from "polkadot-api"
-import { WebSocketProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider/web"
 
-const client = createClient(WebSocketProvider("wss://your-rpc.your-url.xyz"))
+const client = createClient(getWsProvider("wss://your-rpc.your-url.xyz"))
 ```
 
 #### Polkadot-SDK `1.1.0 <= x < 1.11.0`
@@ -41,11 +41,11 @@ If your node uses versions between `1.1` and `1.11`, you are still good to go wi
 
 ```ts
 import { createClient } from "polkadot-api"
-import { WebSocketProvider } from "polkadot-api/ws-provider/web"
-import compatEnhancer from "polkadot-api/polkadot-sdk-compat"
+import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 
 const client = createClient(
-  compatEnhancer(WebSocketProvider("wss://your-rpc.your-url.xyz")),
+  withPolkadotSdkCompat(getWsProvider("wss://your-rpc.your-url.xyz")),
 )
 ```
 
