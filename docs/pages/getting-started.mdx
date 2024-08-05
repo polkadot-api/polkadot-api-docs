@@ -73,11 +73,11 @@ Now you can create a PolkadotClient with a provider of your choice and start int
   <Tabs.Content value="web">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
-    import { WebSocketProvider } from "polkadot-api/ws-provider/web";
+    import { getWsProvider } from "polkadot-api/ws-provider/web";
 
     // Connect to the polkadot relay chain.
     const client = createClient(
-      WebSocketProvider("wss://dot-rpc.stakeworld.io")
+      getWsProvider("wss://dot-rpc.stakeworld.io")
     );
 
     // [!include ~/snippets/gettingStarted.ts:usage]
@@ -87,11 +87,11 @@ Now you can create a PolkadotClient with a provider of your choice and start int
   <Tabs.Content value="node">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
-    import { WebSocketProvider } from "polkadot-api/ws-provider/node";
+    import { getWsProvider } from "polkadot-api/ws-provider/node";
 
     // Connect to the polkadot relay chain.
     const client = createClient(
-      WebSocketProvider("wss://dot-rpc.stakeworld.io")
+      getWsProvider("wss://dot-rpc.stakeworld.io")
     );
 
     // [!include ~/snippets/gettingStarted.ts:usage]
