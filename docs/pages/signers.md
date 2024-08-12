@@ -1,8 +1,10 @@
 # Signers
 
+## `PolkadotSigner`
+
 For transactions, the generated descriptors and its corresponding typed API are needed to create the transaction extrinsics, but for these transactions to be signed, we also need a signer, which is the responsible of taking it the call data and signing it.
 
-Every method on Polkadot-API that needs to sign something, takes in a signer with the following interface:
+Every method on Polkadot-API that needs to sign something, requires a `PolkadotSigner` with the following interface:
 
 ```ts
 interface PolkadotSigner {
@@ -26,7 +28,7 @@ interface PolkadotSigner {
 
 This interface is generic to signing transactions for the chain.
 
-## `PolkadotSigner` from a browser extension
+### From a browser extension
 
 If you want to use a compatible extension as a signer, Polkadot-API has a subpath with a couple of utilities to help with this: `polkadot-api/pjs-signer`.
 
@@ -51,7 +53,7 @@ const accounts: InjectedPolkadotAccount[] = selectedExtension.getAccounts()
 const polkadotSigner = accounts[0].polkadotSigner
 ```
 
-## `PolkadotSigner` from generic signing function
+### From a generic signing function
 
 If you have a signer which takes some arbitrary data and just signs it with one of the supported algorithms, you can create a `PolkadotSigner` with the function `getPolkadotSigner` from `polkadot-api/signer`:
 
@@ -68,16 +70,16 @@ For example, using hdkd from `@polkadot-labs`:
 ```ts
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd"
 import {
-  sr25519,
   DEV_PHRASE,
   entropyToMiniSecret,
   mnemonicToEntropy,
 } from "@polkadot-labs/hdkd-helpers"
+import { getPolkadotSigner } from "polkadot-api/signer"
 
-const entropy = mnemonicToEntropy(MNEMONIC)
+const entropy = mnemonicToEntropy(DEV_PHRASE)
 const miniSecret = entropyToMiniSecret(entropy)
 const derive = sr25519CreateDerive(miniSecret)
-const keypair = derive("//Alice")
+const hdkdKeyPair = derive("//Alice")
 
 const polkadotSigner = getPolkadotSigner(
   hdkdKeyPair.publicKey,

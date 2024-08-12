@@ -41,7 +41,7 @@ function performTransfer() {
   // check if we're running on the next version to run that first
   if (
     await nextApi.tx.Balances.new_fancy_transfer.isCompatible(
-      CompatibilityLevel.Partial
+      CompatibilityLevel.Partial,
     )
   ) {
     nextApi.tx.Balances.new_fancy_transfer({

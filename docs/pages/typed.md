@@ -58,12 +58,15 @@ There's also a small utility next to `.getCompatibilityLevel()` to directly chec
 ```ts
 interface IsCompatible {
   (threshold: CompatibilityLevel): Promise<boolean>
-  (threshold: CompatibilityLevel, compatibilityToken: CompatibilityToken): boolean
+  (
+    threshold: CompatibilityLevel,
+    compatibilityToken: CompatibilityToken,
+  ): boolean
 }
 
 // Possible "pseudocode" implementation, to show the equivalence
 function isCompatible(threshold, token) {
-  return getCompatibilityLevel(token) >= threshold;
+  return getCompatibilityLevel(token) >= threshold
 }
 ```
 
@@ -84,7 +87,9 @@ if (await query.isCompatible(CompatibilityLevel.BackwardsCompatible)) {
 const compatibilityToken = await typedApi.compatibilityToken
 
 // And later on we can use it, so that `getCompatibilityLevel` is sync
-if (query.isCompatible(CompatibilityLevel.BackwardsCompatible, compatibilityToken)) {
+if (
+  query.isCompatible(CompatibilityLevel.BackwardsCompatible, compatibilityToken)
+) {
   // do your stuff, the query is compatible
 } else {
   // the call is not compatible!
