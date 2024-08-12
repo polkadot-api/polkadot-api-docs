@@ -145,7 +145,7 @@ It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the 
 
 ## `signAndSubmit`
 
-`signAndSubmit` will sign (exactly the same way as `sign`) and then broadcast the transaction. If any error happens (both in the signing or if the transaction fails, i.e. wrong nonce, mortality period ended, etc) the promise will be rejected with an error. We're working to make this errors strongly typed. The promise will resolve as soon as the transaction is found in a finalized block, and will reject if the transaction fails. Note that this promise is not abortable. Let's see the interface:
+`signAndSubmit` will sign (exactly the same way as `sign`) and then broadcast the transaction. If any error happens (both in the signing or if the transaction fails, i.e. wrong nonce, mortality period ended, etc) the promise will be rejected with an error. The promise will resolve as soon as the transaction is found in a finalized block, and will reject if the transaction fails. Note that this promise is not abortable. Let's see the interface:
 
 ```ts
 type TxPromise = (
@@ -157,6 +157,7 @@ type TxFinalized = {
   txHash: HexString
   ok: boolean
   events: Array<SystemEvent["event"]>
+  dispatchError?: DispatchError
   block: { hash: string; number: number; index: number }
 }
 ```
@@ -232,6 +233,7 @@ type TxBestBlocksState = {
       found: true
       ok: boolean
       events: Array<SystemEvent["event"]>
+      dispatchError?: DispatchError
       block: { hash: string; number: number; index: number }
     }
 )
@@ -259,6 +261,7 @@ interface TxBestBlockFound {
   found: true
   ok: boolean
   events: Array<SystemEvent["event"]>
+  dispatchError?: DispatchError
   block: { hash: string; number: number; index: number }
 }
 ```
@@ -273,12 +276,14 @@ type TxFinalized = {
   txHash: HexString
   ok: boolean
   events: Array<SystemEvent["event"]>
+  dispatchError?: DispatchError
   block: { hash: string; number: number; index: number }
 }
 ```
 
 At this stage, the transaction is valid and already in the canonical chain, in a finalized block. We pass, besides the `txHash` as in the other events, the following stuff:
 
-- `ok`: it tells if the extrinsic was successful in its purpose. Under the hood it verifies if the event `System.ExtrinsicSuccess` is present.
+- `ok`: it tells if the extrinsic was successful in its purpose. Under the hood it basically checks that the event `System.ExtrinsicFailed` was not emitted.
 - `events`: array of all events emitted by the extrinsic. They are ordered as emitted on-chain.
+- `dispatchError`: in case the transaction failed, this will have the `dispatchError` value of `System.ExtrinsicFailed`.
 - `block`: information of the block where the `tx` is present. `hash` of the block, `number` of the block, `index` of the tx in the block.
