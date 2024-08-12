@@ -1,8 +1,8 @@
 # Signers
 
-For transactions, the generated descriptors and its corresponding typed API are needed to create the transaction extrinsics, but for these transactions to be signed, we also need a signer, which is the responsible of taking it the call data and signing it.
-
 ## `PolkadotSigner`
+
+For transactions, the generated descriptors and its corresponding typed API are needed to create the transaction extrinsics, but for these transactions to be signed, we also need a signer, which is the responsible of taking it the call data and signing it.
 
 Every method on Polkadot-API that needs to sign something, requires a `PolkadotSigner` with the following interface:
 
