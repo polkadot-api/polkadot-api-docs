@@ -92,6 +92,14 @@ export default defineConfig({
           text: "Kheopswap. Swap portal for AssetHub",
           link: "https://github.com/kheopswap/kheopswap",
         },
+        {
+          text: "Polkadot Fellowship Dashboard",
+          link: "https://polkadot-fellows.github.io/dashboard/",
+        },        
+        {
+          text: "Delegit.xyz",
+          link: "https://delegit.xyz/",
+        },
       ],
     },
   ],
