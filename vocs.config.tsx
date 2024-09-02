@@ -94,11 +94,11 @@ export default defineConfig({
         },
         {
           text: "Polkadot Fellowship Dashboard",
-          link: "https://polkadot-fellows.github.io/dashboard/",
-        },        
+          link: "https://github.com/polkadot-fellows/dashboard",
+        },
         {
           text: "Delegit.xyz",
-          link: "https://delegit.xyz/",
+          link: "https://github.com/delegit-xyz/dashboard",
         },
       ],
     },
