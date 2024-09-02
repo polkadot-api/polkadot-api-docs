@@ -16,6 +16,10 @@ In case you are using `bun` as your Javascript runtime, then Papi will work flaw
 
 There is no specific required version, Polkadot-API works as expected in any modern browser.
 
+## Typescript
+
+In order for PAPI to be imported correctly, and get all the types, the minimum working version of `typescript` is `5.2`.
+
 ## Chain
 
 ### Node
