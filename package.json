@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.1.0",
-    "@types/react": "^18.3.3",
+    "@types/react": "^18.3.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.5.4",
-    "vocs": "1.0.0-alpha.55"
+    "vocs": "1.0.0-alpha.57"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^9.0.2",
@@ -28,5 +28,5 @@
       "@homer0/prettier-plugin-jsdoc"
     ]
   },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
+  "packageManager": "pnpm@9.9.0+sha512.60c18acd138bff695d339be6ad13f7e936eea6745660d4cc4a776d5247c540d0edee1a563695c183a66eb917ef88f2b4feb1fc25f32a7adcadc7aaf3438e99c1"
 }
