@@ -39,6 +39,10 @@ import { getWsProvider } from "polkadot-api/ws-provider/web"
 const client = createClient(getWsProvider("wss://your-rpc.your-url.xyz"))
 ```
 
+:::warning
+A new error in Polkadot-SDK has been discovered, reported and solved in Polkadot-SDK `1.16.0` (or `stable-2409`). Therefore, we recommend anyone connecting through a WebSocket to use the same following recommendations as in Polkadot-SDK `1.1.0 <= x < 1.11.0`.
+:::
+
 #### Polkadot-SDK `1.1.0 <= x < 1.11.0`
 
 If your node uses versions between `1.1` and `1.11`, you are still good to go with Polkadot-API. The node implements the JSON-RPC spec wrongly, but we provide some enhancers to workaround these flaws. You need to start the connection as follows:
