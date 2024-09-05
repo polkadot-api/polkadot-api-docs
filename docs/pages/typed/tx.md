@@ -1,24 +1,16 @@
 # Transactions
 
-Preparing, signing, and broadcasting extrinsics is one of the main purposes of polkadot-api. Every `typedApi.tx.Pallet.Call` has the following structure:
+Preparing, signing, and broadcasting extrinsics is one of the main purposes of `polkadot-api`. There are two ways to create transactions in PAPI, and will see both of them in this page.
+
+## `tx.Pallet.Call`
+
+In order to create a transaction directly in PAPI (without a pre-made call data) use the object `typedApi.tx`. Every `typedApi.tx.Pallet.Call` available in the chain has the following structure:
 
 ```ts
 interface TxEntry<Arg> {
   (data: Arg): Transaction
   isCompatible: IsCompatible
   getCompatibilityLevel: GetCompatibilityLevel
-}
-
-type Transaction = {
-  sign: TxSignFn
-  signSubmitAndWatch: TxObservable
-  signAndSubmit: TxPromise
-  getEncodedData: TxCall
-  getEstimatedFees: (
-    from: Uint8Array | SS58String,
-    txOptions?: TxOptions,
-  ) => Promise<bigint>
-  decodedCall: Enum
 }
 ```
 
@@ -43,9 +35,53 @@ const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
 })
 ```
 
-Once we have a `Transaction` type, we're ready to see all methods that it have.
+## `txFromCallData`
 
-## `decodedCall`
+This option will just take a `Binary` call data and pack the transaction from it. It will validate the input when creating it, throwing an error otherwise. It will create the transaction asynchronously if you just pass the call data, and synchronously if you pass an already awaited compatibility token!
+
+Its interface is:
+
+```ts
+interface TxFromBinary {
+  (callData: Binary): Promise<Transaction>
+  (callData: Binary, compatibilityToken: CompatibilityToken): Transaction
+}
+```
+
+Very simple. Let's see it with an example:
+
+```ts
+const callData = Binary.fromHex("0x00002c50415049203c3320444f54")
+
+// without compatibility token it's a promise
+const tx: Transaction = await api.txFromCallData(callData)
+
+const token = await api.compatibilityToken
+// with token is sync!
+const txSync: Transaction = api.txFromCallData(callData, token)
+```
+
+## `Transaction` type
+
+Both methods of creating transactions in PAPI output a `Transaction` type, that has the following interface:
+
+```ts
+type Transaction = {
+  sign: TxSignFn
+  signSubmitAndWatch: TxObservable
+  signAndSubmit: TxPromise
+  getEncodedData: TxCall
+  getEstimatedFees: (
+    from: Uint8Array | SS58String,
+    txOptions?: TxOptions,
+  ) => Promise<bigint>
+  decodedCall: Enum
+}
+```
+
+We will see item by item its content.
+
+### `decodedCall`
 
 The `decodedCall` field holds the `papi` way of expressing an extrinsic, decoded in an `Enum` type. It could be useful to pass it as call data to a `proxy.proxy` call, for example, that takes another call as a parameter:
 
@@ -64,7 +100,7 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 })
 ```
 
-## `getEncodedData`
+### `getEncodedData`
 
 `getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It also runs the compatibility check, so it needs the runtime and descriptors loaded. As we've seen with `getCompatibilityLevel`, if you call it directly it'll be a `Promise`-based call, or you can pass in a `compatibilityToken` you've previously awaited for and it'll answer synchronously. Let's see an example:
 
@@ -90,7 +126,7 @@ const compatibilityToken = await typedApi.compatibilityToken
 const encodedTx = tx.getEncodedData(compatibilityToken)
 ```
 
-## `TxOptions`
+### `TxOptions`
 
 All the methods that will follow sign the transaction (or fake-sign in the case of `getEncodedFees`). When signing a transaction, some optional `TxOptions` could be passed. Every one of them as a default, so it's not needed to pass them. Let's see and discuss them one by one:
 
@@ -119,7 +155,7 @@ type TxOptions<Asset> = Partial<
 - `tip`: add tip to transaction. Default: `0`
 - `asset`: there're several chains that allow you to choose which asset to use to pay for the fees and tip. This field will be strongly typed as well and will adapt to every chain used in the `dApp`. Default: `undefined`. This means to use the native token from the chain.
 
-## `getEstimatedFees`
+### `getEstimatedFees`
 
 With `getEstimatedFees` we make a call to the runtime and check how much would it cost to run a specific transaction. We need the address of the sender (or public key) and the `TxOptions` to construct a fake-signed transaction. We'll check the fees against the latest known `finalizedBlock`. Its interface is as follows:
 
@@ -130,7 +166,7 @@ type TxEstimateFees = (
 ) => Promise<bigint>
 ```
 
-## `sign`
+### `sign`
 
 As simple as it seems, this method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`]("/signers"), we saw them in another section of the docs. Let's see its interface:
 
@@ -143,7 +179,7 @@ type TxSignFn = (
 
 It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the signer fails (or the user cancels the signature) it'll throw an error.
 
-## `signAndSubmit`
+### `signAndSubmit`
 
 `signAndSubmit` will sign (exactly the same way as `sign`) and then broadcast the transaction. If any error happens (both in the signing or if the transaction fails, i.e. wrong nonce, mortality period ended, etc) the promise will be rejected with an error. The promise will resolve as soon as the transaction is found in a finalized block, and will reject if the transaction fails. Note that this promise is not abortable. Let's see the interface:
 
@@ -164,33 +200,7 @@ type TxFinalized = {
 
 You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [this section]("/typed/events") to see what to do with them); `ok` which simply tells if the extrinsic was successful (i.e. event `System.ExtrinsicSuccess` is found) and the `block` information where the tx is found.
 
-### `InvalidError`
-
-When a transaction is deemed as invalid (due to, for example, wrong nonce, expired mortality, not enough balance to pay the fees, etc) we provide a strongly typed error. It can be used as follows:
-
-```ts
-import { InvalidTxError, TransactionValidityError } from "polkadot-api"
-import { myChain } from "@polkadot-api/descriptors"
-
-tx.signAndSubmit(signer)
-  .then(() => "tx went well")
-  .catch((err) => {
-    if (err instanceof InvalidTxError) {
-      const typedErr: TransactionValidityError<typeof myChain> = err.error
-      console.log(typedErr)
-    }
-  })
-```
-
-This `typedErr` will be, then, strongly typed as any other type coming from PAPI. Its content might differ per chain, but it enables the developer to get the information required and act accordingly.
-
-:::info
-This error will only be available for chains with Runtime Metadata `v15` or greater.
-
-In case you are using the whitelist feature of the codegen, remember to add `"api.TaggedTransactionQueue.validate_transaction"` to the list of whitelisted interactions.
-:::
-
-## `signSubmitAndWatch`
+### `signSubmitAndWatch`
 
 `signSubmitAndWatch` is the Observable-based version of `signAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized. Let's see its interface:
 
@@ -287,3 +297,39 @@ At this stage, the transaction is valid and already in the canonical chain, in a
 - `events`: array of all events emitted by the extrinsic. They are ordered as emitted on-chain.
 - `dispatchError`: in case the transaction failed, this will have the `dispatchError` value of `System.ExtrinsicFailed`.
 - `block`: information of the block where the `tx` is present. `hash` of the block, `number` of the block, `index` of the tx in the block.
+
+### `InvalidError`
+
+When a transaction is deemed as invalid (due to, for example, wrong nonce, expired mortality, not enough balance to pay the fees, etc) we provide a strongly typed error. It can be used as follows:
+
+```ts
+import { InvalidTxError, TransactionValidityError } from "polkadot-api"
+import { myChain } from "@polkadot-api/descriptors"
+
+tx.signAndSubmit(signer)
+  .then(() => "tx went well")
+  .catch((err) => {
+    if (err instanceof InvalidTxError) {
+      const typedErr: TransactionValidityError<typeof myChain> = err.error
+      console.log(typedErr)
+    }
+  })
+
+// it is available, of course, for observable-based broadcasting
+tx.signSubmitAndWatch(signer).subscribe({
+  error: (err) => {
+    if (err instanceof InvalidTxError) {
+      const typedErr: TransactionValidityError<typeof myChain> = err.error
+      console.log(typedErr)
+    }
+  },
+})
+```
+
+This `typedErr` will be, then, strongly typed as any other type coming from PAPI. Its content might differ per chain, but it enables the developer to get the information required and act accordingly.
+
+:::info
+This error will only be available for chains with Runtime Metadata `v15` or greater.
+
+In case you are using the whitelist feature of the codegen, remember to add `"api.TaggedTransactionQueue.validate_transaction"` to the list of whitelisted interactions.
+:::
