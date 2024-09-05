@@ -333,3 +333,33 @@ This error will only be available for chains with Runtime Metadata `v15` or grea
 
 In case you are using the whitelist feature of the codegen, remember to add `"api.TaggedTransactionQueue.validate_transaction"` to the list of whitelisted interactions.
 :::
+
+### Failed extrinsic
+
+In Polkadot, a transaction can be valid (and therefore not to throw the `InvalidError`) but the inner extrinsic fail. In this case, the event `ExtrinsicFailed` gives all the information required to understand why it failed. We also expose a `dispatchError` field that helps to guess why it failed. Better a picture than a thousand words:
+
+```ts
+// `Chain` will change depending on the name you gave the chain
+// in the codegen
+import { ChainDispatchError } from "@polkadot-api/descriptors"
+tx.signSubmitAndWatch(signer).subscribe((ev) => {
+  if (
+    ev.type === "finalized" ||
+    (ev.type === "txBestBlocksState" && ev.found)
+  ) {
+    // here we are sure that the transaction is in a block (whether finalized or bestBlock)
+    // with `ok` we know the extrinsic failed
+    if (!ev.ok) {
+      const err: ChainDispatchError = ev.dispatchError
+      // you will have a strongly typed object that you can keep narrowing down
+      // to find the root of the issue
+      if (err.type === "Module" && err.value.type === "Balances")
+        "keep checking..."
+    }
+  }
+})
+```
+
+:::info
+In case you are using the whitelist feature of the codegen, remember to add `"event.System.ExtrinsicFailed"` to the list of whitelisted interactions.
+:::
