@@ -168,7 +168,7 @@ type TxEstimateFees = (
 
 ### `sign`
 
-As simple as it seems, this method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`]("/signers"), we saw them in another section of the docs. Let's see its interface:
+As simple as it seems, this method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`](/signers), we saw them in another section of the docs. Let's see its interface:
 
 ```ts
 type TxSignFn = (
@@ -181,7 +181,12 @@ It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the 
 
 ### `signAndSubmit`
 
-`signAndSubmit` will sign (exactly the same way as `sign`) and then broadcast the transaction. If any error happens (both in the signing or if the transaction fails, i.e. wrong nonce, mortality period ended, etc) the promise will be rejected with an error. The promise will resolve as soon as the transaction is found in a finalized block, and will reject if the transaction fails. Note that this promise is not abortable. Let's see the interface:
+`signAndSubmit` will sign (exactly the same way as `sign`). After signing it will validate the transaction against the block specified in `txOptions` and broadcast the transaction if it is valid. If it is not it will throw an [`InvalidTxError`](#invalidtxerror).
+
+- The promise will resolve as soon as the transaction is found in a finalized block.
+- The promise will reject if the transaction is invalid at any finalized block after broadcasting. It will throw as well an [`InvalidTxError`](#invalidtxerror).
+
+Note that this promise is not abortable. Let's see the interface:
 
 ```ts
 type TxPromise = (
@@ -198,11 +203,11 @@ type TxFinalized = {
 }
 ```
 
-You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [this section]("/typed/events") to see what to do with them); `ok` which simply tells if the extrinsic was successful (i.e. event `System.ExtrinsicSuccess` is found) and the `block` information where the tx is found.
+You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [this section](/typed/events) to see what to do with them); `ok` which simply tells if the extrinsic was successful (i.e. event `System.ExtrinsicSuccess` is found), with its [`dispatchError`](#dispatcherror) and the `block` information where the tx is found.
 
 ### `signSubmitAndWatch`
 
-`signSubmitAndWatch` is the Observable-based version of `signAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized. Let's see its interface:
+`signSubmitAndWatch` is the Observable-based version of `signAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized or definitely invalid. Let's see its interface:
 
 :::warning
 The Observable is single cast, and it's not stateful. The transaction will be sent to signature, broadcasted, etc on every single subscription individually. If you want to share the subscription, you could craft an observable using `shareLatest`.
@@ -221,14 +226,18 @@ export type TxObservable = (
 type TxEvent = TxSigned | TxBroadcasted | TxBestBlocksState | TxFinalized
 ```
 
-The first two are fairly straight-forward. As soon as the transaction gets signed, `TxSigned` will be emitted and the transaction will be broadcasted by the client. `TxBroadcasted` will be emitted then. This two events can only be emitted once each:
+The first two are fairly straight-forward. Let's see them.
+
+First of all, the transaction will be signed (exactly the same way as [`sign`](#sign)) and the event `TxSigned` will be emitted. As soon as the transaction gets signed, the transaction will be validated aganst the block specified in `txOptions` and, if it is valid, the transaction will be broadcasted and `TxBroadcasted` will be emitted then. If the transaction is invalid the observable will error with an [`InvalidTxError`](#invalidtxerror).
+
+This two events can only be emitted once each:
 
 ```ts
 type TxSigned = { type: "signed"; txHash: HexString }
 type TxBroadcasted = { type: "broadcasted"; txHash: HexString }
 ```
 
-Then, as soon as the block is found in a `bestBlock` (or if the transaction is not valid anymore in the latest known bestBlock) the following event will be emitted:
+Then, as soon as the block is found in a `bestBlock` or if the transaction is not valid in one of the best blocks the following event will be emitted:
 
 ```ts
 type TxBestBlocksState = {
@@ -249,9 +258,9 @@ type TxBestBlocksState = {
 )
 ```
 
-We can see that this is a 2-in-1 event. After the broadcast, the library will start verifying the state of the transaction against the latest known `bestBlock`. Then, two main situations could happen:
+We can see that this is a 2-in-1 event. After the broadcast, the library will start verifying the state of the transaction against some best blocks in a smart way. Then, two main situations could happen:
 
-- The transaction is not found in the latest known `bestBlock`. If this is the case, polkadot-api will check if the transaction is still valid in the block. The event received in this case will be
+- The transaction is not found in any block in the latest known `bestBlock` branch. If this is the case, `polkadot-api` will check if the transaction is still valid in the block. The event received in this case will be
 
 ```ts
 interface TxBestBlockNotFound {
@@ -262,7 +271,7 @@ interface TxBestBlockNotFound {
 }
 ```
 
-- The transaction is found in the latest known `bestBlock`. We already infer that the transaction is valid in this block (otherwise it wouldn't get inside it). Therefore, we align the payload to the finalized event, and the event received is as follows. See the finalized event for more info on the fields.
+- The transaction is found in a `bestBlock`. We already infer that the transaction is valid in this block (otherwise it wouldn't get inside it). Therefore, we align the payload to the finalized event, and the event received is as follows. See the finalized event for more info on the fields.
 
 ```ts
 interface TxBestBlockFound {
@@ -276,9 +285,9 @@ interface TxBestBlockFound {
 }
 ```
 
-This event will be emitted any number of times. It might happen that the tx is found in a best block, then it disappears, comes back, etc. We'll pass all that information to the consumer.
+This event will be emitted any number of times. It might happen that the tx is found in a best block, then this block gets pruned and is not anymore in the new best block branch, comes back, etc. We'll pass all that information to the consumer.
 
-Then, when the tx will be finalized, we'll emit the following event once and will complete the subscription.
+Here two things can happen. The first one is that the tx gets in a block that becomes finalized. In this case we will emit the following event once and will complete the subscription.
 
 ```ts
 type TxFinalized = {
@@ -295,10 +304,12 @@ At this stage, the transaction is valid and already in the canonical chain, in a
 
 - `ok`: it tells if the extrinsic was successful in its purpose. Under the hood it basically checks that the event `System.ExtrinsicFailed` was not emitted.
 - `events`: array of all events emitted by the extrinsic. They are ordered as emitted on-chain.
-- `dispatchError`: in case the transaction failed, this will have the `dispatchError` value of `System.ExtrinsicFailed`.
+- `dispatchError`: in case the transaction failed, this will have the `dispatchError` value of `System.ExtrinsicFailed`. Read more about it in [`DispatchError`](#dispatcherror)
 - `block`: information of the block where the `tx` is present. `hash` of the block, `number` of the block, `index` of the tx in the block.
 
-### `InvalidError`
+On the other hand, if the transaction is invalid in any finalized block after the broadcasting the observable will error with an [`InvalidTxError`](#invalidtxerror).
+
+### `InvalidTxError`
 
 When a transaction is deemed as invalid (due to, for example, wrong nonce, expired mortality, not enough balance to pay the fees, etc) we provide a strongly typed error. It can be used as follows:
 
@@ -334,7 +345,7 @@ This error will only be available for chains with Runtime Metadata `v15` or grea
 In case you are using the whitelist feature of the codegen, remember to add `"api.TaggedTransactionQueue.validate_transaction"` to the list of whitelisted interactions.
 :::
 
-### Failed extrinsic
+### `DispatchError`
 
 In Polkadot, a transaction can be valid (and therefore not to throw the `InvalidError`) but the inner extrinsic fail. In this case, the event `ExtrinsicFailed` gives all the information required to understand why it failed. We also expose a `dispatchError` field that helps to guess why it failed. Better a picture than a thousand words:
 
