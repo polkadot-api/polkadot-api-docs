@@ -120,3 +120,51 @@ const finalizedCall = await xcmSendTx.signAndSubmit(signer)
 :::info
 `getTypedApi` has nearly no cost at runtime, so it can be safely called many times.
 :::
+
+## Whitelist
+
+In order to reduce the size of PAPI descriptors bundle, one could filter which calls, queries, etc wants to use and ship with the dApp. This part is particularly interesting when developing web-based dApps, rather than NodeJS or Desktop apps, where bundle size is less critical.
+
+In order to enable the whitelist feature of the codegen, one has to write a `whitelist.ts` file that our CLI can understand. The shape is as follows:
+
+```ts
+import { DotWhitelistEntry } from "@polkadot-api/descriptors"
+
+const dotWhitelist: DotWhitelistEntry[] = [
+  // this will get all calls, queries, and consts inside Balances pallet
+  "*.Balances",
+
+  // this just a specific tx
+  "tx.XcmPallet.transfer_assets",
+
+  // all queries inside system pallet
+  "query.System.*",
+
+  // all constants
+  "const.*",
+]
+
+// the export name has to *EXACTLY* match `whitelist`
+export const whitelist = [...dotWhitelist]
+```
+
+If you generated descriptors for key `dot` (or any other `key` you used to generate the descriptors) you will have that `<Key>WhitelistEntry` helper type that will provide type checking for your whitelist. You can explore all options that you can choose in your IDE. Of course, this can be multichain, let's see an example of it (for `dot` and `dotAh` descriptor keys).
+
+```ts
+import {
+  DotAhWhitelistEntry,
+  DotWhitelistEntry,
+} from "@polkadot-api/descriptors"
+
+const dotWhitelist: DotWhitelistEntry[] = ["tx.XcmPallet.transfer_assets"]
+
+const ahWhitelist: DotAhWhitelistEntry[] = ["tx.PolkadotXcm.transfer_assets"]
+
+export const whitelist = [...dotWhitelist, ...ahWhitelist]
+```
+
+This file could be placed anywhere, but we recommend placing it at `.papi/whitelist.ts`.
+
+In order to generate descriptors taking into account the whitelist, the command should be `papi generate --whitelist .papi/whitelist.ts` (or just `papi --whitelist .papi/whitelist.ts`), or any other directory you chose to save your file. We recommend setting a script in your `package.json` that takes care of it.
+
+A full working example of a dApp with whitelist could be found at [our repo](https://github.com/polkadot-api/polkadot-api/tree/main/examples/vite).
