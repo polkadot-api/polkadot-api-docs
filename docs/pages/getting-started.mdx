@@ -29,8 +29,7 @@ Now you can create a PolkadotClient with a provider of your choice and start int
   smw: 'Smoldot (WebWorker)',
   smnw: 'Smoldot (NodeJS WebWorker)',
   sm: 'Smoldot',
-  web: 'WebSocket',
-  node: 'NodeJS Socket',
+  ws: 'WebSocket',
 }}>
   <Tabs.Content value="smw">
     ```ts
@@ -107,28 +106,21 @@ Now you can create a PolkadotClient with a provider of your choice and start int
     ```
 
   </Tabs.Content>
-  <Tabs.Content value="web">
+  <Tabs.Content value="ws">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
+    // import from "polkadot-api/ws-provider/node"
+    // if you are running in a NodeJS environment
     import { getWsProvider } from "polkadot-api/ws-provider/web";
+    import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 
     // Connect to the polkadot relay chain.
     const client = createClient(
-      getWsProvider("wss://dot-rpc.stakeworld.io")
-    );
-
-    // [!include ~/snippets/gettingStarted.ts:usage]
-    ```
-
-  </Tabs.Content>
-  <Tabs.Content value="node">
-    ```ts
-    // [!include ~/snippets/gettingStarted.ts:import]
-    import { getWsProvider } from "polkadot-api/ws-provider/node";
-
-    // Connect to the polkadot relay chain.
-    const client = createClient(
-      getWsProvider("wss://dot-rpc.stakeworld.io")
+      // Polkadot-SDK Nodes have issues, we recommend adding this enhancer
+      // see Requirements page for more info
+      withPolkadotSdkCompat(
+        getWsProvider("wss://dot-rpc.stakeworld.io")
+      )
     );
 
     // [!include ~/snippets/gettingStarted.ts:usage]
