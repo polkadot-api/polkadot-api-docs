@@ -100,6 +100,10 @@ export default defineConfig({
           text: "Delegit.xyz",
           link: "https://github.com/delegit-xyz/dashboard",
         },
+        {
+          text: "Substrate Kitties",
+          link: "https://github.com/shawntabrizi/substratekitties"
+        }
       ],
     },
   ],
