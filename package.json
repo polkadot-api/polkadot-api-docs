@@ -3,14 +3,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vocs dev",
-    "build": "vocs build",
+    "dev": "NODE_ENV=development concurrently \"pnpm dev:vocs\" \"pnpm dev:chain-docs\"",
+    "dev:vocs": "NODE_ENV=development bun chain_docs/pregen.ts && vocs dev",
+    "dev:chain-docs": "NODE_ENV=development pnpm build:chain-docs && http-server -p 5174 chain_docs/dist",
+    "build": "NODE_ENV=production pnpm build:vocs && pnpm build:chain-docs",
+    "build:vocs": "bun chain_docs/pregen.ts && vocs build",
+    "build:chain-docs": "bun chain_docs/generate.ts",
     "preview": "vocs preview",
     "format": "prettier --write README.md \"docs/**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {
+    "@polkadot-api/docgen": "^0.0.2",
     "@radix-ui/react-tabs": "^1.1.0",
     "@types/react": "^18.3.5",
+    "bun": "^1.1.28",
+    "polkadot-api": "^1.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.5.4",
@@ -18,6 +25,8 @@
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^9.0.2",
+    "concurrently": "^9.0.1",
+    "http-server": "^14.1.1",
     "prettier": "^3.3.3"
   },
   "prettier": {

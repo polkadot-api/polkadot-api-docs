@@ -1,5 +1,10 @@
 import { defineConfig } from "vocs"
 
+import { networks, sections } from "./chain_docs/networks.ts"
+
+const CHAIN_DOCS_URL =
+  process.env.NODE_ENV === "development" ? "http://localhost:5174" : "/chains"
+
 export default defineConfig({
   title: "Polkadot-API",
   description: "Typescript API to interact with polkadot chains",
@@ -79,6 +84,22 @@ export default defineConfig({
             },
           ],
         },
+      ],
+    },
+    {
+      text: "Chain-specific docs",
+      items: [
+        {
+          text: "About generated documentation",
+          link: "/chain_docs",
+        },
+        ...sections.map(({ text, items: networkKeys }) => ({
+          text,
+          items: networkKeys.map((key) => ({
+            text: networks[key],
+            link: `${CHAIN_DOCS_URL}/${key}/`,
+          })),
+        })),
       ],
     },
     {
