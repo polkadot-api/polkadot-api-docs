@@ -9,12 +9,12 @@
     "format": "prettier --write README.md \"docs/**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {
-    "@radix-ui/react-tabs": "^1.1.0",
-    "@types/react": "^18.3.5",
+    "@radix-ui/react-tabs": "^1.1.1",
+    "@types/react": "^18.3.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.5.4",
-    "vocs": "1.0.0-alpha.58"
+    "typescript": "^5.6.2",
+    "vocs": "1.0.0-alpha.61"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^9.0.2",
@@ -28,5 +28,5 @@
       "@homer0/prettier-plugin-jsdoc"
     ]
   },
-  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca"
 }
