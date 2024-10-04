@@ -105,6 +105,15 @@ interface PolkadotClient {
   getTypedApi: <D extends ChainDefinition>(descriptors: D) => TypedApi<D>
 
   /**
+   * Returns an instance of a `UnsafeApi`.
+   *
+   * Note that this method is only meant for advanced users that really know
+   * what are they doing. This API does not provide any runtime compatibility
+   * checks protection and the consumer should implement them on their own.
+   */
+  getUnsafeApi: <D>() => UnsafeApi<D>
+
+  /**
    * This will `unfollow` the provider, disconnect and error every subscription.
    * After calling it nothing can be done with the client.
    */
@@ -131,4 +140,4 @@ interface PolkadotClient {
 }
 ```
 
-As one can note, `PolkadotClient` heavily relies on rxjs' `Observable`, used as well under the hood of Promise-based methods. Every method is fairly straight-forward and already documented exhaustively, except for `getTypedApi`. Let's dive into it.
+As one can note, `PolkadotClient` heavily relies on rxjs' `Observable`, used as well under the hood of Promise-based methods. Every method is fairly straight-forward and already documented exhaustively, except for `getTypedApi` and `getUnsafeApi`. We will see first of all the `TypedApi`, and afterwards the `UnsafeApi`.

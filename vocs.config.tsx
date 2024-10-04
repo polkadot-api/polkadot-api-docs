@@ -79,6 +79,10 @@ export default defineConfig({
             },
           ],
         },
+        {
+          text: "Unsafe API",
+          link: "/unsafe",
+        },
       ],
     },
     {
@@ -102,8 +106,8 @@ export default defineConfig({
         },
         {
           text: "Substrate Kitties",
-          link: "https://github.com/shawntabrizi/substratekitties"
-        }
+          link: "https://github.com/shawntabrizi/substratekitties",
+        },
       ],
     },
   ],

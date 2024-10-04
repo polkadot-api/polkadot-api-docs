@@ -6,6 +6,7 @@ The `TypedApi` allows to interact with the runtime metadata easily and with a gr
 type TypedApi = {
   query: StorageApi
   tx: TxApi
+  txFromCallData: TxFromBinary
   event: EvApi
   apis: RuntimeCallsApi
   constants: ConstApi
@@ -13,7 +14,9 @@ type TypedApi = {
 }
 ```
 
-Every field except for `compatibilityToken` is a `Record<string, Record<string, ???>>`. The first index defines the pallet, and the second one defines which query/tx/event/api/constant within that pallet. Each one of them will be described in the following pages, but let's focus on the compatibility check, which is common for all of them.
+Every field except for `compatibilityToken` and `txFromCallData` is a `Record<string, Record<string, ???>>`. The first index defines the pallet, and the second one defines which query/tx/event/api/constant within that pallet. Each one of them will be described in the following pages.
+
+`txFromCallData` will be explained as well in the [`tx`](/typed/tx) section. Let's focus on the compatibility check, which is common for all of them.
 
 ## getCompatibilityLevel
 
