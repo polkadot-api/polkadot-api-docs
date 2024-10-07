@@ -4,12 +4,12 @@ The entry point of Polkadot-API, `createClient(provider)` requires one `JsonRpcP
 
 ```ts
 interface JsonRpcProvider {
-    (onMessage: (message: string) => void) => JsonRpcConnection;
+  (onMessage: (message: string) => void) => JsonRpcConnection;
 }
 
 interface JsonRpcConnection {
-    send: (message: string) => void;
-    disconnect: () => void;
+  send: (message: string) => void;
+  disconnect: () => void;
 }
 ```
 
@@ -17,10 +17,10 @@ Calling it will initiate a connection. Messages coming from the service will com
 
 Polkadot-API offers a couple of providers for some of the most used ways of connecting to a chain:
 
-- `getWsProvider(uri: string)` from `polkadot-api/ws-provider/web` or `polkadot-api/ws-provider/node` to connect through WebSocket.
-- `getSmProvider(chain: smoldot.Chain)` from `polkadot-api/sm-provider` to connect through Smoldot.
+- [`getWsProvider`](/providers/ws) from `polkadot-api/ws-provider/web` or `polkadot-api/ws-provider/node` (depending on where your code is running) to connect through WebSocket.
+- [`getSmProvider`](/providers/sm) from `polkadot-api/sm-provider` to connect through Smoldot.
 
-The `JsonRpcProvider` interface is designed so that it can be easily enhanced: You can wrap any JsonRpcProvider with another one that adds in more features, such as logging, statistics, or error recovery.
+The `JsonRpcProvider` interface is designed so that it can be easily enhanced: You can wrap any JsonRpcProvider with another one that adds in more features, such as logging, statistics, or error recovery. Let's see the two PAPI builtin providers in the next pages.
 
 ## Logs provider
 

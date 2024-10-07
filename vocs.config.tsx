@@ -20,7 +20,11 @@ export default defineConfig({
     },
     {
       text: "Providers",
-      link: "/providers",
+      items: [
+        { text: "Providers", link: "/providers" },
+        { text: "WebSocket", link: "/providers/ws" },
+        { text: "Smoldot", link: "/providers/sm" },
+      ],
     },
     {
       text: "Codegen",
