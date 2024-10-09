@@ -45,6 +45,10 @@ export default defineConfig({
           text: "Prepare for runtime upgrade",
           link: "/recipes/upgrade",
         },
+        {
+          text: "Make a simple transfer",
+          link: "/recipes/simple-transfer",
+        },
       ],
     },
     {
