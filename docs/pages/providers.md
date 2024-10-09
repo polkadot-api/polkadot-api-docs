@@ -1,6 +1,10 @@
 # Providers
 
-The entry point of Polkadot-API, `createClient(provider)` requires one `JsonRpcProvider`, which lets Polkadot-API communicate with a node. It's a function with the following shape:
+The entry point of Polkadot-API, `createClient(provider)` requires one `JsonRpcProvider`, which lets Polkadot-API communicate with a node. Let's dive into it.
+
+## `JsonRpcProvider`
+
+`JsonRpcProvider` is a simple function with the following shape:
 
 ```ts
 interface JsonRpcProvider {
@@ -15,16 +19,41 @@ interface JsonRpcConnection {
 
 Calling it will initiate a connection. Messages coming from the service will come through the `onMessage` call, and the returned connection handle can be used to send messages or terminate the connection.
 
-Polkadot-API offers a couple of providers for some of the most used ways of connecting to a chain:
+It is noticeable that the interface is decoupled from the transport layer and it does not leak any internals of particular transports (e.g. WebSocket) that implement this interface. For example, it does not assume that the provider accept subscriptions, that can be reconnected, etc. The idea is that the interface provides the minimal set of methods to be used by clients, that do not need to know about the transport.
+
+Besides that, `JsonRpcProvider` interface is designed so that it can be easily enhanced: the consumer can wrap any `JsonRpcProvider` with another one that adds in more features, such as logging, statistics, or error recovery. Let's show it with an example of an enhancer that just logs any message in or out:
+
+```ts
+const logProvider = (inner: JsonRpcProvider): JsonRpcProvider => {
+  return (onMsg) => {
+    const { send: innerSend, disconnect: innerDisconnect } = inner((msg) => {
+      console.log(`MSG IN: ${msg}`)
+      onMsg(msg)
+    })
+    return {
+      send(msg) {
+        console.log(`MSG OUT: ${msg}`)
+        innerSend(msg)
+      },
+      disconnect() {
+        console.log(`DISCONNECTED`)
+        innerDisconnect()
+      },
+    }
+  }
+}
+```
+
+Having this clean interface allowed us to build several enhancers to increase the compatibility with, for example, Polkadot-SDK nodes that didn't comply with the JSON-RPC spec. See [this page](/requirements#chain) to see the `withPolkadotSdkCompat` enhancer.
+
+Polkadot-API offers a couple of builtin providers for some of the most used ways of connecting to a chain:
 
 - [`getWsProvider`](/providers/ws) from `polkadot-api/ws-provider/web` or `polkadot-api/ws-provider/node` (depending on where your code is running) to connect through WebSocket.
 - [`getSmProvider`](/providers/sm) from `polkadot-api/sm-provider` to connect through Smoldot.
 
-The `JsonRpcProvider` interface is designed so that it can be easily enhanced: You can wrap any JsonRpcProvider with another one that adds in more features, such as logging, statistics, or error recovery. Let's see the two PAPI builtin providers in the next pages.
-
 ## Logs provider
 
-Polkadot-API has a subpackage `polkadot-api/logs-provider` that can be used to create a provider that will replay node messages from a log file (`logsProvider`), along with a provider enhancer that can be used to generate the logs consumed by `logsProvider`: `withLogsRecorder`.
+One of the enhancers that we created is `polkadot-api/logs-provider`, that can be used to create a provider that will replay node messages from a log file (`logsProvider`), along with a provider enhancer that can be used to generate the logs consumed by `logsProvider`: `withLogsRecorder`.
 
 ```ts
 // 1. recording logs
