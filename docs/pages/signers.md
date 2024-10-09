@@ -65,7 +65,39 @@ export function getPolkadotSigner(
 ): PolkadotSigner
 ```
 
-For example, using hdkd from `@polkadot-labs`:
+Any crypto library that supports one of the three schemes would be supported, let's see examples with both `sr25519` and `ed25519` signing schemes, the most common among the three of them:
+
+#### `ed25519`
+
+```ts
+import { ed25519 } from "@noble/curves/ed25519"
+import { getPolkadotSigner } from "polkadot-api/signer"
+
+const yourPrivateKey = new Uint8Array() // or an hex string
+export const signer = getPolkadotSigner(
+  ed25519.getPublicKey(yourPrivateKey),
+  "Ed25519",
+  (input) => ed25519.sign(input, yourPrivateKey),
+)
+```
+
+#### `sr25519`
+
+Using a private key:
+
+```ts
+import { sr25519 } from "@polkadot-labs/hdkd-helpers"
+import { getPolkadotSigner } from "polkadot-api/signer"
+
+const yourPrivateKey = new Uint8Array() // or an hex string
+export const signer = getPolkadotSigner(
+  sr25519.getPublicKey(yourPrivateKey),
+  "Sr25519",
+  (input) => sr25519.sign(input, yourPrivateKey),
+)
+```
+
+Signer for a mnemonic (for example, Alice, Bob, etc):
 
 ```ts
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd"
