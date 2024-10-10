@@ -94,6 +94,10 @@ export default defineConfig({
       ],
     },
     {
+      text: "Chain-specific documentation",
+      link: "https://chains.papi.how",
+    },
+    {
       text: "Built with PAPI",
       items: [
         {
