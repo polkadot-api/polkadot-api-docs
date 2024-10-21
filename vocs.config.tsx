@@ -91,6 +91,10 @@ export default defineConfig({
           text: "Unsafe API",
           link: "/unsafe",
         },
+        {
+          text: "Ink!",
+          link: "/ink",
+        },
       ],
     },
     {
