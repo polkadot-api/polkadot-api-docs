@@ -7,12 +7,12 @@ mkdir papi-simple-transfer
 cd papi-simple-transfer
 bun init -y
 bun i polkadot-api @polkadot-labs/hdkd @polkadot-labs/hdkd-helpers
-bun papi add -n westned2 wnd
+bun papi add -n westend2 wnd
 ```
 
 This sample shows how to create a transaction on Westend,
 using the light-client, in order to transfer some assets
-from Alice to Bob. Simply crate an `index.ts` file with
+from Alice to Bob. Simply create an `index.ts` file with
 the following content in it:
 
 ```ts
