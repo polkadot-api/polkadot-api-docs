@@ -29,7 +29,7 @@ would do the trick. Let's see the other one, that takes arguments:
 import { MultiAddress } from "@polkadot-api/descriptors"
 
 const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
-  // these args are be strongly typed!
+  // these args are meant to be strongly typed!
   dest: MultiAddress.Id("destAddressInSS58Format"),
   value: 10n ** 10n, // 1 DOT
 })
