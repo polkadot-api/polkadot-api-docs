@@ -22,10 +22,16 @@ interface GetWsProvider {
     endpoints: Array<string | { uri: string; protocol: string[] }>,
     onStatusChanged?: (status: StatusChange) => void,
   ): WsJsonRpcProvider
+  (wsProviderConfig: WsProviderConfig): WsJsonRpcProvider
+}
+interface WsProviderConfig {
+  endpoints: Array<string | { uri: string; protocol: string[] }>
+  onStatusChanged?: (status: StatusChange) => void
+  timeout?: number
 }
 ```
 
-In order to create the provider, there are three overloads for it. In a nutshell, one can pass one (or more) websocket `uri`s with its optional supported protocols. For example:
+In order to create the provider, there are four overloads for it. In a nutshell, one can pass one (or more) websocket `uri`s with its optional supported protocols. For example:
 
 ```ts
 import { getWsProvider } from "polkadot-api/ws-provider/web"
@@ -71,14 +77,14 @@ type WsClose = {
 type StatusChange = WsConnecting | WsConnected | WsError | WsClose
 ```
 
-- `CONNECTING`: The connection is still being opened. It includes which socket and protocols is trying to connect to.
+- `CONNECTING`: The connection is still being opened. It includes which socket and protocols is trying to connect to. The connection will be attempted for the time set in `timeout` option, defaulting to 3.5 seconds. Afterwards, in case it didn't succeed, it will go to `ERROR` status and proceed as if it was any other error.
 - `CONNECTED`: The connection has been established and is currently open. It includes which socket and protocols is trying to connect to.
 - `ERROR`: The connection had an error. The provider will try to reconnect to other websockets (if available) or the same one. It includes the event sent by the server.
 - `CLOSE`: The connection closed. If the server was the one closing the connection, the provider will try to reconnect to other websockets (if available) or the same one. It includes the event sent by the server.
 
 `provider.getStatus()` returns the current status.
 
-When creating the provider, the consumer can pass a callback that will be called every time the status changes:
+When creating the provider, the consumer can pass a callback (`onStatusChanged`) that will be called every time the status changes:
 
 ```ts
 const provider = getWsProvider("wss://myws.com", (status) => {
