@@ -119,3 +119,73 @@ const polkadotSigner = getPolkadotSigner(
   hdkdKeyPair.sign,
 )
 ```
+
+#### `Ecdsa`
+
+Creating an `Ecdsa` `PolkadotSigner` can be tricky, especially when dealing with different chains like Polkadot and EVM-like chains. Below is some code to illustrate how this can be done effectively.
+
+##### Chain Differences in Signers
+
+- **EVM-like chains** (Moonbeam, Mythos, Darwinia, Crab, etc.) expect the signer to sign payloads using a **Keccak256 hash** and use **AccountId20** addresses (Ethereum-like addresses).
+- **Polkadot-like chains** (e.g., Polkadot, Kusama) expect the signer to sign payloads using **Blake2_256** and use **AccountId32** addresses (Polkadot-like addresses).
+
+With that distinction in mind, here's how you can create `Ecdsa` `PolkadotSigner`s for these different chain types:
+
+:::warning
+The following code is for illustrative purposes only. It stores private keys in memory, which is not ideal from a security standpoint. You should refactor the code to meet the security standards of your environment.
+:::
+
+```ts
+import { mnemonicToSeedSync } from "@scure/bip39"
+import { HDKey } from "@scure/bip32"
+import { getPolkadotSigner, type PolkadotSigner } from "polkadot-api/signer"
+import { secp256k1 } from "@noble/curves/secp256k1"
+import { keccak_256 } from "@noble/hashes/sha3"
+import { blake2b256 } from "@noble/hashes/blake2b"
+
+const signEcdsa = (
+  hasher: (input: Uint8Array) => Uint8Array,
+  value: Uint8Array,
+  priv: Uint8Array,
+) => {
+  const signature = secp256k1.sign(hasher(value), priv)
+  const signedBytes = signature.toCompactRawBytes()
+
+  const result = new Uint8Array(signedBytes.length + 1)
+  result.set(signedBytes)
+  result[signedBytes.length] = signature.recovery
+
+  return result
+}
+
+// A signer for EVM like chains that use AccountId20 as their public address
+const getEvmEcdsaSigner = (privateKey: Uint8Array): PolkadotSigner => {
+  const publicAddress = keccak_256(
+    secp256k1.getPublicKey(privateKey, false).slice(1),
+  ).slice(-20)
+
+  return getPolkadotSigner(publicAddress, "Ecdsa", (iput) =>
+    signEcdsa(keccak_256, input, privateKey),
+  )
+}
+
+const getEvmEcdsaSignerFromMnemonic = (
+  mnemonic: string,
+  accountIdx: number = 0,
+  password: string = "",
+): PolkadotSigner => {
+  const seed = mnemonicToSeedSync(mnemonic, password)
+  const keyPair = HDKey.fromMasterSeed(seed).derive(
+    `m/44'/60'/0'/0/${accountIdx}`,
+  )
+  return getEvmEcdsaSigner(keyPair.privateKey!)
+}
+
+// A signer for Polkadot like chains that use AccountId32 as the public address
+const getPolkadotEcdsaSigner = (privateKey: Uint8Array): PolkadotSigner =>
+  getPolkadotSigner(
+    blake2b(secp256k1.getPublicKey(privateKey), { dkLen: 32 }),
+    "Ecdsa",
+    (input) => signEcdsa((i) => blake2b(i, { dkLen: 32 }), input, privateKey),
+  )
+```
