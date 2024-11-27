@@ -29,7 +29,7 @@ On the other hand, `watchValue` function returns an Observable allows you to che
 Similarly, we'll use the example of `System.Account` query (it returns the information of a particular `Account`). In this case, this storage query has a key to index it with, and therefore we find the following structure:
 
 ```ts
-type StorageEntryWithKeys<Args, Payload> = {
+type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
   isCompatible: IsCompatible
   getCompatibilityLevel: GetCompatibilityLevel
   getValue: (...args: [...Args, options?: CallOptions]) => Promise<Payload>
@@ -44,7 +44,7 @@ type StorageEntryWithKeys<Args, Payload> = {
     ...args: [PossibleParents<Args>, options?: CallOptions]
   ) => Promise<
     Array<{
-      keyArgs: Args
+      keyArgs: ArgsOut
       value: NonNullable<Payload>
     }>
   >
@@ -66,3 +66,7 @@ typedApi.query.Pallet.Query.getEntries({ at: "best" }) // no keys
 typedApi.query.Pallet.Query.getEntries(arg1, { at: "finalized" }) // 1/3 keys
 typedApi.query.Pallet.Query.getEntries(arg1, arg2, { at: "0x12345678" }) // 2/3 keys
 ```
+
+:::note
+`getEntries` returns as well the key arguments for every entry found. There are some storage entries whose arguments cannot be inferred directly from the key, because the arguments are hashed to compute the key. Therefore, only in these cases, `keyArgs` will be the `key` instead of the arguments themselves. The type will be `OpaqueKeyHash`.
+:::
