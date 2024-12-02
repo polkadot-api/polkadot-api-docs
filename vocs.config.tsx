@@ -124,6 +124,10 @@ export default defineConfig({
           text: "Substrate Kitties",
           link: "https://github.com/shawntabrizi/substratekitties",
         },
+        {
+          text: "Multix",
+          link: "https://github.com/ChainSafe/Multix",
+        },
       ],
     },
   ],
