@@ -128,6 +128,10 @@ export default defineConfig({
           text: "Multix",
           link: "https://github.com/ChainSafe/Multix",
         },
+        {
+          text: "ParaSpell XCM SDK",
+          link: "https://paraspell.xyz/",
+        },
       ],
     },
   ],
