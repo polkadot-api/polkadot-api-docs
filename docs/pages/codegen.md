@@ -168,3 +168,23 @@ This file could be placed anywhere, but we recommend placing it at `.papi/whitel
 In order to generate descriptors taking into account the whitelist, the command should be `papi generate --whitelist .papi/whitelist.ts` (or just `papi --whitelist .papi/whitelist.ts`), or any other directory you chose to save your file. We recommend setting a script in your `package.json` that takes care of it.
 
 A full working example of a dApp with whitelist could be found at [our repo](https://github.com/polkadot-api/polkadot-api/tree/main/examples/vite).
+
+## Codegen without descriptors package
+
+PAPI is designed to create a descriptors package, `@polkadot-api/descriptors`, allowing it to be imported like any other package. To ensure compatibility with most package managers and bundlers, the CLI automatically adds this package as a dependency to your project.
+
+For advanced use cases, you can configure the CLI to perform only the code generation without installing it as a dependency. To do this, add the following option to your configuration file, `.papi/polkadot-api.json`:
+
+```json
+{
+  "descriptorPath": …,
+  "entries": { … },
+  "options": {
+    "noDescriptorsPackage": true
+  }
+}
+```
+
+:::info
+You can also modify the `"descriptorPath"` property to specify a different path for generating the descriptors.
+::: 
