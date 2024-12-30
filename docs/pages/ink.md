@@ -2,7 +2,7 @@
 
 Polkadot-API adds typescript definitions for ink! contracts, as well as utilities to encode and decode messages, contract storage and events.
 
-The ink client with type support can be found at `polkadot-api/ink`. It's chain-agnostic, meaning it doesn't dictate which runtime APIs, storage or transactions are required. For a more integrated ink! support for specific chains, a Polkadot-API SDK for ink! contracts is currently in development.
+The ink client with type support can be found at `polkadot-api/ink`. It's chain-agnostic, meaning it doesn't dictate which runtime APIs, storage or transactions are required. For a more integrated ink! support for specific chains, see [Ink! SDK](/sdks/ink-sdk).
 
 ## Codegen
 
