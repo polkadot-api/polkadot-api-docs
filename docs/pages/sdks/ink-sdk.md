@@ -4,6 +4,12 @@ The Ink! SDK is a library for interacting with smart contracts, built on top of 
 
 ## Getting Started
 
+Install the sdk through your package manager:
+
+```sh
+pnpm i @polkadot-api/sdk-ink
+```
+
 Begin by generating the type definitions for your chain and contract. For example, using a PSP22 contract on the test Aleph Zero network:
 
 ```sh
