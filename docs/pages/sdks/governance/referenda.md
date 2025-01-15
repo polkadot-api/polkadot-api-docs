@@ -13,7 +13,7 @@ The Referenda SDK provides the following features:
 
 ## Getting Started
 
-Install the governance SDK using your package manager:
+Install the Governance SDK using your package manager:
 
 ```sh
 npm i @polkadot-api/sdk-governance

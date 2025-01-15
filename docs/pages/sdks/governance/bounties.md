@@ -2,14 +2,14 @@
 
 The Bounties SDK provides the following features:
 
-- Loads descriptions of each bounty
-- Matches referenda related to the bounty
-- Looks for scheduled changes on the bounty status
-- Abstracts the different states into a TS-friendly interface
+- Loads descriptions of each bounty.
+- Matches referenda related to the bounty.
+- Looks for scheduled changes in the bounty status.
+- Abstracts different states into a TypeScript-friendly interface.
 
 ## Getting Started
 
-Install the governance SDK using your package manager:
+Install the Governance SDK using your package manager:
 
 ```sh
 npm i @polkadot-api/sdk-governance
@@ -34,18 +34,18 @@ const typedApi = client.getTypedApi(dot);
 const bountiesSdk = createBountiesSdk(typedApi);
 ```
 
-## Get the current list of bounties
+## Get the current list of Bounties
 
-The bounties pallet has the description of the bounties on-chain but as a separate storage query. The Bounties SDK helps by loading the descriptions automatically when getting any bounty.
+The Bounties pallet stores bounty descriptions on-chain as a separate storage query. The Bounties SDK automatically loads these descriptions when retrieving any bounty.
 
-To get the list of bounties at a given time, you can use `getBounties`, or `getBounty(id)` to get one by id:
+To get the list of bounties at a given time use `getBounties`, or use `getBounty(id)` to retrieve a specific bounty by ID:
 
 ```ts
 const bounties = await bountiesSdk.getBounties();
 const bounty = await bountiesSdk.getBounty(10);
 ```
 
-Alternatively, to get the bounty that was created from a `propose_bounty` call, use the `getProposedBounty` passing in the result from `submit`:
+To retrieve a bounty created from a `propose_bounty` call, use `getProposedBounty` with the result from `submit`:
 
 ```ts
 const tx = typedApi.tx.Bounties.propose_bounty({
@@ -56,32 +56,32 @@ const result = await tx.signAndSubmit(signer);
 const bounty = await bountiesSdk.getProposedBounty(result);
 ```
 
-You can also subscribe to changes by using the watch API. This offers two ways of working with it: `bounties$` gives a `Map<number, Bounty>` with all the bounties in it, but it's also offered as a separate `bountyIds$` list of ids and `getBountyById$(id: number)`, which is useful in some applications.
+You can also subscribe to changes using the watch API. This provides two ways of working with it: `bounties$` returns a `Map<number, Bounty>` with all bounties, and there are also `bountyIds$` and `getBountyById$(id: number)` for cases where you want to show the list and detail separately.
 
 ```ts
 // Map<number, Bounty>
-bountiesSdk.watch.bounties$.subscribe(console.log)
+bountiesSdk.watch.bounties$.subscribe(console.log);
 
 // number[]
-bountiesSdk.watch.bountyIds$.subscribe(console.log)
+bountiesSdk.watch.bountyIds$.subscribe(console.log);
 
 // Bounty
-bountiesSdk.watch.getBountyById$(5).subscribe(console.log)
+bountiesSdk.watch.getBountyById$(5).subscribe(console.log);
 ```
 
-The underlying subscription to the bounties and descriptions is shared among all subscribers, and is cleaned up as soon as all subscribers unsubscribe.
+The underlying subscription to bounties and descriptions is shared among all subscribers and is automatically cleaned up when all subscribers unsubscribe.
 
-## Bounty states
+## Bounty States
 
-The bounties have many states they can be in, and each one have their own list of operations, and some have some extra parameters.
+Bounties have many states they can be in, each with its own operations list of operations, and some have some extra parameters.
 
 ![Bounties](/bounties.png)
 
-The SDK exposes this with a union of Bounty types, which can be discriminated by `type`. Each of these types have only the methods available to their status.
+The SDK exposes these states through a union of Bounty types, discriminated by `type`. Each type includes only the methods and parameters relevant to its status.
 
 ### Proposed
 
-After a bounty is proposed, it must be approved through a referendum. The function `approveBounty()` creates the approve transaction, but you should submit it as part of a referendum. You can use the [Referenda SDK](/sdks/governance/referenda) for that:
+After a bounty is proposed, it must be approved via a referendum. Use `approveBounty()` to create the approval transaction. Submit it as part of a referendum using the [Referenda SDK](/sdks/governance/referenda):
 
 ```ts
 const approveCall = proposedBounty.approveBounty();
@@ -91,14 +91,14 @@ const tx = referendaSdk.createSpenderReferenda(callData, proposedBounty.value);
 await tx.signAndSubmit(signer);
 ```
 
-The proposed bounty also has a function to filter referenda that's approving it. Again, by using the [Referenda SDK](/sdks/governance/referenda) you can get the list of referenda and then filter it:
+You can also filter existing referenda that are already approving the bounty:
 
 ```ts
 const referenda = await referendaSdk.getOngoingReferenda();
 const approvingReferenda = await proposedBounty.findApprovingReferenda(referenda);
 ```
 
-Once the referendum has passed, it gets removed from on-chain, but it's added to the scheduler to actually perform the call after the enactment. For these cases, the SDK can also look at the scheduler:
+Once the referendum passes, the bounty is removed from the chain and scheduled for enactment. The SDK can check the scheduler for these cases:
 
 ```ts
 const scheduledApprovals = await proposedBounty.getScheduledApprovals();
@@ -108,11 +108,11 @@ console.log(scheduledApprovals);
 
 ### Approved
 
-No methods exists after the bounty has been approved. It's now pending the next treasury spend period before it becomes Funded.
+No methods are available in the Approved state. The bounty is pending the next treasury spend period to become Funded.
 
 ### Funded
 
-After it has been funded, a new referendum must be created proposing a curator. In this status, it has the same methods as [Proposed](#proposed) to filter existing referenda and lookup the scheduler.
+After funding, a new referendum must propose a curator. This state shares methods with [Proposed](#proposed) for filtering referenda and checking the scheduler.
 
 ```ts
 const curator = "…SS58 address…";
@@ -136,11 +136,9 @@ Has methods for `extendExpiry(remark: string)` and `unassignCurator()`
 
 Has methods for `claim()` and `unassignCurator()`. In this case, unassign curator must also happen in a referendum.
 
-## Child bounties
+## Child Bounties
 
-Some chains also have a pallet for child bounties, which let the curator of a bounty to manage and split it into smaller child bounties.
-
-This is exposed as a separate sdk, as it requires the ChildBounties pallet.
+Some chains support child bounties, allowing a curator to split a bounty into smaller tasks. This feature is available through a separate SDK, which requires the ChildBounties pallet.
 
 ```ts
 import { createChildBountiesSdk } from '@polkadot-api/sdk-governance';
@@ -153,23 +151,26 @@ It's very similar to the bounties SDK, except that it needs a `parentId` of the 
 ```ts
 const parentId = 10;
 
-// fetch one child bounty
+// Fetch one child bounty
 const childBounty = await childBountiesSdk.getChildBounty(parentId, 5);
 
-// watch the list of child bounties as a Map<number, ChildBounty>
+// Watch the list of child bounties
 childBountiesSdk.watch(parentId).bounties$.subscribe(console.log);
-// watch the list of child ids as a number[]
+
+// Watch the list of child bounty IDs
 childBountiesSdk.watch(parentId).bountyIds$.subscribe(console.log);
-// get one specific watched bounty
+
+// Get a specific watched child bounty
 childBountiesSdk.watch(parentId).getBountyById$(5).subscribe(console.log);
 ```
 
-The underlying subscription to the child bounties and descriptions is shared among all subscribers for each parentId, and is cleaned up as soon as all subscribers unsubscribe.
+Subscriptions to child bounties and descriptions are shared among subscribers for each `parentId` and are cleaned up when all subscribers unsubscribe.
 
 ### States
 
-The number of states is also greatly simplified, and removes the need for passing transactions through referendums, as the curator is the one that manages them.
+Child bounty states are simplified, and eliminates the need for referenda. The curator directly manages these bounties.
 
 ![Child Bounties](/childBounties.png)
 
-The SDK also exposes this with a union of ChildBounty types, which can be discriminated by `type`. Each of these types have only the methods available to their status.
+The SDK exposes these states through a union of ChildBounty types, discriminated by `type`. Each type includes only the methods relevant to its status.
+
