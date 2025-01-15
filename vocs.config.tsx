@@ -60,11 +60,8 @@ export default defineConfig({
         },
         {
           text: "Typed API",
+          link: "/typed",
           items: [
-            {
-              text: "API",
-              link: "/typed",
-            },
             {
               text: "Constants",
               link: "/typed/constants",
@@ -94,6 +91,16 @@ export default defineConfig({
         {
           text: "Ink!",
           link: "/ink",
+        },
+      ],
+    },
+    {
+      text: "PAPI SDKs",
+      link: "/sdks/intro",
+      items: [
+        {
+          text: "Ink! SDK",
+          link: "/sdks/ink-sdk",
         },
       ],
     },
