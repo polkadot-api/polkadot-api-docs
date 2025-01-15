@@ -1,25 +1,25 @@
 # Referenda SDK
 
-The referenda SDK helps with the following:
+The Referenda SDK provides the following features:
 
-- Abstract over preimages
-    - When creating a referendum, it will only create a preimage if it's required by length, significantly reducing deposit costs.
-    - When reading from a referendum, it resolves the calldata regardless if it's a preimage or not.
-- Decide the best spender track for a referendum with a value.
-    - Will always set the track to the appropriate value.
-- Approval / Support curves for tracks
-    - Provides them as regular JS functions, useful to create charts.
-    - Calculates the confirmation start/end given block number for the current results of a referendum.
+- Abstraction over Preimages
+  - When creating a referendum, it only generates a preimage if required by the length, significantly reducing deposit costs.
+  - When reading a referendum, it resolves the calldata regardless of whether it's a preimage or not.
+- Automatic Track Selection for Spender Referenda
+  - Automatically selects the appropriate spender track for a referendum with a given value.
+- Approval/Support Curves for Tracks
+  - Provides approval/support curves as regular JavaScript functions, useful for creating charts.
+  - Calculates the confirmation start and end blocks based on the current referendum results.
 
 ## Getting Started
 
-Install the governance sdk through your package manager:
+Install the governance SDK using your package manager:
 
 ```sh
 pnpm i @polkadot-api/sdk-governance
 ```
 
-Then create it passing in the `typedApi` for your chain
+Then, initialize it by passing in the `typedApi` for your chain:
 
 ```ts
 import { createReferendaSdk } from '@polkadot-api/sdk-governance';
@@ -28,30 +28,31 @@ import { getSmProvider } from 'polkadot-api/sm-provider';
 import { chainSpec } from 'polkadot-api/chains/polkadot';
 import { start } from 'polkadot-api/smoldot';
 import { createClient } from 'polkadot-api';
- 
+
 const smoldot = start();
 const chain = await smoldot.addChain({ chainSpec });
- 
+
 const client = createClient(getSmProvider(chain));
 const typedApi = client.getTypedApi(dot);
 
 const referendaSdk = createReferendaSdk(typedApi);
 ```
 
-Different chains come with different spender track configurations, which unfortunately is not available on-chain, but rather as hard-coded values. By default, referenda SDK will use the values from polkadot, but other chains might have others. To use kusama, you can import the kusama configuration and pass it into the options parameter:
+Different chains have their own spender track configurations, which unfortunately are hard-coded and not available on-chain. By default, the Referenda SDK uses Polkadot's configuration. For Kusama, you can import the Kusama configuration and pass it into the options parameter:
 
 ```ts
 import { createReferendaSdk, kusamaSpenderOrigin } from '@polkadot-api/sdk-governance';
+
 const referendaSdk = createReferendaSdk(typedApi, {
   spenderOrigin: kusamaSpenderOrigin
 });
 ```
 
-## Create a referendum
+## Creating a Referendum
 
-There are many origins to choose when creating a referendum, each one have [specific purposes](https://wiki.polkadot.network/docs/learn-polkadot-opengov-origins#origins-and-tracks-info).
+There are multiple origins to choose from when creating a referendum, each with [specific purposes](https://wiki.polkadot.network/docs/learn-polkadot-opengov-origins#origins-and-tracks-info).
 
-For creating a referendum that requires a treasury spend of a certain value, this Referenda SDK will choose the appropriate origin for you:
+For creating a referendum that requires a treasury spend, the SDK automatically selects the appropriate origin:
 
 ```ts
 const beneficiaryAddress = "………";
@@ -64,21 +65,21 @@ const callData = await spendCall.getEncodedData();
 
 const tx = referendaSdk.createSpenderReferenda(callData, amount);
 
-// Submitting the tx will create the referendum on-chain
+// Submitting the transaction will create the referendum on-chain
 const result = await tx.signAndSubmit(signer);
 const referendumInfo = referendaSdk.getSubmittedReferendum(result);
 if (referendumInfo) {
-    console.log("Referendum ID: ", referendumInfo.index);
-    console.log("Referendum Track: ", referendumInfo.track);
+  console.log("Referendum ID:", referendumInfo.index);
+  console.log("Referendum Track:", referendumInfo.track);
 }
 ```
 
-In cases where you are not using a spender track, then you will need to provide the origin:
+For non-spender referenda, you need to provide the origin:
 
 ```ts
 const remarkCall = typedApi.tx.System.remark({
-  remark: Binary.fromText("Make polkadot even better")
-})
+  remark: Binary.fromText("Make Polkadot even better")
+});
 const callData = await remarkCall.getEncodedData();
 
 const tx = referendaSdk.createReferenda(
@@ -89,50 +90,48 @@ const tx = referendaSdk.createReferenda(
 const result = await tx.signAndSubmit(signer);
 const referendumInfo = referendaSdk.getSubmittedReferendum(result);
 if (referendumInfo) {
-    console.log("Referendum ID: ", referendumInfo.index);
-    console.log("Referendum Track: ", referendumInfo.track);
+  console.log("Referendum ID:", referendumInfo.index);
+  console.log("Referendum Track:", referendumInfo.track);
 }
 ```
 
-When creating a referendum, if the call is not too long it can be inlined in the same referendum submit call, otherwise it needs to be registered as a preimage.
+When creating a referendum, if the call is short it can be inlined directly in the referendum submit call. Otherwise, it must be registered as a preimage. The SDK automatically handles this, inlining the call if possible or creating a batch transaction to register the preimage and submit the referendum with just one transaction.
 
-The Referenda SDK for both cases (createReferenda and createSpenderReferenda) will inline the call as long as the call data falls within that limit, otherwise it will automatically create a batch call that will do both creating the preimage and submitting the referendum with the same transaction.
+## Fetching Ongoing Referenda
 
-## Get ongoing referenda
-
-Referenda get mostly removed from chain once they are closed. Referenda SDK relies with on-chain data, so currently it will list the ongoing referenda from on-chain data.
+Closed referenda are mostly removed from the chain. The Referenda SDK lists ongoing referenda based from on-chain data:
 
 ```ts
 const referenda: Array<OngoingReferendum> = await referendaSdk.getOngoingReferenda();
 ```
 
-`OngoingReferendum` represents an ongoing referendum, and adds a few methods to work with it.
+`OngoingReferendum` provides helpful methods to interact with proposals.
 
 First of all, the proposal on a referendum can be inlined or through a preimage. `OngoingReferendum` unwraps this to get the raw call data or even the decoded call data:
 
 ```ts
-console.log(referenda[0].proposal.rawValue) // PreimagesBounded
-console.log(await referenda[0].proposal.resolve()) // Binary with the call data
-console.log(await referenda[0].proposal.decodedCall()) // Decoded call data
+console.log(referenda[0].proposal.rawValue); // PreimagesBounded
+console.log(await referenda[0].proposal.resolve()); // Binary with the call data
+console.log(await referenda[0].proposal.decodedCall()); // Decoded call data
 ```
 
-It also adds a couple of functions to get the expected block this referendum will enter confirmation or finish confirmation:
+You can also check when the referendum enters or finishes the confirmation phase:
 
 ```ts
-console.log(await referenda[0].getConfirmationStart()) // number | null
-console.log(await referenda[0].getConfirmationEnd()) // number | null
+console.log(await referenda[0].getConfirmationStart()); // number | null
+console.log(await referenda[0].getConfirmationEnd());   // number | null
 ```
 
-Lastly, there is some useful information that's not available on-chain, but through the public forums (e.g. OpenGov or subsquare). To get the title of a referendum, the one you would see in either of the forums, you can use a [Subscan API Key](https://support.subscan.io) to fetch that information for you:
+Lastly, there is some useful information that's not available on-chain, but through the public forums (e.g. OpenGov or subsquare). To fetch this information, like the referendum title, you can use a [Subscan API Key](https://support.subscan.io):
 
 ```ts
 const apiKey = "………";
-console.log(await referenda[0].getDetails(apiKey)) // { title: string }
+console.log(await referenda[0].getDetails(apiKey)); // { title: string }
 ```
 
-## Get track details
+## Accessing Track Details
 
-The track for a referendum is a runtime constant that contains the name and different values for the period and minimum approval and support curves.
+Referendum tracks are runtime constants with specific properties for periods, approval, and support curves.
 
 This SDK enhances the track by adding some helper functions to easily work with the curves.
 
