@@ -16,7 +16,7 @@ The Referenda SDK provides the following features:
 Install the governance SDK using your package manager:
 
 ```sh
-pnpm i @polkadot-api/sdk-governance
+npm i @polkadot-api/sdk-governance
 ```
 
 Then, initialize it by passing in the `typedApi` for your chain:
