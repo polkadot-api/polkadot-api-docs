@@ -102,6 +102,19 @@ export default defineConfig({
           text: "Ink! SDK",
           link: "/sdks/ink-sdk",
         },
+        {
+          text: "Governance SDK",
+          items: [
+            {
+              text: "Referenda",
+              link: "/sdks/governance/referenda",
+            },
+            {
+              text: "Bounties",
+              link: "/sdks/governance/bounties",
+            },
+          ],
+        },
       ],
     },
     {
