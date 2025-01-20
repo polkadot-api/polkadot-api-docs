@@ -73,7 +73,7 @@ The underlying subscription to bounties and descriptions is shared among all sub
 
 ## Bounty States
 
-Bounties have many states they can be in, each with its own operations list of operations, and some have some extra parameters.
+Bounties have many states they can be in, each with its own available operations, and some have some extra parameters.
 
 ![Bounties](/bounties.png)
 
