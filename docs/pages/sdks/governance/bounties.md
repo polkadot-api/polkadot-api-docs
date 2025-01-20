@@ -138,7 +138,7 @@ Has methods for `claim()` and `unassignCurator()`. In this case, unassign curato
 
 ## Child Bounties
 
-Some chains support child bounties, allowing a curator to split a bounty into smaller tasks. This feature is available through a separate SDK, which requires the ChildBounties pallet.
+Some chains support child bounties, allowing a curator to split a bounty into smaller tasks. This feature is available through a separate SDK, which requires the chain to have `ChildBounties` pallet.
 
 ```ts
 import { createChildBountiesSdk } from '@polkadot-api/sdk-governance';
