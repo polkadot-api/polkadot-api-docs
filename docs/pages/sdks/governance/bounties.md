@@ -98,7 +98,7 @@ const referenda = await referendaSdk.getOngoingReferenda();
 const approvingReferenda = await proposedBounty.findApprovingReferenda(referenda);
 ```
 
-Once the referendum passes, the bounty is removed from the chain and scheduled for enactment. The SDK can check the scheduler for these cases:
+Once the referendum passes, its content is removed from the chain and scheduled for enactment. The SDK can check the scheduler for these cases:
 
 ```ts
 const scheduledApprovals = await proposedBounty.getScheduledApprovals();
