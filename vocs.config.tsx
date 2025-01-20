@@ -139,6 +139,10 @@ export default defineConfig({
           text: "ParaSpell XCM SDK",
           link: "https://paraspell.xyz/",
         },
+        {
+          text: "Bounty Manager",
+          link: "https://github.com/galaniprojects/Polkadot-Bounty-Manager",
+        },
       ],
     },
   ],
