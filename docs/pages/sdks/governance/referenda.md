@@ -99,10 +99,25 @@ When creating a referendum, if the call is short it can be inlined directly in t
 
 ## Fetching Ongoing Referenda
 
-Closed referenda are mostly removed from the chain. The Referenda SDK lists ongoing referenda based from on-chain data:
+Closed referenda are mostly removed from the chain. The Referenda SDK lists ongoing referenda based from on-chain data, or can fetch one specific by index:
 
 ```ts
 const referenda: Array<OngoingReferendum> = await referendaSdk.getOngoingReferenda();
+
+const referendum: OngoingReferendum | null = await referendaSdk.getOngoingReferendum(15);
+```
+
+You can also subscribe to changes using the watch API. This provides two ways of working with it: `ongoingReferenda$` returns a `Map<number, OngoingReferendum>` with all referenda, and there are also `ongoingReferendaIds$` and `getOngoingReferendumById$(id: number)` for cases where you want to show the list and detail separately.
+
+```ts
+// Map<number, OngoingReferendum>
+referendaSdk.watch.ongoingReferenda$.subscribe(console.log);
+
+// number[]
+referendaSdk.watch.ongoingReferendaIds$.subscribe(console.log);
+
+// Bounty
+referendaSdk.watch.getOngoingReferendumById$(5).subscribe(console.log);
 ```
 
 `OngoingReferendum` provides helpful methods to interact with proposals.
