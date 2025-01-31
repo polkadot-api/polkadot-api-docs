@@ -196,17 +196,14 @@ Something to keep in mind is that when removing a vote that would create a lock,
 
 This only happens if the lock caused by the removal of the vote is still relevant, meaning in this example we are before the block 7000. If we have already passed that, then the lock is not created or updated.
 
-The SDK exposes for each vote a method `getLock(outcome)` that will return which scenario will removing a vote cause:
+The SDK exposes for each vote a method `getLock(outcome)` that will return which scenario will removing a vote cause. The outcome is an object `{ ended: number, side: 'aye' | 'nay' } | null`, that can be taken from a [Referendum](/sdks/governance/referenda), or filled from any other source:
 
 ```ts
 const track = await votingSdk.getVotingTrack(ALICE, MEDIUM_SPENDER);
 if (track.type === "casting") {
   const vote = track.votes[0];
-  const lock = vote.getLock({
-    // Assuming the poll ended at block 8000 with a result of "aye"
-    ended: 8000,
-    side: "aye"
-  });
+  const referendum = await referendaSdk.getReferendum(vote.poll);
+  const lock = vote.getLock(referendum!.outcome);
 
   switch (lock.type) {
     case 'free':

@@ -97,27 +97,31 @@ if (referendumInfo) {
 
 When creating a referendum, if the call is short it can be inlined directly in the referendum submit call. Otherwise, it must be registered as a preimage. The SDK automatically handles this, inlining the call if possible or creating a batch transaction to register the preimage and submit the referendum with just one transaction.
 
-## Fetching Ongoing Referenda
+## Fetching Referenda
 
-Closed referenda are mostly removed from the chain. The Referenda SDK lists ongoing referenda based from on-chain data, or can fetch one specific by index:
+Referenda can be in one of multiple states (Ongoing, Approved, Rejected, etc.). The SDK abstracts this into a union type, which has two main variations: `OngoingReferendum` and `ClosedReferendum`.
+
+When a referendum becomes closed (Approved, Rejected, Cancelled, etc.), most of the information is removed from the chain, it only keeps the block at which it was closed, and the submission / decision deposits if they haven't been claimed yet. This SDK focuses mainly on Ongoing referenda, which has more parameters.
 
 ```ts
-const referenda: Array<OngoingReferendum> = await referendaSdk.getOngoingReferenda();
+const referenda: Array<Referendum> = await referendaSdk.getReferenda();
 
-const referendum: OngoingReferendum | null = await referendaSdk.getOngoingReferendum(15);
+const referendum: Referendum | null = await referendaSdk.getReferendum(15);
+
+const ongoingReferenda: Array<OngoingReferendum> = referenda.filter(r => r.type === "Ongoing");
 ```
 
-You can also subscribe to changes using the watch API. This provides two ways of working with it: `ongoingReferenda$` returns a `Map<number, OngoingReferendum>` with all referenda, and there are also `ongoingReferendaIds$` and `getOngoingReferendumById$(id: number)` for cases where you want to show the list and detail separately.
+You can also subscribe to changes using the watch API. This provides two ways of working with it: `referenda$` returns a `Map<number, Referendum>` with all referenda, and there are also `referendaIds$` and `getReferendumById$(id: number)` for cases where you want to show the list and detail separately.
 
 ```ts
-// Map<number, OngoingReferendum>
-referendaSdk.watch.ongoingReferenda$.subscribe(console.log);
+// Map<number, Referendum>
+referendaSdk.watch.referenda$.subscribe(console.log);
 
 // number[]
-referendaSdk.watch.ongoingReferendaIds$.subscribe(console.log);
+referendaSdk.watch.referendaIds$.subscribe(console.log);
 
-// Bounty
-referendaSdk.watch.getOngoingReferendumById$(5).subscribe(console.log);
+// Referendum
+referendaSdk.watch.getReferendumById$(5).subscribe(console.log);
 ```
 
 `OngoingReferendum` provides helpful methods to interact with proposals.
