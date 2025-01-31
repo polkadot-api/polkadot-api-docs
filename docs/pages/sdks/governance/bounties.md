@@ -56,6 +56,13 @@ const result = await tx.signAndSubmit(signer);
 const bounty = await bountiesSdk.getProposedBounty(result);
 ```
 
+Each bounty returned by the SDK has the information available on-chain of the bounty, enhanced based on their [State](#bounty-states), but also adds the account of the bounty, as a SS58Address. This can be used to query the current bounty balance:
+
+```ts
+const bountyAccount = await typedApi.query.System.Account.getValue(bounty.account);
+console.log('Bounty balance:', bountyAccount.data.free);
+```
+
 You can also subscribe to changes using the watch API. This provides two ways of working with it: `bounties$` returns a `Map<number, Bounty>` with all bounties, and there are also `bountyIds$` and `getBountyById$(id: number)` for cases where you want to show the list and detail separately.
 
 ```ts

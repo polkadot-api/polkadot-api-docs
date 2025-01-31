@@ -113,6 +113,10 @@ export default defineConfig({
               text: "Bounties",
               link: "/sdks/governance/bounties",
             },
+            {
+              text: "Conviction Voting",
+              link: "/sdks/governance/voting",
+            },
           ],
         },
       ],
