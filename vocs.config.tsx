@@ -3,6 +3,7 @@ import { defineConfig } from "vocs"
 export default defineConfig({
   title: "Polkadot-API",
   description: "Typescript API to interact with polkadot chains",
+  iconUrl: '/favicon.png',
   topNav: [
     {
       text: "Guide",
