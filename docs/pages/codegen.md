@@ -18,13 +18,14 @@ Arguments:
 Options:
   --config <filename>         Source for the config file
   -f, --file <filename>       Source from metadata encoded file
-  -w, --wsUrl <URL>           Source from websocket URL
+  -w, --wsUrl <URL>           Source from websocket url
   -c, --chainSpec <filename>  Source from chain spec file
   -n, --name <name>           Source from a well-known chain (choices: "ksmcc3", "paseo",
                               "polkadot", "polkadot_collectives", "rococo_v2_2", "westend2", [...]")
   --wasm <filename>           Source from runtime wasm file
   --no-persist                Do not persist the metadata as a file
   --skip-codegen              Skip running codegen after adding
+  --whitelist <filename>      Use whitelist file to reduce descriptor size
   -h, --help                  display help for command
 ```
 
