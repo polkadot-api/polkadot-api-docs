@@ -17,20 +17,20 @@ npm i @polkadot-api/sdk-governance
 Then, initialize it by passing in the `typedApi` for your chain:
 
 ```ts
-import { createConvictionVotingSdk } from '@polkadot-api/sdk-governance';
-import { dot } from '@polkadot-api/descriptors';
-import { getSmProvider } from 'polkadot-api/sm-provider';
-import { chainSpec } from 'polkadot-api/chains/polkadot';
-import { start } from 'polkadot-api/smoldot';
-import { createClient } from 'polkadot-api';
+import { createConvictionVotingSdk } from "@polkadot-api/sdk-governance"
+import { dot } from "@polkadot-api/descriptors"
+import { getSmProvider } from "polkadot-api/sm-provider"
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { start } from "polkadot-api/smoldot"
+import { createClient } from "polkadot-api"
 
-const smoldot = start();
-const chain = await smoldot.addChain({ chainSpec });
+const smoldot = start()
+const chain = await smoldot.addChain({ chainSpec })
 
-const client = createClient(getSmProvider(chain));
-const typedApi = client.getTypedApi(dot);
+const client = createClient(getSmProvider(chain))
+const typedApi = client.getTypedApi(dot)
 
-const votingSdk = createConvictionVotingSdk(typedApi);
+const votingSdk = createConvictionVotingSdk(typedApi)
 ```
 
 ## Querying votes
@@ -41,8 +41,13 @@ The entry point of this SDK is `getVotingTrack` to get one specific track or `ge
 
 ```ts
 interface ConvictionVotingSdk {
-  getVotingTracks(account: SS58String): Promise<Array<TrackCasting | TrackDelegating>>
-  getVotingTrack(account: SS58String, track: number): Promise<TrackCasting | TrackDelegating>
+  getVotingTracks(
+    account: SS58String,
+  ): Promise<Array<TrackCasting | TrackDelegating>>
+  getVotingTrack(
+    account: SS58String,
+    track: number,
+  ): Promise<TrackCasting | TrackDelegating>
   // ...
 }
 
@@ -110,10 +115,14 @@ Votes with `abstain` also can't have conviction, but to simplify the API they ar
 An example to filter all the votes that have voted `aye` for an account:
 
 ```ts
-const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
-const allTracks = await votingSdk.getVotingTracks(ALICE);
-const allVotes = allTracks.flatMap(track => track.type === "casting" ? track.votes : []);
-const ayeVotes = allVotes.filter(vote => vote.type === "standard" && vote.direction === "aye");
+const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+const allTracks = await votingSdk.getVotingTracks(ALICE)
+const allVotes = allTracks.flatMap((track) =>
+  track.type === "casting" ? track.votes : [],
+)
+const ayeVotes = allVotes.filter(
+  (vote) => vote.type === "standard" && vote.direction === "aye",
+)
 ```
 
 The SDK also offers an observable-based API with the homologous methods `votingTrack$` and `votingTracks$`, which will update as soon as changes are done to the account or track.
@@ -159,9 +168,9 @@ The balance used by the Conviction Voting pallet becomes frozen while it's being
 To get any existing lock for a track, use the property `lock`:
 
 ```ts
-const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
-const MEDIUM_SPENDER = 33;
-const track = await votingSdk.getVotingTrack(ALICE, MEDIUM_SPENDER);
+const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+const MEDIUM_SPENDER = 33
+const track = await votingSdk.getVotingTrack(ALICE, MEDIUM_SPENDER)
 // { block: number, balance: bigint } | null
 console.log(track.lock)
 ```
@@ -174,7 +183,9 @@ Removing a delegation will always lock that balance for some time, based on the 
 
 ```ts
 if (track.type === "delegating") {
-  console.log(`Removing the vote will lock ${track.balance} tokens for ${track.lockDuration} blocks`);
+  console.log(
+    `Removing the vote will lock ${track.balance} tokens for ${track.lockDuration} blocks`,
+  )
 }
 ```
 
@@ -199,35 +210,39 @@ This only happens if the lock caused by the removal of the vote is still relevan
 The SDK exposes for each vote a method `getLock(outcome)` that will return which scenario will removing a vote cause. The outcome is an object `{ ended: number, side: 'aye' | 'nay' } | null`, that can be taken from a [Referendum](/sdks/governance/referenda), or filled from any other source:
 
 ```ts
-const track = await votingSdk.getVotingTrack(ALICE, MEDIUM_SPENDER);
+const track = await votingSdk.getVotingTrack(ALICE, MEDIUM_SPENDER)
 if (track.type === "casting") {
-  const vote = track.votes[0];
-  const referendum = await referendaSdk.getReferendum(vote.poll);
-  const lock = vote.getLock(referendum!.outcome);
+  const vote = track.votes[0]
+  const referendum = await referendaSdk.getReferendum(vote.poll)
+  const lock = vote.getLock(referendum!.outcome)
 
   switch (lock.type) {
-    case 'free':
-      console.log("Removing this vote won't cause any lock");
-      break;
-    case 'locked':
+    case "free":
+      console.log("Removing this vote won't cause any lock")
+      break
+    case "locked":
       console.log(
-        `Removing this vote will have ${vote.balance} tokens locked until block ${lock.end}`
-      );
-      break;
-    case 'extends':
-      console.log(`Removing this vote will cause the track lock to become extended to ${lock.end}`);
+        `Removing this vote will have ${vote.balance} tokens locked until block ${lock.end}`,
+      )
+      break
+    case "extends":
+      console.log(
+        `Removing this vote will cause the track lock to become extended to ${lock.end}`,
+      )
       console.log(
         `We might want to wait until block ${track.lock.block} and call track.unlock() before
-         removing this vote.`
+         removing this vote.`,
       )
-      break;
-    case 'extended':
+      break
+    case "extended":
       console.log(
         `Removing this vote before ${lock.end} will cause its balance to become extended to the
-         track lock ${track.lock.end}`
-      );
-      console.log(`We might want to wait until block ${lock.end} before removing this vote.`)
-      break;
+         track lock ${track.lock.end}`,
+      )
+      console.log(
+        `We might want to wait until block ${lock.end} before removing this vote.`,
+      )
+      break
   }
 }
 ```
@@ -262,4 +277,3 @@ if (track.type === "casting") {
   })
 }
 ```
-

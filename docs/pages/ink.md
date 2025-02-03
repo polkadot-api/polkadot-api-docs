@@ -24,6 +24,7 @@ Commands:
 ```
 
 So to generate the types for a contract, run the `ink add` command:
+
 ```sh
 > pnpm papi ink add "path to .contract or .json metadata file"
 ```
@@ -159,8 +160,8 @@ Ink! has its own SystemEvent, `Contracts.ContractEmitted` which can contain even
 Polkadot-API's inkClient offers an API to decode a specific ink! event, and also to filter all the `Contracts.ContractEmitted` events from a list and return them already decoded:
 
 ```ts
-type InkEvent = { data: Binary };
-type SystemEvent = { type: string, value: unknown };
+type InkEvent = { data: Binary }
+type SystemEvent = { type: string; value: unknown }
 interface InkEventInterface<E> {
   // For v5 events, we need the event's `signatureTopic` to decode it.
   decode: (value: InkEvent, signatureTopic: string) => E
@@ -196,19 +197,21 @@ To get the codecs for a specific storage query, use `inkClient.storage()`:
 ```ts
 interface StorageCodecs<K, V> {
   // key arg can be omitted if that storage entry takes no keys
-  encode: (key: K) => Binary,
+  encode: (key: K) => Binary
   decode: (data: Binary) => V
 }
 interface StorageInterface<D extends StorageDescriptors> {
   // path can be omitted to target the root storage (equivalent to path = "")
-  storage: <P extends PathsOf<D>>(path: P) => StorageCodecs<D[P]['key'], D[P]['value']>
+  storage: <P extends PathsOf<D>>(
+    path: P,
+  ) => StorageCodecs<D[P]["key"], D[P]["value"]>
 }
 ```
 
 For example, to read the root storage of psp22:
 
 ```ts
-const psp22Root = psp22Client.storage();
+const psp22Root = psp22Client.storage()
 
 const response = await typedApi.apis.ContractsApi.get_storage(
   ADDRESS.psp22,
@@ -220,8 +223,8 @@ if (response.success && response.value) {
   const decoded = psp22Root.decode(response.value)
   console.log("storage", decoded)
   // The values are typed
-  console.log('decimals', decoded.decimals)
-  console.log('total supply', decoded.data.total_supply)
+  console.log("decimals", decoded.decimals)
+  console.log("total supply", decoded.data.total_supply)
 
   // Note that `decoded.data.balances` is not defined (nor included in the type), because
   // even though it's defined in the layout as a property of `data.balances`, it's a HashMap,
@@ -235,7 +238,7 @@ And to get the balances for a particular address, we have to do a separate stora
 
 ```ts
 // Pass in the path to the storage root to query (TS also autosuggest the possible values)
-const psp22Balances = psp22Client.storage("data.balances");
+const psp22Balances = psp22Client.storage("data.balances")
 
 const response = await typedApi.apis.ContractsApi.get_storage(
   ADDRESS.psp22,

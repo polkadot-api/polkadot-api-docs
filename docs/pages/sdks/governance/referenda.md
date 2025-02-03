@@ -22,30 +22,33 @@ npm i @polkadot-api/sdk-governance
 Then, initialize it by passing in the `typedApi` for your chain:
 
 ```ts
-import { createReferendaSdk } from '@polkadot-api/sdk-governance';
-import { dot } from '@polkadot-api/descriptors';
-import { getSmProvider } from 'polkadot-api/sm-provider';
-import { chainSpec } from 'polkadot-api/chains/polkadot';
-import { start } from 'polkadot-api/smoldot';
-import { createClient } from 'polkadot-api';
+import { createReferendaSdk } from "@polkadot-api/sdk-governance"
+import { dot } from "@polkadot-api/descriptors"
+import { getSmProvider } from "polkadot-api/sm-provider"
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { start } from "polkadot-api/smoldot"
+import { createClient } from "polkadot-api"
 
-const smoldot = start();
-const chain = await smoldot.addChain({ chainSpec });
+const smoldot = start()
+const chain = await smoldot.addChain({ chainSpec })
 
-const client = createClient(getSmProvider(chain));
-const typedApi = client.getTypedApi(dot);
+const client = createClient(getSmProvider(chain))
+const typedApi = client.getTypedApi(dot)
 
-const referendaSdk = createReferendaSdk(typedApi);
+const referendaSdk = createReferendaSdk(typedApi)
 ```
 
 Different chains have their own spender track configurations, which unfortunately are hard-coded and not available on-chain. By default, the Referenda SDK uses Polkadot's configuration. For Kusama, you can import the Kusama configuration and pass it into the options parameter:
 
 ```ts
-import { createReferendaSdk, kusamaSpenderOrigin } from '@polkadot-api/sdk-governance';
+import {
+  createReferendaSdk,
+  kusamaSpenderOrigin,
+} from "@polkadot-api/sdk-governance"
 
 const referendaSdk = createReferendaSdk(typedApi, {
-  spenderOrigin: kusamaSpenderOrigin
-});
+  spenderOrigin: kusamaSpenderOrigin,
+})
 ```
 
 ## Creating a Referendum
@@ -55,22 +58,22 @@ There are multiple origins to choose from when creating a referendum, each with 
 For creating a referendum that requires a treasury spend, the SDK automatically selects the appropriate origin:
 
 ```ts
-const beneficiaryAddress = "………";
-const amount = 10_000_0000_000n;
+const beneficiaryAddress = "………"
+const amount = 10_000_0000_000n
 const spendCall = typedApi.tx.Treasury.spend({
   amount,
-  beneficiary: MultiAddress.Id(beneficiaryAddress)
-});
-const callData = await spendCall.getEncodedData();
+  beneficiary: MultiAddress.Id(beneficiaryAddress),
+})
+const callData = await spendCall.getEncodedData()
 
-const tx = referendaSdk.createSpenderReferenda(callData, amount);
+const tx = referendaSdk.createSpenderReferenda(callData, amount)
 
 // Submitting the transaction will create the referendum on-chain
-const result = await tx.signAndSubmit(signer);
-const referendumInfo = referendaSdk.getSubmittedReferendum(result);
+const result = await tx.signAndSubmit(signer)
+const referendumInfo = referendaSdk.getSubmittedReferendum(result)
 if (referendumInfo) {
-  console.log("Referendum ID:", referendumInfo.index);
-  console.log("Referendum Track:", referendumInfo.track);
+  console.log("Referendum ID:", referendumInfo.index)
+  console.log("Referendum Track:", referendumInfo.track)
 }
 ```
 
@@ -78,20 +81,20 @@ For non-spender referenda, you need to provide the origin:
 
 ```ts
 const remarkCall = typedApi.tx.System.remark({
-  remark: Binary.fromText("Make Polkadot even better")
-});
-const callData = await remarkCall.getEncodedData();
+  remark: Binary.fromText("Make Polkadot even better"),
+})
+const callData = await remarkCall.getEncodedData()
 
 const tx = referendaSdk.createReferenda(
   PolkadotRuntimeOriginCaller.Origins(GovernanceOrigin.WishForChange()),
-  callData
-);
+  callData,
+)
 
-const result = await tx.signAndSubmit(signer);
-const referendumInfo = referendaSdk.getSubmittedReferendum(result);
+const result = await tx.signAndSubmit(signer)
+const referendumInfo = referendaSdk.getSubmittedReferendum(result)
 if (referendumInfo) {
-  console.log("Referendum ID:", referendumInfo.index);
-  console.log("Referendum Track:", referendumInfo.track);
+  console.log("Referendum ID:", referendumInfo.index)
+  console.log("Referendum Track:", referendumInfo.track)
 }
 ```
 
@@ -104,24 +107,26 @@ Referenda can be in one of multiple states (Ongoing, Approved, Rejected, etc.). 
 When a referendum becomes closed (Approved, Rejected, Cancelled, etc.), most of the information is removed from the chain, it only keeps the block at which it was closed, and the submission / decision deposits if they haven't been claimed yet. This SDK focuses mainly on Ongoing referenda, which has more parameters.
 
 ```ts
-const referenda: Array<Referendum> = await referendaSdk.getReferenda();
+const referenda: Array<Referendum> = await referendaSdk.getReferenda()
 
-const referendum: Referendum | null = await referendaSdk.getReferendum(15);
+const referendum: Referendum | null = await referendaSdk.getReferendum(15)
 
-const ongoingReferenda: Array<OngoingReferendum> = referenda.filter(r => r.type === "Ongoing");
+const ongoingReferenda: Array<OngoingReferendum> = referenda.filter(
+  (r) => r.type === "Ongoing",
+)
 ```
 
 You can also subscribe to changes using the watch API. This provides two ways of working with it: `referenda$` returns a `Map<number, Referendum>` with all referenda, and there are also `referendaIds$` and `getReferendumById$(id: number)` for cases where you want to show the list and detail separately.
 
 ```ts
 // Map<number, Referendum>
-referendaSdk.watch.referenda$.subscribe(console.log);
+referendaSdk.watch.referenda$.subscribe(console.log)
 
 // number[]
-referendaSdk.watch.referendaIds$.subscribe(console.log);
+referendaSdk.watch.referendaIds$.subscribe(console.log)
 
 // Referendum
-referendaSdk.watch.getReferendumById$(5).subscribe(console.log);
+referendaSdk.watch.getReferendumById$(5).subscribe(console.log)
 ```
 
 `OngoingReferendum` provides helpful methods to interact with proposals.
@@ -129,23 +134,23 @@ referendaSdk.watch.getReferendumById$(5).subscribe(console.log);
 First of all, the proposal on a referendum can be inlined or through a preimage. `OngoingReferendum` unwraps this to get the raw call data or even the decoded call data:
 
 ```ts
-console.log(referenda[0].proposal.rawValue); // PreimagesBounded
-console.log(await referenda[0].proposal.resolve()); // Binary with the call data
-console.log(await referenda[0].proposal.decodedCall()); // Decoded call data
+console.log(referenda[0].proposal.rawValue) // PreimagesBounded
+console.log(await referenda[0].proposal.resolve()) // Binary with the call data
+console.log(await referenda[0].proposal.decodedCall()) // Decoded call data
 ```
 
 You can also check when the referendum enters or finishes the confirmation phase:
 
 ```ts
-console.log(await referenda[0].getConfirmationStart()); // number | null
-console.log(await referenda[0].getConfirmationEnd());   // number | null
+console.log(await referenda[0].getConfirmationStart()) // number | null
+console.log(await referenda[0].getConfirmationEnd()) // number | null
 ```
 
 Lastly, there is some useful information that's not available on-chain, but through the public forums (e.g. OpenGov or subsquare). To fetch this information, like the referendum title, you can use a [Subscan API Key](https://support.subscan.io):
 
 ```ts
-const apiKey = "………";
-console.log(await referenda[0].getDetails(apiKey)); // { title: string }
+const apiKey = "………"
+console.log(await referenda[0].getDetails(apiKey)) // { title: string }
 ```
 
 ## Accessing Track Details
@@ -157,26 +162,25 @@ This SDK enhances the track by adding some helper functions to easily work with 
 You can get the track from an `OngoingReferendum` through the method `referendum.getTrack()`, or you can get one by id:
 
 ```ts
-const referendumTrack = await referendum.getTrack();
-const track = await referendaSdk.getTrack(5);
+const referendumTrack = await referendum.getTrack()
+const track = await referendaSdk.getTrack(5)
 ```
 
 Then for both `minApproval` and `minSupport` curves, it adds functions to get the values at specific points of the curve:
 
 ```ts
 // Raw curve data (LinearDescending, SteppedDecreasing or Reciprocal with parameters)
-console.log(track.curve);
+console.log(track.curve)
 
 // Get the threshold [0-1] value when time is at 10th block.
-console.log(track.getThreshold(10));
+console.log(track.getThreshold(10))
 
 // Get the first block at which the threshold 50% happens
 // Returns -Infinity if the curve starts at a lower threshold (meaning it has reached the threshold since the beginning)
 // Returns +Infinity if the curve ends at a higher threshold (meaning it will never reach the threshold)
-console.log(track.getBlock(0.5));
+console.log(track.getBlock(0.5))
 
 // Get Array<{ block:number, threshold: number }> needed to draw a chart.
 // It will have the minimum amount of datapoints needed to draw a line chart.
-console.log(track.getData());
+console.log(track.getData())
 ```
-

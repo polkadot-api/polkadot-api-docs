@@ -20,20 +20,20 @@ pnpm papi ink add ./psp22.json # Path to the .contract or .json metadata file
 This process uses the name defined in the contract metadata to export it as a property of `contracts` in `@polkadot-api/descriptors`. For this example, the contract name is "psp22." You can now instantiate the Ink! SDK:
 
 ```ts
-import { contracts, testAzero } from "@polkadot-api/descriptors";
-import { createInkSdk } from "@polkadot-api/sdk-ink";
-import { createClient } from "polkadot-api";
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
-import { getWsProvider } from "polkadot-api/ws-provider/web";
+import { contracts, testAzero } from "@polkadot-api/descriptors"
+import { createInkSdk } from "@polkadot-api/sdk-ink"
+import { createClient } from "polkadot-api"
+import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
+import { getWsProvider } from "polkadot-api/ws-provider/web"
 
 const client = createClient(
   withPolkadotSdkCompat(
     getWsProvider("wss://aleph-zero-testnet-rpc.dwellir.com"),
   ),
-);
-const typedApi = client.getTypedApi(testAzero);
+)
+const typedApi = client.getTypedApi(testAzero)
 
-const psp22Sdk = createInkSdk(typedApi, contracts.psp22);
+const psp22Sdk = createInkSdk(typedApi, contracts.psp22)
 ```
 
 The SDK provides two main functions for different workflows:
@@ -62,23 +62,23 @@ The "salt" parameter ensures unique contract deployments. By default, it is empt
 
 ```ts
 // Deploy psp22
-const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
 const tx = psp22Deployer.deploy("new", {
   origin: ALICE,
   data: {
     supply: 1_000_000_000_000n,
     decimals: 9,
   },
-});
+})
 
 // `tx` is a regular transaction that can be sent with `.signSubmitAndWatch`, `.signAndSubmit`, etc.
-const result = await tx.signAndSubmit(aliceSigner);
+const result = await tx.signAndSubmit(aliceSigner)
 
 // To get the resulting address the contract was deployed to, we can pass the events back into the SDK:
 const data: {
-  address: string;
-  contractEvents: EventDescriptor[];
-} | null = psp22Sdk.readDeploymentEvents(ALICE, result.events);
+  address: string
+  contractEvents: EventDescriptor[]
+} | null = psp22Sdk.readDeploymentEvents(ALICE, result.events)
 ```
 
 Dry-running takes in the same arguments, but returns a Promise with the result directly instead:
@@ -90,10 +90,10 @@ const dryRunResult = await psp22Deployer.deploy("new", {
     supply: 1_000_000_000_000n,
     decimals: 9,
   },
-});
+})
 
 if (dryRunResult.success) {
-  console.log(dryRunResult.value);
+  console.log(dryRunResult.value)
   /*
   dryRunResult.value has:
   {
@@ -113,12 +113,12 @@ if (dryRunResult.success) {
 The contract API targets a specific instance of a contract by address, providing multiple interaction functions:
 
 ```ts
-const PSP22_INSTANCE = "5F69jP7VwzCp6pGZ93mv9FkAhwnwz4scR4J9asNeSgFPUGLq";
-const psp22Contract = psp22Sdk.getContract(PSP22_INSTANCE);
+const PSP22_INSTANCE = "5F69jP7VwzCp6pGZ93mv9FkAhwnwz4scR4J9asNeSgFPUGLq"
+const psp22Contract = psp22Sdk.getContract(PSP22_INSTANCE)
 
 // You optionally can make sure the hash hasn't changed by checking compatibility
-if (!await psp22Contract.isCompatible()) {
-  throw new Error("Contract has changed");
+if (!(await psp22Contract.isCompatible())) {
+  throw new Error("Contract has changed")
 }
 ```
 
@@ -148,7 +148,7 @@ if (result.success) {
 Sending a message requires signing a transaction, which can be created with the `.send()` method:
 
 ```ts
-console.log("Increase allowance");
+console.log("Increase allowance")
 const allowanceTxResult = await psp22Contract
   .send("PSP22::increase_allowance", {
     origin: ADDRESS.alice,
@@ -179,8 +179,7 @@ const result = await psp22Contract.dryRunRedeploy("new", {
   },
 })
 
-if (result.success)
-  console.log("redeploy dry run", result)
+if (result.success) console.log("redeploy dry run", result)
 
 const txResult = await psp22Contract
   .redeploy("new", {
@@ -192,10 +191,7 @@ const txResult = await psp22Contract
   })
   .signAndSubmit(signer)
 
-const deployment = psp22Sdk.readDeploymentEvents(
-  ADDRESS.alice,
-  txResult.events,
-)
+const deployment = psp22Sdk.readDeploymentEvents(ADDRESS.alice, txResult.events)
 ```
 
 ### Storage API
@@ -205,9 +201,9 @@ The storage of a contract is a tree structure, where you can query the values th
 This SDK has full typescript support for storage. You start by selecting where to begin from the tree, and you'll get back an object with the data within that tree.
 
 ```ts
-const storage = psp22Contract.getStorage();
+const storage = psp22Contract.getStorage()
 
-const root = await storage.getRoot();
+const root = await storage.getRoot()
 if (root.success) {
   /* result.value is what the psp22 contract has defined as the root of its storage
   {
@@ -229,8 +225,8 @@ If inside of that subtree there are storage entries that have to be queried sepa
 If you don't need the data of the root and just want to query for a specific balance directly, you can get any nested subtree by calling `.getNested()`:
 
 ```ts
-const aliceBalance = await storage.getNested("data.balances", ALICE);
+const aliceBalance = await storage.getNested("data.balances", ALICE)
 if (aliceBalance.success) {
-  console.log("Alice balance", aliceBalance.value);
+  console.log("Alice balance", aliceBalance.value)
 }
 ```

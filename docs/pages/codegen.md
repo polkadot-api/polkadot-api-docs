@@ -187,4 +187,4 @@ For advanced use cases, you can configure the CLI to perform only the code gener
 
 :::info
 You can also modify the `"descriptorPath"` property to specify a different path for generating the descriptors.
-::: 
+:::
