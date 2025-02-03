@@ -48,6 +48,16 @@ type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
       value: NonNullable<Payload>
     }>
   >
+  watchEntries: (
+    ...args: [PossibleParents<Args>, options?: { at: "best" }]
+  ) => Observable<{
+    block: BlockInfo
+    deltas: null | {
+      deleted: Array<{ args: ArgsOut; value: NonNullable<Payload> }>
+      upserted: Array<{ args: ArgsOut; value: NonNullable<Payload> }>
+    }
+    entries: Array<{ args: ArgsOut; value: NonNullable<Payload> }>
+  }>
 }
 ```
 
@@ -70,3 +80,9 @@ typedApi.query.Pallet.Query.getEntries(arg1, arg2, { at: "0x12345678" }) // 2/3 
 :::note
 `getEntries` returns as well the key arguments for every entry found. There are some storage entries whose arguments cannot be inferred directly from the key, because the arguments are hashed to compute the key. Therefore, only in these cases, `keyArgs` will be the `key` instead of the arguments themselves. The type will be `OpaqueKeyHash`.
 :::
+
+`watchEntries` allows you to watch changes to all entries of a storage map. As in `getEntries`, you can optionally provide a subset of the keys and/or `{at: "best"}` to watch changes to the best block, instead of the default `"finalized"` block. An event will be emitted for every new block, containing:
+
+- `block`: Block hash, block number, and parent block hash; to identify how updated the information is.
+- `deltas`: In case there were any changes since previous event, `upserted` (meaning added or changed) and `deleted` entries. If `deltas` is `null`, then no changes happened during that block.
+- `entries`: Immutable data-structure with the whole bunch of entries, updated to that block.
