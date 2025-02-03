@@ -131,22 +131,20 @@ const encodedTx = tx.getEncodedData(compatibilityToken)
 All the methods that will follow sign the transaction (or fake-sign in the case of `getEncodedFees`). When signing a transaction, some optional `TxOptions` could be passed. Every one of them as a default, so it's not needed to pass them. Let's see and discuss them one by one:
 
 ```ts
-type TxOptions<Asset> = Partial<
-  void extends Asset
-    ? {
-        at: HexString | "best" | "finalized"
-        tip: bigint
-        mortality: { mortal: false } | { mortal: true; period: number }
-        nonce: number
-      }
-    : {
-        at: HexString | "best" | "finalized"
-        tip: bigint
-        mortality: { mortal: false } | { mortal: true; period: number }
-        asset: Asset
-        nonce: number
-      }
->
+type TxOptions<Asset> = Partial<{
+  at: HexString | "best" | "finalized"
+  tip: bigint
+  mortality: { mortal: false } | { mortal: true; period: number }
+  asset: Asset
+  nonce: number
+  customSignedExtensions: Record<
+    string,
+    {
+      value?: any
+      additionalSigned?: any
+    }
+  >
+}>
 ```
 
 - `at`: gives the option to choose which block to target when creating the transaction. Default: `finalized`
@@ -154,6 +152,7 @@ type TxOptions<Asset> = Partial<
 - `nonce`: this is meant for advanced users that submit several transactions in a row, it allows to modify the default `nonce`. Default: latest nonce from `finalized` block
 - `tip`: add tip to transaction. Default: `0`
 - `asset`: there're several chains that allow you to choose which asset to use to pay for the fees and tip. This field will be strongly typed as well and will adapt to every chain used in the `dApp`. Default: `undefined`. This means to use the native token from the chain.
+- `customSignedExtensions`: gives the option to define the value of "custom" signed extensions, understood as signed extensions that PAPI is not aware of. One can define either one of `value` or `additionalSigned`, or both of them. Their type should be either SCALE-encoded `Uint8Array` or the JS type that PAPI's dynamic codecs infer. The default behaviour for unknown signed extensions is to throw an error, unless the type of it is an `Option`, in that case the default is `None`.
 
 ### `getEstimatedFees`
 
