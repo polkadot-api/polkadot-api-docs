@@ -172,15 +172,15 @@ Then for both `minApproval` and `minSupport` curves, it adds functions to get th
 // Raw curve data (LinearDescending, SteppedDecreasing or Reciprocal with parameters)
 console.log(track.curve)
 
-// Get the threshold [0-1] value when time is at 10th block.
+// Get the threshold value (in perbillion, [0n - 1_000_000_000n]) when time is at 10th block.
 console.log(track.getThreshold(10))
 
 // Get the first block at which the threshold 50% happens
-// Returns -Infinity if the curve starts at a lower threshold (meaning it has reached the threshold since the beginning)
 // Returns +Infinity if the curve ends at a higher threshold (meaning it will never reach the threshold)
-console.log(track.getBlock(0.5))
+console.log(track.getBlock(500_000_000n))
 
 // Get Array<{ block:number, threshold: number }> needed to draw a chart.
+// The threshold is in the range from 0 to 1 (0% and 100% respectively).
 // It will have the minimum amount of datapoints needed to draw a line chart.
 console.log(track.getData())
 ```
