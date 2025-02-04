@@ -127,12 +127,25 @@ export default defineConfig({
       link: "https://chains.papi.how",
     },
     {
-      text: "Built with PAPI",
+      text: "PAPI Apps",
       items: [
+        {
+          text: "PAPI Console",
+          link: "https://github.com/polkadot-api/papi-console",
+        },
+        {
+          text: "Polkadot Bounties",
+          link: "https://github.com/polkadot-api/polkadot-bounties",
+        },
         {
           text: "Teleport across chains",
           link: "https://github.com/polkadot-api/react-teleport-example",
         },
+      ],
+    },
+    {
+      text: "Built with PAPI",
+      items: [
         {
           text: "Kheopswap. Swap portal for AssetHub",
           link: "https://github.com/kheopswap/kheopswap",
