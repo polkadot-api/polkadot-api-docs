@@ -96,6 +96,10 @@ export default defineConfig({
       ],
     },
     {
+      text: "Offline API",
+      link: "/offline",
+    },
+    {
       text: "PAPI SDKs",
       link: "/sdks/intro",
       items: [
