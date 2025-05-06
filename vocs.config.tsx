@@ -89,15 +89,19 @@ export default defineConfig({
           text: "Unsafe API",
           link: "/unsafe",
         },
-        {
-          text: "Ink!",
-          link: "/ink",
-        },
       ],
+    },
+    {
+      text: "Ink!",
+      link: "/ink",
     },
     {
       text: "Offline API",
       link: "/offline",
+    },
+    {
+      text: "Typed Codecs",
+      link: "/typed-codecs",
     },
     {
       text: "PAPI SDKs",
