@@ -253,3 +253,37 @@ if (response.success && response.value) {
   console.log("error", response.value)
 }
 ```
+
+### Attributes
+
+Ink! adds some attributes to some of the messages or constructors to indicate various features:
+
+- `default`: Whether a message or constructor should be treated as the default.
+- `payable`: Whether a message or constructor accepts a `value` parameter which will transfer tokens from the origin signer to the contract's address.
+- `mutates`: Whether a message performs a change to the storage.
+
+The ink client exposes these properties on the message and constructor objects:
+
+```ts
+const psp22Constructor = psp22Client.constructor("new")
+console.log(psp22Constructor.attributes)
+
+const increaseAllowance = psp22Client.message("PSP22::increase_allowance")
+console.log(increaseAllowance.attributes)
+```
+
+Additionally, if the contract does have a "default" message or constructor specified, then the id of that can also be found in the client itself:
+
+```ts
+const defaultConstructor = psp22Client.defaultConstructor
+  ? psp22Client.message(psp22Client.defaultConstructor)
+  : null
+
+const defaultMessage = psp22Client.defaultMessage
+  ? psp22Client.message(psp22Client.defaultMessage)
+  : null
+```
+
+:::note
+For better typescript support, if you're working with just one contract that has a defaultConstructor, then the types will already be non-nullable. In that case you shouldn't need the nullable ternary.
+:::
