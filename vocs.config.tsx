@@ -1,5 +1,7 @@
 import { defineConfig } from "vocs"
 
+const version = "1.10.0"
+
 export default defineConfig({
   title: "Polkadot-API",
   description: "Typescript API to interact with polkadot chains",
@@ -8,6 +10,15 @@ export default defineConfig({
     {
       text: "Guide",
       link: "/getting-started",
+    },
+    {
+      text: `${version}`,
+      items: [
+        {
+          text: "Changelog",
+          link: `https://github.com/polkadot-api/polkadot-api/releases/tag/polkadot-api${encodeURIComponent("@")}${version}`,
+        },
+      ],
     },
   ],
   sidebar: [
