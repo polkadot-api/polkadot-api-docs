@@ -54,12 +54,16 @@ export default defineConfig({
       text: "Recipes",
       items: [
         {
-          text: "Prepare for runtime upgrade",
-          link: "/recipes/upgrade",
-        },
-        {
           text: "Make a simple transfer",
           link: "/recipes/simple-transfer",
+        },
+        {
+          text: "Connect to multiple chains",
+          link: "/recipes/connect-to-multiple-chains",
+        },
+        {
+          text: "Prepare for runtime upgrade",
+          link: "/recipes/upgrade",
         },
       ],
     },
