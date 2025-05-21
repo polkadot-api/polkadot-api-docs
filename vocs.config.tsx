@@ -65,6 +65,10 @@ export default defineConfig({
           text: "Prepare for runtime upgrade",
           link: "/recipes/upgrade",
         },
+        {
+          text: "Caching the metadata",
+          link: "/recipes/metadata-caching",
+        },
       ],
     },
     {
