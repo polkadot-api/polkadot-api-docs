@@ -162,7 +162,7 @@ export default defineConfig({
         },
         {
           text: "Polkadot Bounties",
-          link: "https://github.com/polkadot-api/polkadot-bounties",
+          link: "https://github.com/polkadot-api/bounties",
         },
         {
           text: "Teleport across chains",
