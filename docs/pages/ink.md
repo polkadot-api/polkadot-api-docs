@@ -29,7 +29,9 @@ So to generate the types for a contract, run the `ink add` command:
 > pnpm papi ink add "path to .contract or .json metadata file"
 ```
 
-This will add the contract to the `.papi` subfolder, and generate the type descriptors for the ink! contract. These can be found in `@polkadot-api/descriptors` within an object named "contracts".
+This will add the contract to the `.papi` subfolder, and generate the type descriptors for the ink! contract. These can be found in `@polkadot-api/descriptors` within an object named "contracts", and are keyed by contract name.
+
+The contract name by default is the one specified in the contract's metadata, but if needed it can be overriden with the `--key` parameter in `ink add`.
 
 The generated code contains all the types, and also the required info from the metadata to encode and decode values.
 
