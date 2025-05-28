@@ -1,6 +1,6 @@
 # Ink! SDK
 
-The Ink! SDK is a library for interacting with smart contracts, built on top of the [Ink! Client](/ink).
+The Ink! SDK is a library for interacting with smart contracts, built on top of the [Ink! Client](/ink). It supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
 
 ## Getting Started
 
@@ -10,31 +10,37 @@ Install the sdk through your package manager:
 pnpm i @polkadot-api/sdk-ink
 ```
 
-Begin by generating the type definitions for your chain and contract. For example, using a PSP22 contract on the test Aleph Zero network:
+Begin by generating the type definitions for your chain and contract. For example, using a PSP22 contract on the test Paseo Pop network:
 
 ```sh
-pnpm papi add -w wss://aleph-zero-testnet-rpc.dwellir.com testAzero
+pnpm papi add -w wss://rpc1.paseo.popnetwork.xyz pop
 pnpm papi ink add ./psp22.json # Path to the .contract or .json metadata file
 ```
+
+:::note
+You can find a working example in [the ink-sdk repo](https://github.com/polkadot-api/papi-sdks/tree/main/examples/ink-playground). An example PSP22 contract and its metadata is available in the `./contracts/psp22_mod` folder.
+:::
 
 This process uses the name defined in the contract metadata to export it as a property of `contracts` in `@polkadot-api/descriptors`. For this example, the contract name is "psp22." You can now instantiate the Ink! SDK:
 
 ```ts
-import { contracts, testAzero } from "@polkadot-api/descriptors"
+import { contracts, pop } from "@polkadot-api/descriptors"
 import { createInkSdk } from "@polkadot-api/sdk-ink"
 import { createClient } from "polkadot-api"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 import { getWsProvider } from "polkadot-api/ws-provider/web"
 
 const client = createClient(
-  withPolkadotSdkCompat(
-    getWsProvider("wss://aleph-zero-testnet-rpc.dwellir.com"),
-  ),
+  withPolkadotSdkCompat(getWsProvider("wss://rpc1.paseo.popnetwork.xyz")),
 )
-const typedApi = client.getTypedApi(testAzero)
+const typedApi = client.getTypedApi(pop)
 
 const psp22Sdk = createInkSdk(typedApi, contracts.psp22)
 ```
+
+:::note
+When using a ink!v6 contract, use `createReviveSdk` instead of `createInkSdk`. Both have the same API, but revive sdk uses the pallet-revive instead, which is where ink!v6 contracts are deployed.
+:::
 
 The SDK provides two main functions for different workflows:
 
@@ -56,7 +62,7 @@ The deployer API supports two methods: one for dry-running deployments and anoth
 
 When deploying, the SDK calculates all parameters, requiring only the constructor arguments defined in the contract.
 
-To calculate the gas limit required, the SDK also needs the origin account the transaction will be sent from. So it either uses the origin account or the gas limit if you already have it.
+To calculate the gas limit and storage deposit limit required, the SDK also needs the origin account the transaction will be sent from. So it either uses the origin account or the gas limit if you already have it.
 
 The "salt" parameter ensures unique contract deployments. By default, it is empty, but you can provide a custom value for deploying multiple instances of the same contract.
 
@@ -75,10 +81,10 @@ const tx = psp22Deployer.deploy("new", {
 const result = await tx.signAndSubmit(aliceSigner)
 
 // To get the resulting address the contract was deployed to, we can pass the events back into the SDK:
-const data: {
+const data: Array<{
   address: string
   contractEvents: EventDescriptor[]
-} | null = psp22Sdk.readDeploymentEvents(ALICE, result.events)
+}> = psp22Sdk.readDeploymentEvents(result.events)
 ```
 
 Dry-running takes in the same arguments, but returns a Promise with the result directly instead:
@@ -105,6 +111,11 @@ if (dryRunResult.success) {
     gasRequired: Gas;
   }
   */
+
+  // The dry-run result also has a method to get the transaction to perform the actual deployment.
+  const deploymentResult = await dryRunResult.value
+    .deploy()
+    .signAndSubmit(aliceSigner)
 }
 ```
 
@@ -138,6 +149,9 @@ const result = await psp22Contract.query("PSP22::balance_of", {
 if (result.success) {
   console.log("balance of alice", result.value.response)
   console.log("events", result.value.events)
+
+  // The dry-run result also has a method to get the transaction to send the same message to the contract.
+  const callResult = await result.value.send().signAndSubmit(aliceSigner)
 } else {
   console.log("error", result.value)
 }
@@ -230,3 +244,7 @@ if (aliceBalance.success) {
   console.log("Alice balance", aliceBalance.value)
 }
 ```
+
+:::note
+Storage for `createReviveSdk` is not yet available, pending an update on polkadot-sdk.
+:::
