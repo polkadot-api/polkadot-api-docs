@@ -1,6 +1,6 @@
 import { defineConfig } from "vocs"
 
-const version = "1.10.0"
+const version = "1.13.0"
 
 export default defineConfig({
   title: "Polkadot-API",
@@ -89,6 +89,10 @@ export default defineConfig({
             {
               text: "Runtime APIs",
               link: "/typed/apis",
+            },
+            {
+              text: "View Functions",
+              link: "/typed/view",
             },
             {
               text: "Storage queries",

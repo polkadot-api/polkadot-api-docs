@@ -157,7 +157,7 @@ if (response.result.success) {
 
 Every message or contract deployment generates `SystemEvent`s that are available through the regular RuntimeApi's `response.events` or through `transactionResult.events`. These can be filtered using the [Events Filter API](/typed/events#filter).
 
-Ink! has its own SystemEvent, `Contracts.ContractEmitted` which can contain events emitted within the contract, but the payload is SCALE encoded, with a type definition declared in the metadata.
+Ink! has its own SystemEvent, `Contracts.ContractEmitted` (or `Revive.ContractEmitted`) which can contain events emitted within the contract, but the payload is SCALE encoded, with a type definition declared in the metadata.
 
 Polkadot-API's inkClient offers an API to decode a specific ink! event, and also to filter all the `Contracts.ContractEmitted` events from a list and return them already decoded:
 
