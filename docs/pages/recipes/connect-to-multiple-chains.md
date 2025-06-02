@@ -68,7 +68,7 @@ const identityDataToString = (data: IdentityData | undefined) => {
     return Binary.fromBytes(new Uint8Array(data.value)).asText()
   return data.value.asText()
 }
-const name = identityDataToString(identity?.[0].info.display) ?? ADDRESS
+const name = identityDataToString(identity?.info.display) ?? ADDRESS
 const freeBalance = Number(account.data.free) / Math.pow(10, DECIMALS)
 
 console.log(`${name}'s balance is ${freeBalance.toLocaleString()} DOT`)
