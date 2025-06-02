@@ -17,8 +17,13 @@ type StorageEntryWithoutKeys<Payload> = {
   getCompatibilityLevel: GetCompatibilityLevel
   getValue: (options?: CallOptions) => Promise<Payload>
   watchValue: (bestOrFinalized?: "best" | "finalized") => Observable<Payload>
+
+  getKey: () => Promise<HexString>
+  getKey: (token: CompatibilityToken) => HexString
 }
 ```
+
+`getKey` builds the storage key for a specific query. It optionally takes a [`CompatibilityToken`](/typed), making it synchronous if passed.
 
 As you might expect, `getValue` returns you the `Payload` for that particular query, allowing you to choose which block to query (`at` can be a blockHash, `"finalized"` (the default), or `"best"`).
 
@@ -58,8 +63,13 @@ type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
     }
     entries: Array<{ args: ArgsOut; value: NonNullable<Payload> }>
   }>
+
+  getKey: (...args: PossibleArgs) => Promise<HexString>
+  getKey: (...args: PossibleArgs, token: CompatibilityToken) => HexString
 }
 ```
+
+`getKey` builds the storage key for a specific query and set of arguments. You can pass all args just a subset of them. It optionally takes a [`CompatibilityToken`](/typed), making it synchronous if passed.
 
 Both `getValue` and `watchValue` have the same behaviour as in the previous case, but they require you to pass all keys required for that storage query (in our example, an address). The same function arguments that are found in the no-keys situation can be passed at the end of the call to modify which block to query, etc. For example, a query with 3 args:
 
