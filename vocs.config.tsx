@@ -91,6 +91,10 @@ export default defineConfig({
               link: "/typed/apis",
             },
             {
+              text: "View Functions",
+              link: "/typed/view",
+            },
+            {
               text: "Storage queries",
               link: "/typed/queries",
             },
