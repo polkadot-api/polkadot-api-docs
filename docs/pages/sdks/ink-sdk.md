@@ -245,6 +245,73 @@ if (aliceBalance.success) {
 }
 ```
 
-:::note
-Storage for `createReviveSdk` is not yet available, pending an update on polkadot-sdk.
-:::
+## Revive Addresses
+
+Ink! v6+ contracts are deployed to `pallet-revive`, which took several design compromises to make it compatible with EVM contracts.
+
+PAPI’s `ink-sdk` supports both `pallet-contracts` and `pallet-revive`, providing a unified interface where **all features are supported for both** (including queries, dry-run instantiations with event handling, sending and instantiating contracts, and storage access).
+
+The main issue comes from the fact that contracts in Revive use Ethereum-like addresses, represented as 20-byte hex strings. `ink-sdk` includes several helpers to work with these addresses:
+
+### Account Mapping
+
+Before an account can interact with a contract, it must be mapped using the transaction `typedApi.tx.Revive.map_account()` (even for dry-runs). [See issue #8619](https://github.com/paritytech/polkadot-sdk/issues/8619).
+
+The Revive SDK provides a convenient function to check whether a given account is already mapped (as this information is not directly accessible from storage):
+
+```ts
+const erc20Sdk = createReviveSdk(typedApi, contracts.erc20)
+const isMapped = await erc20Sdk.addressIsMapped(ALICE)
+if (!isMapped) {
+  console.log("Alice needs to be mapped first!")
+}
+```
+
+### Deployment Address
+
+`pallet-revive` currently [does not emit `ContractInstantiated` events](https://github.com/paritytech/polkadot-sdk/issues/8677), which makes it less straightforward to retrieve a contract address after deployment.
+
+However, if the contract emits an event via `ContractEmitted`, the SDK will detect it in `readDeploymentEvents(finalizedTxEvent)`.
+
+Fortunately, contract addresses are deterministic: they are derived either from the signer’s `accountId` + contract code + constructor data + salt, or just the signer’s `accountId` + nonce if no salt is used.
+
+The Revive SDK provides methods to estimate the contract address given these parameters:
+
+```ts
+const erc20Sdk = createReviveSdk(typedApi, contracts.erc20)
+const erc20Deployer = erc20Sdk.getDeployer(code)
+
+// Estimate address using nonce:
+const estimatedAddressWithNonce = await erc20Deployer.estimateAddress("new", {
+  origin: ADDRESS.alice,
+  // Optionally, specify `nonce: {number}`. Otherwise, the SDK will query it for you.
+})
+
+// Estimate address using salt:
+const estimatedAddressWithSalt = await erc20Deployer.estimateAddress("new", {
+  origin: ADDRESS.alice,
+  salt: Binary.fromHex(
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
+  ),
+})
+
+// Since the nonce-based equation does not depend on contract code, ink-sdk exposes
+// a lower-level utility function for quick address calculation:
+import { getDeploymentAddressWithNonce } from "@polkadot-api/ink-sdk"
+
+const manualAddress = getDeploymentAddressWithNonce(ADDRESS.alice, 123)
+```
+
+### Contract's AccountId
+
+Because contract addresses are now in Ethereum-like format (20-byte hex strings), retrieving their `AccountId` (SS58) is not straightforward, which could be used for example to check the contract's funds.
+
+`ink-sdk` provides an `accountId` property to get the SS58 address of the contract:
+
+```ts
+const erc20Sdk = createReviveSdk(typedApi, contracts.erc20)
+const contract = erc20Sdk.getContract(ADDRESS.erc20)
+
+const account = await typedApi.query.System.Account.getValue(contract.accountId)
+console.log("Contract account", account)
+```
