@@ -90,7 +90,7 @@ const data: Array<{
 Dry-running takes in the same arguments, but returns a Promise with the result directly instead:
 
 ```ts
-const dryRunResult = await psp22Deployer.deploy("new", {
+const dryRunResult = await psp22Deployer.dryRun("new", {
   origin: ALICE,
   data: {
     supply: 1_000_000_000_000n,
@@ -297,7 +297,7 @@ const estimatedAddressWithSalt = await erc20Deployer.estimateAddress("new", {
 
 // Since the nonce-based equation does not depend on contract code, ink-sdk exposes
 // a lower-level utility function for quick address calculation:
-import { getDeploymentAddressWithNonce } from "@polkadot-api/ink-sdk"
+import { getDeploymentAddressWithNonce } from "@polkadot-api/sdk-ink"
 
 const manualAddress = getDeploymentAddressWithNonce(ADDRESS.alice, 123)
 ```
