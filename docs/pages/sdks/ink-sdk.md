@@ -38,11 +38,14 @@ const client = createClient(
 const typedApi = client.getTypedApi(pop)
 
 const psp22Sdk = createInkSdk(typedApi, contracts.psp22)
-```
 
-:::note
-When using a ink!v6 contract, use `createReviveSdk` instead of `createInkSdk`. Both have the same API, but revive sdk uses the pallet-revive instead, which is where ink!v6 contracts are deployed.
-:::
+// If using ink!v6 use this instead:
+//
+// import { createReviveSdk } from "@polkadot-api/sdk-ink"
+// const psp22Sdk = createReviveSdk(typedApi, contracts.psp22)
+//
+// The public interface is the same as `createInkSdk`, but uses pallet revive instead, which is where v6 contracts are deployed.
+```
 
 The SDK provides two main functions for different workflows:
 
@@ -54,8 +57,8 @@ The SDK provides two main functions for different workflows:
 ```ts
 import { Binary } from "polkadot-api";
 
-const wasmBlob = ...; // Uint8Array of the contract WASM blob.
-const code = Binary.fromBytes(wasmBlob);
+const codeBlob = ...; // Uint8Array of the contract WASM (v5-) or PolkaVM (v6+) blob.
+const code = Binary.fromBytes(codeBlob);
 
 const psp22Deployer = psp22Sdk.getDeployer(code);
 ```
