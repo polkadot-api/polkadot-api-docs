@@ -1,6 +1,8 @@
 # Ink! SDK
 
-The Ink! SDK is a library for interacting with smart contracts, built on top of the [Ink! Client](/ink). It supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
+The Ink! SDK is a library for interacting with smart contracts, which supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
+
+Built on top of the [Ink! Client](/ink), a set of low-level bindings for ink!, this SDK significantly simplifies interacting with contracts. It provides a developer-friendly interface that covers most dApps use cases.
 
 ## Getting Started
 
