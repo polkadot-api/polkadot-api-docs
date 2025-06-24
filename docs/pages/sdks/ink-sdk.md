@@ -1,6 +1,8 @@
 # Ink! SDK
 
-The Ink! SDK is a library for interacting with smart contracts, built on top of the [Ink! Client](/ink). It supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
+The Ink! SDK is a library for interacting with smart contracts, which supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
+
+Built on top of the [Ink! Client](/ink), a set of low-level bindings for ink!, this SDK significantly simplifies interacting with contracts. It provides a developer-friendly interface that covers most dApps use cases.
 
 ## Getting Started
 
@@ -36,11 +38,14 @@ const client = createClient(
 const typedApi = client.getTypedApi(pop)
 
 const psp22Sdk = createInkSdk(typedApi, contracts.psp22)
-```
 
-:::note
-When using a ink!v6 contract, use `createReviveSdk` instead of `createInkSdk`. Both have the same API, but revive sdk uses the pallet-revive instead, which is where ink!v6 contracts are deployed.
-:::
+// If using ink!v6 use this instead:
+//
+// import { createReviveSdk } from "@polkadot-api/sdk-ink"
+// const psp22Sdk = createReviveSdk(typedApi, contracts.psp22)
+//
+// The public interface is the same as `createInkSdk`, but uses pallet revive instead, which is where v6 contracts are deployed.
+```
 
 The SDK provides two main functions for different workflows:
 
@@ -52,8 +57,8 @@ The SDK provides two main functions for different workflows:
 ```ts
 import { Binary } from "polkadot-api";
 
-const wasmBlob = ...; // Uint8Array of the contract WASM blob.
-const code = Binary.fromBytes(wasmBlob);
+const codeBlob = ...; // Uint8Array of the contract WASM (v5-) or PolkaVM (v6+) blob.
+const code = Binary.fromBytes(codeBlob);
 
 const psp22Deployer = psp22Sdk.getDeployer(code);
 ```
@@ -90,7 +95,7 @@ const data: Array<{
 Dry-running takes in the same arguments, but returns a Promise with the result directly instead:
 
 ```ts
-const dryRunResult = await psp22Deployer.deploy("new", {
+const dryRunResult = await psp22Deployer.dryRun("new", {
   origin: ALICE,
   data: {
     supply: 1_000_000_000_000n,
@@ -297,7 +302,7 @@ const estimatedAddressWithSalt = await erc20Deployer.estimateAddress("new", {
 
 // Since the nonce-based equation does not depend on contract code, ink-sdk exposes
 // a lower-level utility function for quick address calculation:
-import { getDeploymentAddressWithNonce } from "@polkadot-api/ink-sdk"
+import { getDeploymentAddressWithNonce } from "@polkadot-api/sdk-ink"
 
 const manualAddress = getDeploymentAddressWithNonce(ADDRESS.alice, 123)
 ```
