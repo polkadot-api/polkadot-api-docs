@@ -129,7 +129,7 @@ In order to reduce the size of PAPI descriptors bundle, one could filter which c
 In order to enable the whitelist feature of the codegen, one has to write a `whitelist.ts` file that our CLI can understand. The shape is as follows:
 
 ```ts
-import { DotWhitelistEntry } from "@polkadot-api/descriptors"
+import type { DotWhitelistEntry } from "@polkadot-api/descriptors"
 
 const dotWhitelist: DotWhitelistEntry[] = [
   // this will get all calls, queries, and consts inside Balances pallet
@@ -152,7 +152,7 @@ export const whitelist = [...dotWhitelist]
 If you generated descriptors for key `dot` (or any other `key` you used to generate the descriptors) you will have that `<Key>WhitelistEntry` helper type that will provide type checking for your whitelist. You can explore all options that you can choose in your IDE. Of course, this can be multichain, let's see an example of it (for `dot` and `dotAh` descriptor keys).
 
 ```ts
-import {
+import type {
   DotAhWhitelistEntry,
   DotWhitelistEntry,
 } from "@polkadot-api/descriptors"
