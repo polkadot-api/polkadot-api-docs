@@ -41,6 +41,11 @@ interface PolkadotClient {
   getBestBlocks: () => Promise<BlockInfo[]>
 
   /**
+   * Observable of new blocks that have been discovered by the client.
+   */
+  blocks$: Observable<BlockInfo>
+
+  /**
    * Observable to watch Block Body.
    *
    * @param hash  It can be a block hash, `"finalized"`, or `"best"`
@@ -112,6 +117,18 @@ interface PolkadotClient {
    * checks protection and the consumer should implement them on their own.
    */
   getUnsafeApi: <D>() => UnsafeApi<D>
+
+  /**
+   * Returns a Promise that resolves into the encoded value of a storage entry
+   * or `null` if the key doesn't have a corresponding value.
+   *
+   * @param storageKey  Either one of the well-known substrate storage keys
+   *                    or an hexadecimal storage key.
+   */
+  rawQuery: (
+    storageKey: HexString | string,
+    options?: PullOptions,
+  ) => Promise<HexString | null>
 
   /**
    * This will `unfollow` the provider, disconnect and error every subscription.
