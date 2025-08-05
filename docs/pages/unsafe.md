@@ -39,7 +39,7 @@ const unsafeApi = client.getUnsafeApi()
 // in typed is `compatibilityToken`
 const typedToken = await typedApi.compatibilityToken
 // in unsafe is `runtimeToken`
-const unsafeToken = await typedApi.runtimeToken
+const unsafeToken = await unsafeApi.runtimeToken
 
 // typed version
 typedApi.consts.System.SS58Prefix(typedToken)
