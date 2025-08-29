@@ -205,6 +205,10 @@ export default defineConfig({
           text: "Bounty Manager",
           link: "https://github.com/galaniprojects/Polkadot-Bounty-Manager",
         },
+        {
+          text: "inkathon",
+          link: "https://github.com/scio-labs/inkathon",
+        },
       ],
     },
   ],
