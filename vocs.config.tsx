@@ -169,8 +169,20 @@ export default defineConfig({
           link: "https://github.com/polkadot-api/bounties",
         },
         {
+          text: "Diff runtimes",
+          link: "https://github.com/polkadot-api/polka-diff",
+        },
+        {
+          text: "Multisig tool",
+          link: "https://github.com/polkadot-api/multisig-tool",
+        },
+        {
           text: "Teleport across chains",
           link: "https://github.com/polkadot-api/react-teleport-example",
+        },
+        {
+          text: "Scale tool",
+          link: "https://github.com/polkadot-api/scale-tool",
         },
       ],
     },
@@ -180,6 +192,18 @@ export default defineConfig({
         {
           text: "Kheopswap. Swap portal for AssetHub",
           link: "https://github.com/kheopswap/kheopswap",
+        },
+        {
+          text: "Multix",
+          link: "https://github.com/ChainSafe/Multix",
+        },
+        {
+          text: "ParaSpell XCM SDK",
+          link: "https://github.com/paraspell/xcm-tools/",
+        },
+        {
+          text: "Inkathon",
+          link: "https://github.com/scio-labs/inkathon",
         },
         {
           text: "Polkadot Fellowship Dashboard",
@@ -194,20 +218,8 @@ export default defineConfig({
           link: "https://github.com/shawntabrizi/substratekitties",
         },
         {
-          text: "Multix",
-          link: "https://github.com/ChainSafe/Multix",
-        },
-        {
-          text: "ParaSpell XCM SDK",
-          link: "https://paraspell.xyz/",
-        },
-        {
           text: "Bounty Manager",
           link: "https://github.com/galaniprojects/Polkadot-Bounty-Manager",
-        },
-        {
-          text: "inkathon",
-          link: "https://github.com/scio-labs/inkathon",
         },
       ],
     },
