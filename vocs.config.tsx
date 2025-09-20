@@ -221,6 +221,14 @@ export default defineConfig({
           text: "Bounty Manager",
           link: "https://github.com/galaniprojects/Polkadot-Bounty-Manager",
         },
+        {
+          text: "ReactiveDOT",
+          link: "https://reactivedot.dev",
+        },
+        {
+          text: "DOTConnect",
+          link: "https://dotconnect.dev",
+        },
       ],
     },
   ],
