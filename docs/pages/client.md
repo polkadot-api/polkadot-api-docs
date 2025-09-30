@@ -11,6 +11,23 @@ interface PolkadotClient {
   getChainSpecData: () => Promise<ChainSpecData>
 
   /**
+   * Retrieves the most modern stable version of the metadata for a given block.
+   *
+   * @param atBlock  The block-hash of the block.
+   * @returns Observable that emits the most modern stable version of the
+   *          metadata, and immediately completes.
+   */
+  getMetadata$: (atBlock: HexString) => Observable<Uint8Array>
+  /**
+   * Retrieves the most modern stable version of the metadata for a given block.
+   *
+   * @param atBlock  The block-hash of the block.
+   * @returns An abortable Promise that resolves into the most modern
+   *          stable version of the metadata.
+   */
+  getMetadata: (atBlock: HexString, signal?: AbortSignal) => Promise<Uint8Array>
+
+  /**
    * Observable that emits `BlockInfo` for every new finalized block. It's a
    * multicast and stateful observable, that will synchronously replay its
    * latest known state.
@@ -44,6 +61,14 @@ interface PolkadotClient {
    * Observable of new blocks that have been discovered by the client.
    */
   blocks$: Observable<BlockInfo>
+
+  /**
+   * Ensures that a block stays available, even after it has been finalized and
+   * no operations are running for that block.
+   *
+   * @returns A callback function to release the block.
+   */
+  hodlBlock: (blockHash: HexString) => () => void
 
   /**
    * Observable to watch Block Body.

@@ -23,7 +23,7 @@ If you're using the PAPI CLI to generate type descriptors for your chain, you ca
 ```ts
 import { dot, getMetadata } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 
 const client = createClient(
@@ -51,7 +51,7 @@ import {
   getMetadata as getDescriptorsMetadata,
 } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 import { toHex, fromHex } from "@polkadot-api/utils" // Ensure hex helpers are imported
 
@@ -89,7 +89,7 @@ import {
   getMetadata as getDescriptorsMetadata,
 } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 
 const setMetadata = (key: string, value: Uint8Array) => {

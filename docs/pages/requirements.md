@@ -10,7 +10,7 @@ PAPI is developed using the latest NodeJS LTS (currently `22.x`). The minimum re
 
 ### Bun
 
-In case you are using `bun` as your Javascript runtime, then Papi will work flawlessly with it! Just a small detail, if using a WebSocket provider, make sure you import it from `polkadot-api/ws-provider/web`!
+In case you are using `bun` as your Javascript runtime, then Papi will work flawlessly with it!
 
 ### Browser
 
@@ -34,7 +34,7 @@ Polkadot-API will work without any issues. The WebSocket provider could be used 
 
 ```ts
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 
 const client = createClient(getWsProvider("wss://your-rpc.your-url.xyz"))
 ```
@@ -49,13 +49,17 @@ If your node uses versions between `1.1` and `1.11`, you are still good to go wi
 
 ```ts
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 
 const client = createClient(
   withPolkadotSdkCompat(getWsProvider("wss://your-rpc.your-url.xyz")),
 )
 ```
+
+:::warning
+If you are using [`@polkadot-api/legacy-provider`](/providers#legacy-provider), don’t stack with polkadot-sdk-compat. Using the legacy-provider, it is unnecessary to add the Polkadot SDK compatibility layer as it already outputs a new‑spec‑compliant surface, so there’s nothing left for that middleware to “fix.”
+:::
 
 #### Polkadot-SDK `< 1.1.0`
 

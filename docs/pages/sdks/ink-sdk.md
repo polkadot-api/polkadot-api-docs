@@ -30,7 +30,7 @@ import { contracts, pop } from "@polkadot-api/descriptors"
 import { createInkSdk } from "@polkadot-api/sdk-ink"
 import { createClient } from "polkadot-api"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 
 const client = createClient(
   withPolkadotSdkCompat(getWsProvider("wss://rpc1.paseo.popnetwork.xyz")),
