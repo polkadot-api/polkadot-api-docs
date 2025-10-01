@@ -1,6 +1,6 @@
 # Ink! SDK
 
-The Ink! SDK is a library for interacting with smart contracts, which supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above).
+The Ink! SDK is a library for interacting with smart contracts, which supports both pallet contracts (for ink!v5 or below) and pallet revive (for ink!v6 and above and solidity).
 
 Built on top of the [Ink! Client](/ink), a set of low-level bindings for ink!, this SDK significantly simplifies interacting with contracts. It provides a developer-friendly interface that covers most dApps use cases.
 
@@ -12,55 +12,46 @@ Install the sdk through your package manager:
 pnpm i @polkadot-api/sdk-ink
 ```
 
-Begin by generating the type definitions for your chain and contract. For example, using a PSP22 contract on the test Paseo Pop network:
+Begin by generating the type definitions for your chain and contract. For example, using the starter `flipper` contract on Passet Hub:
 
 ```sh
-pnpm papi add -w wss://rpc1.paseo.popnetwork.xyz pop
-pnpm papi ink add ./psp22.json # Path to the .contract or .json metadata file
+pnpm papi add -w wss://testnet-passet-hub.polkadot.io passet
+pnpm papi ink add ./flipper.json # Path to the .contract or .json metadata file
 ```
 
 :::note
-You can find a working example in [the ink-sdk repo](https://github.com/polkadot-api/papi-sdks/tree/main/examples/ink-playground). An example PSP22 contract and its metadata is available in the `./contracts/psp22_mod` folder.
+You can find a working example in [the ink-sdk repo](https://github.com/polkadot-api/papi-sdks/tree/main/examples/ink-playground). The example contracts and their metadata is available in the `./contracts` folder.
 :::
 
-This process uses the name defined in the contract metadata to export it as a property of `contracts` in `@polkadot-api/descriptors`. For this example, the contract name is "psp22." You can now instantiate the Ink! SDK:
+This process uses the name defined in the contract metadata to export it as a property of `contracts` in `@polkadot-api/descriptors`, which will be needed when interacting with a contract. You can now instantiate the Ink! SDK:
 
 ```ts
-import { contracts, pop } from "@polkadot-api/descriptors"
 import { createInkSdk } from "@polkadot-api/sdk-ink"
 import { createClient } from "polkadot-api"
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
-import { getWsProvider } from "polkadot-api/ws-provider/web"
+import { getWsProvider } from "polkadot-api/ws-provider"
 
 const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://rpc1.paseo.popnetwork.xyz")),
+  withPolkadotSdkCompat(getWsProvider("wss://testnet-passet-hub.polkadot.io")),
 )
-const typedApi = client.getTypedApi(pop)
-
-const psp22Sdk = createInkSdk(typedApi, contracts.psp22)
-
-// If using ink!v6 use this instead:
-//
-// import { createReviveSdk } from "@polkadot-api/sdk-ink"
-// const psp22Sdk = createReviveSdk(typedApi, contracts.psp22)
-//
-// The public interface is the same as `createInkSdk`, but uses pallet revive instead, which is where v6 contracts are deployed.
+const inkSdk = createInkSdk(client)
 ```
 
 The SDK provides two main functions for different workflows:
 
-- `getDeployer(code: Binary)`: Returns an API for deploying contracts.
-- `getContract(address: SS58String)`: Returns an API for interacting with deployed contracts.
+- `getDeployer(contract: ContractDescriptors, code: Binary)`: Returns an API for deploying contracts.
+- `getContract(contract: ContractDescriptors, address: SS58String)`: Returns an API for interacting with deployed contracts.
 
 ## Contract Deployer
 
 ```ts
+import { contracts } from '@polkadot-api/descriptors'
 import { Binary } from "polkadot-api";
 
 const codeBlob = ...; // Uint8Array of the contract WASM (v5-) or PolkaVM (v6+) blob.
 const code = Binary.fromBytes(codeBlob);
 
-const psp22Deployer = psp22Sdk.getDeployer(code);
+const flipperDeployer = inkSdk.getDeployer(contracts.flipper, code);
 ```
 
 The deployer API supports two methods: one for dry-running deployments and another for actual deployments.
@@ -74,11 +65,10 @@ The "salt" parameter ensures unique contract deployments. By default, it is empt
 ```ts
 // Deploy psp22
 const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
-const tx = psp22Deployer.deploy("new", {
+const tx = flipperDeployer.deploy("new", {
   origin: ALICE,
   data: {
-    supply: 1_000_000_000_000n,
-    decimals: 9,
+    initial_value: false,
   },
 })
 
@@ -92,14 +82,15 @@ const data: Array<{
 }> = psp22Sdk.readDeploymentEvents(result.events)
 ```
 
+This gives us all the contracts created by that transaction (in case you batched them), along with the decoded events emitted by each one of them.
+
 Dry-running takes in the same arguments, but returns a Promise with the result directly instead:
 
 ```ts
 const dryRunResult = await psp22Deployer.dryRun("new", {
   origin: ALICE,
   data: {
-    supply: 1_000_000_000_000n,
-    decimals: 9,
+    initial_value: false,
   },
 })
 
@@ -129,11 +120,11 @@ if (dryRunResult.success) {
 The contract API targets a specific instance of a contract by address, providing multiple interaction functions:
 
 ```ts
-const PSP22_INSTANCE = "5F69jP7VwzCp6pGZ93mv9FkAhwnwz4scR4J9asNeSgFPUGLq"
-const psp22Contract = psp22Sdk.getContract(PSP22_INSTANCE)
+const flipperAddr = "0x6f38a07b338aed6b7146df28ea2a4f8d2c420afc"
+const flipperContract = inkSdk.getContract(contracts.flipper, flipperAddr)
 
 // You optionally can make sure the hash hasn't changed by checking compatibility
-if (!(await psp22Contract.isCompatible())) {
+if (!(await flipperContract.isCompatible())) {
   throw new Error("Contract has changed")
 }
 ```
@@ -144,15 +135,12 @@ Sending a query (also known as dry-running a message), can be sent directly thro
 
 ```ts
 console.log("Get balance of ALICE")
-const result = await psp22Contract.query("PSP22::balance_of", {
+const result = await flipperContract.query("get", {
   origin: ALICE,
-  data: {
-    owner: ALICE,
-  },
 })
 
 if (result.success) {
-  console.log("balance of alice", result.value.response)
+  console.log("flip value", result.value.response)
   console.log("events", result.value.events)
 
   // The dry-run result also has a method to get the transaction to send the same message to the contract.
@@ -167,20 +155,19 @@ if (result.success) {
 Sending a message requires signing a transaction, which can be created with the `.send()` method:
 
 ```ts
-console.log("Increase allowance")
-const allowanceTxResult = await psp22Contract
-  .send("PSP22::increase_allowance", {
+console.log("Flipping")
+const flipTxResult = await flipperContract
+  .send("flip", {
     origin: ADDRESS.alice,
-    data,
   })
   .signAndSubmit(aliceSigner)
 
-if (allowanceTxResult.ok) {
-  console.log("block", allowanceTxResult.block)
+if (flipTxResult.ok) {
+  console.log("block", flipTxResult.block)
   // The events generated by this contract can also be filtered using `filterEvents`:
-  console.log("events", psp22Contract.filterEvents(allowanceTxResult.events))
+  console.log("events", flipperContract.filterEvents(flipTxResult.events))
 } else {
-  console.log("error", allowanceTxResult.dispatchError)
+  console.log("error", flipTxResult.dispatchError)
 }
 ```
 
@@ -190,7 +177,7 @@ Contract instances can also be redeployed without the need to have the actual WA
 
 ```ts
 const salt = Binary.fromHex("0x00")
-const result = await psp22Contract.dryRunRedeploy("new", {
+const result = await flipperContract.dryRunRedeploy("new", {
   data,
   origin: ADDRESS.alice,
   options: {
@@ -200,7 +187,7 @@ const result = await psp22Contract.dryRunRedeploy("new", {
 
 if (result.success) console.log("redeploy dry run", result)
 
-const txResult = await psp22Contract
+const txResult = await flipperContract
   .redeploy("new", {
     data,
     origin: ADDRESS.alice,
@@ -220,35 +207,56 @@ The storage of a contract is a tree structure, where you can query the values th
 This SDK has full typescript support for storage. You start by selecting where to begin from the tree, and you'll get back an object with the data within that tree.
 
 ```ts
-const storage = psp22Contract.getStorage()
+const storage = flipperContract.getStorage()
 
 const root = await storage.getRoot()
 if (root.success) {
-  /* result.value is what the psp22 contract has defined as the root of its storage
-  {
-    name: Option<string>,
-    symbol: Option<string>,
-    decimals: number,
-    data: {
-      total_supply: bigint,
-      allowances: (key: [SS58String, SS58String]) => Promise<Result<bigint>>,
-      balances: (key: SS58String) => Promise<Result<bigint>>
-    }
-  }
-  */
+  /* result.value is what the flipper contract has defined as the root of its storage */
 }
 ```
 
-If inside of that subtree there are storage entries that have to be queried separately, the SDK turns those properties into functions that query that. In the example above, `data.allowances` and `data.balances` are maps that require one specific key to perform the query, so they have been turned into async functions.
+If inside of that subtree there are storage entries that have to be queried separately, the SDK turns those properties into functions that query that. For example, a PSP22 contract has nested storage roots, which mean that in the example above, it would have `data.allowances` and `data.balances` properties which are async functions that return the value for a given key.
 
 If you don't need the data of the root and just want to query for a specific balance directly, you can get any nested subtree by calling `.getNested()`:
 
 ```ts
+// Flipper doesn't have any nested storage, but for a contract with a "data.balances" Map:
 const aliceBalance = await storage.getNested("data.balances", ALICE)
 if (aliceBalance.success) {
   console.log("Alice balance", aliceBalance.value)
 }
 ```
+
+## Solidity Contracts
+
+The ink! SDK basically abstracts over Revive pallet, which means that it also supports Solidity contracts.
+
+In this case, to generate the types of your contract, add your contracts to the project using `papi sol add` instead and with a contract name:
+
+```sh
+# ./ballot.abi in JSON format
+pnpm papi ink add ./ballot.abi ballot
+```
+
+And you can use it the same way as shown above:
+
+```ts
+import { contracts } from "@polkadot-api/descriptors"
+
+const contractAddress = "0x45db12…"
+const ballot = inkSdk.getContract(contracts.ballot, contractAddress)
+
+const result = await ballot.query("winningProposal", {
+  origin: ADDRESS.alice,
+})
+if (result.success) {
+  console.log(`Winning proposal: ${result.value.response.winningProposal_}`)
+} else {
+  console.log(`request failed`, result.value)
+}
+```
+
+You can find a working example in the [github repo](https://github.com/polkadot-api/papi-sdks/tree/main/examples/ink-playground/src/ballot.ts)
 
 ## Revive Addresses
 
@@ -262,11 +270,10 @@ The main issue comes from the fact that contracts in Revive use Ethereum-like ad
 
 Before an account can interact with a contract, it must be mapped using the transaction `typedApi.tx.Revive.map_account()` (even for dry-runs). [See issue #8619](https://github.com/paritytech/polkadot-sdk/issues/8619).
 
-The Revive SDK provides a convenient function to check whether a given account is already mapped (as this information is not directly accessible from storage):
+The Ink SDK provides a convenient function to check whether a given account is already mapped (as this information is not directly accessible from storage):
 
 ```ts
-const erc20Sdk = createReviveSdk(typedApi, contracts.erc20)
-const isMapped = await erc20Sdk.addressIsMapped(ALICE)
+const isMapped = await inkSdk.addressIsMapped(ALICE)
 if (!isMapped) {
   console.log("Alice needs to be mapped first!")
 }
@@ -274,11 +281,7 @@ if (!isMapped) {
 
 ### Deployment Address
 
-`pallet-revive` currently [does not emit `ContractInstantiated` events](https://github.com/paritytech/polkadot-sdk/issues/8677), which makes it less straightforward to retrieve a contract address after deployment.
-
-However, if the contract emits an event via `ContractEmitted`, the SDK will detect it in `readDeploymentEvents(finalizedTxEvent)`.
-
-Fortunately, contract addresses are deterministic: they are derived either from the signer’s `accountId` + contract code + constructor data + salt, or just the signer’s `accountId` + nonce if no salt is used.
+Contract addresses are deterministic: they are derived either from the signer’s `accountId` + contract code + constructor data + salt, or just the signer’s `accountId` + nonce if no salt is used.
 
 The Revive SDK provides methods to estimate the contract address given these parameters:
 
@@ -314,8 +317,7 @@ Because contract addresses are now in Ethereum-like format (20-byte hex strings)
 `ink-sdk` provides an `accountId` property to get the SS58 address of the contract:
 
 ```ts
-const erc20Sdk = createReviveSdk(typedApi, contracts.erc20)
-const contract = erc20Sdk.getContract(ADDRESS.erc20)
+const contract = inkSdk.getContract(contracts.flipper, flipperAddress)
 
 const account = await typedApi.query.System.Account.getValue(contract.accountId)
 console.log("Contract account", account)

@@ -131,6 +131,19 @@ export default defineConfig({
       link: "/sdks/intro",
       items: [
         {
+          text: "Accounts SDK",
+          items: [
+            {
+              text: "Identity",
+              link: "/sdks/accounts/identity",
+            },
+            {
+              text: "Linked Accounts",
+              link: "/sdks/accounts/linked-accounts",
+            },
+          ],
+        },
+        {
           text: "Ink! SDK",
           link: "/sdks/ink-sdk",
         },
@@ -150,6 +163,10 @@ export default defineConfig({
               link: "/sdks/governance/voting",
             },
           ],
+        },
+        {
+          text: "Multisig SDK",
+          link: "/sdks/multisig-sdk",
         },
       ],
     },
