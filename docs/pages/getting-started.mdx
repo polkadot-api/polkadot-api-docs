@@ -109,9 +109,7 @@ Now you can create a PolkadotClient with a provider of your choice and start int
   <Tabs.Content value="ws">
     ```ts
     // [!include ~/snippets/gettingStarted.ts:import]
-    // import from "polkadot-api/ws-provider/node"
-    // if you are running in a NodeJS environment
-    import { getWsProvider } from "polkadot-api/ws-provider/web";
+    import { getWsProvider } from "polkadot-api/ws-provider";
     import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 
     // Connect to the polkadot relay chain.
