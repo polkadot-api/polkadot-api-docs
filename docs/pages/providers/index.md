@@ -17,6 +17,6 @@ Besides providers, we offer some enhancers for JSON-RPC providers, some of them 
 - [Legacy Provider](./enhancers#legacy-provider), exposing a JSON-RPC compliant API on top of the legacy RPC.
 - [Logs Provider and Recorder](./enhancers#logs-provider), allowing to capture JSON-RPC messaging logs, useful for debugging.
 
-## Low-level Docs
+## JSON-RPC providers in-depth
 
-If you are interested on low-level docs, useful to build your own providers, check out our [JSON-RPC Provider Interface Docs](/providers/json-rpc).
+For a description of the provider interface, behaviour and advanced use cases such as building your own providers, check out our [JSON-RPC Provider Interface Docs](/providers/json-rpc).
