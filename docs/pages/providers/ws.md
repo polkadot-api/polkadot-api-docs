@@ -23,7 +23,7 @@ interface GetWsProvider {
 }
 ```
 
-In order to create the provider, there are two overloads for it. In its simplest form, you can pass one (or more) websocket `uri`s with its optional supported protocols. For example:
+In order to create the provider, you can pass one (or more) websocket `uri`s with its optional supported protocols. For example:
 
 ```ts
 import { getWsProvider } from "polkadot-api/ws-provider"
