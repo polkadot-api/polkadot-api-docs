@@ -48,7 +48,7 @@ Having this clean interface allowed us to build several enhancers to increase th
 
 Polkadot-API offers a couple of builtin providers for some of the most used ways of connecting to a chain:
 
-- [`getWsProvider`](/providers/ws) from `polkadot-api/ws-provider/web` or `polkadot-api/ws-provider/node` (depending on where your code is running) to connect through WebSocket.
+- [`getWsProvider`](/providers/ws) from `polkadot-api/ws-provider` to connect through WebSocket.
 - [`getSmProvider`](/providers/sm) from `polkadot-api/sm-provider` to connect through Smoldot.
 
 ## Logs provider
@@ -59,7 +59,7 @@ One of the enhancers that we created is `polkadot-api/logs-provider`, that can b
 // 1. recording logs
 import { createClient } from "polkadot-api"
 import { withLogsRecorder } from "polkadot-api/logs-provider"
-import { getWsProvider } from "polkadot-api/ws-provider/node"
+import { getWsProvider } from "polkadot-api/ws-provider"
 
 const wsProvider = getWsProvider("wss://example.url")
 // Using console.log to output each line, but you could e.g. write it directly to a
@@ -79,3 +79,25 @@ const client = createClient(provider)
 ```
 
 This can be useful to debug specific scenarios without needing to depend on an external source.
+
+## Legacy provider
+
+The `@polkadot-api/legacy-provider` enhancer acts as a transparent compatibility layer and exposes the new JSON-RPC endpoints while internally translating calls to the legacy RPC APIs.
+
+All PAPI providers assume that they are interacting with the new JSON-RPC spec. For this reason, legacy-provider-enhancer **must be applied before any other enhancer**. To make this possible, the ws-provider supports an `innerEnhancer` option, which allows enhancers to be applied at the lowest possible level.
+
+```ts
+import { createClient } from "polkadot-api"
+import { getWsProvider } from "polkadot-api/ws-provider"
+import { withLegacy } from "@polkadot-api/legacy-provider"
+
+const client = createClient(
+  getWsProvider("wss://your-rpc.your-url.xyz", {
+    innerEnhancer: withLegacy(),
+  }),
+)
+```
+
+:::info
+`withLegacy` is not exported from top-level `polkadot-api` package. You should install `@polkadot-api/legacy-provider` with the package manager of your preference to access it.
+:::
