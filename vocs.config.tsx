@@ -4,12 +4,23 @@ const version = "1.19.0"
 
 export default defineConfig({
   title: "Polkadot-API",
-  description: "Typescript API to interact with polkadot chains",
+  titleTemplate: "%s · PAPI",
+  description: "Next-Gen TS API to interact with Polkadot-based chains",
   iconUrl: "/favicon.svg",
+  head() {
+    return (
+      <script
+        src="https://cdn.usefathom.com/script.js"
+        data-site="DTWNOCOD"
+        defer
+      />
+    )
+  },
   topNav: [
     {
-      text: "Guide",
+      text: "Docs",
       link: "/getting-started",
+      match: "/",
     },
     {
       text: `${version}`,
