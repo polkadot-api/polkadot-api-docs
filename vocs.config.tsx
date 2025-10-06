@@ -34,19 +34,26 @@ export default defineConfig({
   ],
   sidebar: [
     {
-      text: "Getting Started",
-      link: "/getting-started",
-    },
-    {
-      text: "Requirements",
-      link: "/requirements",
+      text: "Introduction",
+      items: [
+        {
+          text: "Getting Started",
+          link: "/getting-started",
+        },
+        {
+          text: "Requirements and Compatibility",
+          link: "/requirements",
+        },
+      ],
     },
     {
       text: "Providers",
       items: [
-        { text: "Providers", link: "/providers" },
+        { text: "Introduction", link: "/providers" },
         { text: "WebSocket", link: "/providers/ws" },
         { text: "Smoldot", link: "/providers/sm" },
+        { text: "Enhancers", link: "/providers/enhancers" },
+        { text: "JSON-RPC Provider", link: "/providers/json-rpc" },
       ],
     },
     {
@@ -60,27 +67,6 @@ export default defineConfig({
     {
       text: "Signers",
       link: "/signers",
-    },
-    {
-      text: "Recipes",
-      items: [
-        {
-          text: "Make a simple transfer",
-          link: "/recipes/simple-transfer",
-        },
-        {
-          text: "Connect to multiple chains",
-          link: "/recipes/connect-to-multiple-chains",
-        },
-        {
-          text: "Prepare for runtime upgrade",
-          link: "/recipes/upgrade",
-        },
-        {
-          text: "Caching the metadata",
-          link: "/recipes/metadata-caching",
-        },
-      ],
     },
     {
       text: "Top-level client",
@@ -138,7 +124,34 @@ export default defineConfig({
       link: "/typed-codecs",
     },
     {
+      text: "Chain-specific documentation",
+      link: "https://chains.papi.how",
+    },
+    {
+      text: "Recipes",
+      collapsed: true,
+      items: [
+        {
+          text: "Make a simple transfer",
+          link: "/recipes/simple-transfer",
+        },
+        {
+          text: "Connect to multiple chains",
+          link: "/recipes/connect-to-multiple-chains",
+        },
+        {
+          text: "Prepare for runtime upgrade",
+          link: "/recipes/upgrade",
+        },
+        {
+          text: "Caching the metadata",
+          link: "/recipes/metadata-caching",
+        },
+      ],
+    },
+    {
       text: "PAPI SDKs",
+      collapsed: true,
       link: "/sdks/intro",
       items: [
         {
@@ -182,11 +195,8 @@ export default defineConfig({
       ],
     },
     {
-      text: "Chain-specific documentation",
-      link: "https://chains.papi.how",
-    },
-    {
       text: "PAPI Apps",
+      collapsed: true,
       items: [
         {
           text: "PAPI Console",
@@ -216,6 +226,7 @@ export default defineConfig({
     },
     {
       text: "Built with PAPI",
+      collapsed: true,
       items: [
         {
           text: "Kheopswap. Swap portal for AssetHub",
