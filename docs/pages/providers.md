@@ -82,11 +82,9 @@ This can be useful to debug specific scenarios without needing to depend on an e
 
 ## Legacy provider
 
-Another enhancer introduced in `1.16.0` is the `@polkadot-api/legacy-provider`. This provider acts as a transparent compatibility layer and exposes the new JSON-RPC endpoints while internally translating calls to the legacy RPC APIs.
+The `@polkadot-api/legacy-provider` enhancer acts as a transparent compatibility layer and exposes the new JSON-RPC endpoints while internally translating calls to the legacy RPC APIs.
 
-:::info
-All PAPI providers assume that they are interacting with the new JSON-RPC spec. For this reason, legacy-provider-enhancer **_must be applied before any other enhancer_**. To make this possible, the ws-provider supports an `innerEnhancer` option, which allows enhancers to be applied at the lowest possible level.
-:::
+All PAPI providers assume that they are interacting with the new JSON-RPC spec. For this reason, legacy-provider-enhancer **must be applied before any other enhancer**. To make this possible, the ws-provider supports an `innerEnhancer` option, which allows enhancers to be applied at the lowest possible level.
 
 ```ts
 import { createClient } from "polkadot-api"
@@ -100,6 +98,6 @@ const client = createClient(
 )
 ```
 
-### Limitations
-
-The legacy-provider does not support storage queries using the `closestDescendantMerkleValue` option. This impacts the `watchEntries` API, which relies on this functionality, meaning `watchEntries` will not work when using the legacy-provider.
+:::info
+`withLegacy` is not exported from top-level `polkadot-api` package. You should install `@polkadot-api/legacy-provider` with the package manager of your preference to access it.
+:::
