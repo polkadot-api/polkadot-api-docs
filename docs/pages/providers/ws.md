@@ -1,4 +1,4 @@
-# WS Provider
+## WS Provider
 
 The WS provider enables PAPI to interact with JSON-RPC servers via WebSocket connection, generally Polkadot-SDK based nodes that include a JSON-RPC server. This provider is a special one, since its shape extends `JsonRpcProvider` and has some extra goodies. First of all, let's see its shape:
 
