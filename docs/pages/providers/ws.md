@@ -45,8 +45,6 @@ Use `innerEnhancer` to pass in enhancers that must be applied before any other e
 
 You can also pass a callback to `onStatusChanged` that will be called every time the status changes.
 
-You can even bring your own WebSocket implementation using `websocketClass` if you prefer. By default, it uses the global WebSocket available in browsers, Node.js >=22, and Bun.
-
 ```ts
 import { getWsProvider } from "polkadot-api/ws-provider"
 import { withLegacy } from "@polkadot-api/legacy-provider"
@@ -71,6 +69,22 @@ const provider = getWsProvider("wss://myws.com", {
     }
   },
 })
+```
+
+You can even bring your own WebSocket implementation using `websocketClass` if you prefer. By default, it uses the global WebSocket available in browsers, Node.js >=22.4.0, and Bun.
+For example, for NodeJS 20 and `ws` library:
+
+```typescript
+import { WebSocket } from "ws"
+
+class WSForPapi extends WebSocket {
+  // make sure that `close()` is properly defined and fully kills the instance
+  close() {
+    this.terminate()
+  }
+}
+
+const provider = getWsProvider("wss://myws.com", { websocketClass: WSForPapi })
 ```
 
 ## Connection status
