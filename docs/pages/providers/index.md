@@ -6,8 +6,8 @@ The Polkadot-API entry point is `createClient(provider)`. It takes a `JsonRpcPro
 
 We have mainly two first-class providers:
 
-- [WebSocket Provider](/providers/ws), connecting to a JSON-RPC server through WebSocket.
 - [Smoldot Provider](/providers/sm), connecting to a local instance of Smoldot, Polkadot's light client.
+- [WebSocket Provider](/providers/ws), connecting to a JSON-RPC server through WebSocket.
 
 ## Enhancers
 
