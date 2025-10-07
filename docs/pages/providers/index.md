@@ -1,6 +1,6 @@
 # JSON-RPC Providers
 
-The entry point of Polkadot-API, `createClient(provider)` requires one `JsonRpcProvider`, which lets Polkadot-API communicate with a JSON-RPC server ready to feed all information necessary to PAPI. Let's dive into it.
+The Polkadot-API entry point is `createClient(provider)`. It takes a `JsonRpcProvider` that connects to a JSON-RPC endpoint, enabling Polkadot-API to interact with the chain.
 
 ## Providers
 
