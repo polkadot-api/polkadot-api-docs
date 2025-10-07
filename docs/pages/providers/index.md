@@ -11,7 +11,7 @@ We have mainly two first-class providers:
 
 ## Enhancers
 
-Besides providers, we offer some enhancers for JSON-RPC providers, some of them increasing capabilities, and others fixing external issues.
+Besides providers, we offer some enhancers (aka middlewares) for JSON-RPC providers, some of them increasing capabilities, and others fixing external issues.
 
 - [Polkadot-SDK Compatibility Enhancer](/providers/enhancers#polkadot-sdk-compatibility-layer), fixing common pitfalls among JSON-RPC servers running over Polkadot-SDK nodes.
 - [Legacy Provider](/providers/enhancers#legacy-provider), a compliant middleware that exposes the modern [JSON-RPC APIs](https://paritytech.github.io/json-rpc-interface-spec/) while delegating calls to the legacy JSON-RPC APIs.
