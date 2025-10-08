@@ -7,6 +7,11 @@ export default defineConfig({
   titleTemplate: "%s · PAPI",
   description: "Next-Gen TS API to interact with Polkadot-based chains",
   iconUrl: "/favicon.svg",
+  editLink: {
+    pattern:
+      "https://github.com/polkadot-api/polkadot-api-docs/edit/main/docs/pages/:path",
+    text: "Suggest changes to this page",
+  },
   head() {
     return (
       <script
