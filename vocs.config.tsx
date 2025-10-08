@@ -50,8 +50,8 @@ export default defineConfig({
       text: "Providers",
       items: [
         { text: "Introduction", link: "/providers" },
-        { text: "WebSocket", link: "/providers/ws" },
         { text: "Smoldot", link: "/providers/sm" },
+        { text: "WebSocket", link: "/providers/ws" },
         { text: "Enhancers", link: "/providers/enhancers" },
         { text: "JSON-RPC Provider", link: "/providers/json-rpc" },
       ],
