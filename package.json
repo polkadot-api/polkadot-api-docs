@@ -7,11 +7,14 @@
     "build": "vocs build",
     "preview": "vocs preview",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,json,md,mdx,css,cjs}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "papi"
   },
   "dependencies": {
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@radix-ui/react-tabs": "^1.1.13",
     "@types/react": "^19.2.0",
+    "polkadot-api": "^1.19.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
