@@ -2,10 +2,10 @@
 
 If using Polkadot-API client through Smoldot provider (light client) there are no specific requirements.
 
-Nevertheless, some [WS Providers](./ws) over a [Paritytech Polkadot-SDK](https://github.com/paritytech/polkadot-sdk) based node offer a flawed version of the JSON-RPC API Spec, which can be solved in the client in some cases.
+Nevertheless, some [WS Providers](/providers/ws) over a [Paritytech Polkadot-SDK](https://github.com/paritytech/polkadot-sdk) based node offer a flawed version of the JSON-RPC API Spec, which can be solved in the client in some cases.
 
 :::warning
-If you are using [`@polkadot-api/legacy-provider`](./enhancers#legacy), **DO NOT** use `withPolkadotSdkCompat`. `withLegacy` already tackles every bit to offer a spec compliant JSON-RPC server.
+If you are using [`@polkadot-api/legacy-provider`](/providers/enhancers#legacy-provider), **DO NOT** use `withPolkadotSdkCompat`. `withLegacy` already tackles every bit to offer a spec compliant JSON-RPC server.
 :::
 
 Our recommendation is to **always use** `withPolkadotSdkCompat` to avoid any issues, but there are three cases:
