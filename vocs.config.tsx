@@ -7,6 +7,17 @@ export default defineConfig({
   titleTemplate: "%s · PAPI",
   description: "Next-Gen TS API to interact with Polkadot-based chains",
   iconUrl: "/favicon.svg",
+  theme: {
+    accentColor: {
+      dark: "#ff2f92",
+      light: "#e7007b",
+    },
+  },
+  editLink: {
+    pattern:
+      "https://github.com/polkadot-api/polkadot-api-docs/edit/main/docs/pages/:path",
+    text: "Suggest changes to this page",
+  },
   head() {
     return (
       <script
@@ -50,10 +61,19 @@ export default defineConfig({
       text: "Providers",
       items: [
         { text: "Introduction", link: "/providers" },
-        { text: "WebSocket", link: "/providers/ws" },
         { text: "Smoldot", link: "/providers/sm" },
+        { text: "WebSocket", link: "/providers/ws" },
         { text: "Enhancers", link: "/providers/enhancers" },
         { text: "JSON-RPC Provider", link: "/providers/json-rpc" },
+      ],
+    },
+    {
+      text: "Signers",
+      items: [
+        { text: "Introduction", link: "/signers" },
+        { text: "Browser extensions", link: "/signers/extensions" },
+        { text: "Raw signers", link: "/signers/raw" },
+        { text: "PolkadotSigner", link: "/signers/polkadot-signer" },
       ],
     },
     {
@@ -63,10 +83,6 @@ export default defineConfig({
     {
       text: "Types",
       link: "/types",
-    },
-    {
-      text: "Signers",
-      link: "/signers",
     },
     {
       text: "Top-level client",

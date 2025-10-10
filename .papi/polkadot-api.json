@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "descriptorPath": ".papi/descriptors",
+  "entries": {
+    "dot": {
+      "chain": "polkadot",
+      "metadata": ".papi/metadata/dot.scale",
+      "genesis": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
+      "codeHash": "0xa4d527cb0db4146686eeffb216b562fe68440185d5067e6177d1681ff7bb3043"
+    }
+  }
+}
