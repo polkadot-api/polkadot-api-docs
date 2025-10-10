@@ -68,16 +68,21 @@ export default defineConfig({
       ],
     },
     {
+      text: "Signers",
+      items: [
+        { text: "Introduction", link: "/signers" },
+        { text: "Browser extensions", link: "/signers/extensions" },
+        { text: "Raw signers", link: "/signers/raw" },
+        { text: "PolkadotSigner", link: "/signers/polkadot-signer" },
+      ],
+    },
+    {
       text: "Codegen",
       link: "/codegen",
     },
     {
       text: "Types",
       link: "/types",
-    },
-    {
-      text: "Signers",
-      link: "/signers",
     },
     {
       text: "Top-level client",
