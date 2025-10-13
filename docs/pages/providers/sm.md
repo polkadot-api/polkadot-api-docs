@@ -63,31 +63,26 @@ Once we have an instance of smoldot, we need to tell smoldot to connect to the c
 
 In order to add a solo-chain (or a relay chain), it is very simple:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+// ---cut---
 import { chainSpec } from "polkadot-api/chains/polkadot"
 
-const polkadotChain: Promise<Chain> = smoldot.addChain({ chainSpec })
+const polkadotChain = smoldot.addChain({ chainSpec })
+//    ^?
 ```
 
 In case it is a parachain, we will need both the `chainSpec` of the relay chain, and the parachain one. It is simple as well:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+// ---cut---
 import { polkadot, polkadot_asset_hub } from "polkadot-api/chains"
 
-// without async-await
-const assetHubChain: Promise<Chain> = smoldot
-  .addChain({ chainSpec: polkadot })
-  .then((relayChain) =>
-    smoldot.addChain({
-      chainSpec: polkadot_asset_hub,
-      potentialRelayChains: [relayChain],
-    }),
-  )
-
-// or with an async-await structure:
-const assetHubChain: Promise<Chain> = smoldot.addChain({
+const relayChain = await smoldot.addChain({ chainSpec: polkadot })
+const assetHubChain = smoldot.addChain({
   chainSpec: polkadot_asset_hub,
-  potentialRelayChains: [await smoldot.addChain({ chainSpec: polkadot })],
+  potentialRelayChains: [relayChain],
 })
 ```
 
@@ -95,7 +90,10 @@ const assetHubChain: Promise<Chain> = smoldot.addChain({
 
 Once we have a `Chain` (or `Promise<Chain>`), we can initialize the provider and the client.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+// ---cut---
+import { chainSpec } from "polkadot-api/chains/polkadot"
 import { createClient } from "polkadot-api"
 import { getSmProvider } from "polkadot-api/sm-provider"
 
