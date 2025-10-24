@@ -70,3 +70,13 @@ Now you can create a `PolkadotClient` instance with a [provider](/providers) of 
 // ---cut---
 // [!include ~/snippets/gettingStarted.ts:usage]
 ```
+
+### 3. Discover our documentation!
+
+To continue learning about PAPI, we recommend reading about:
+
+1. [CLI & Codegen](/codegen). Fully grasp how to generate descriptors, and why does it matter for PAPI.
+2. [Providers](/providers). Discover all options that our providers offer! You'll need a provider to proceed with the client.
+3. [Client](/client). Get information for blocks, metadata, etc. Essentially, everything generic that does not depend on the runtime itself. For runtime specifics, keep reading...
+4. [Typed API](/typed). The cherry on top of the cake! Interact with the network: transactions, storage entries, runtime apis, and others!
+5. [Signers](/signers). You'll find here how PAPI abstracts away signers, and how can be used to sign transactions!
