@@ -1,10 +1,16 @@
 # Codegen
 
-Technically, to connect to a chain, all you need is just the provider. But to interact with it, you need to know the list of storage, runtime, and transaction calls and their types.
+Technically, to connect to a chain, all you need is just the [provider](/providers). But to interact with it, you need to know the list of storage, runtime, and transaction calls and their types.
 
 During runtime, the library can request the metadata for the chain it's connected to, and from this, it generates all the codecs to interact with it. But as a developer, you need to get that information beforehand.
 
 Polkadot-API has a CLI that downloads the metadata for a chain and then uses that metadata to generate all the type descriptors.
+
+## `papi add`
+
+`papi add` registers a new chain. It requires a key, which is the name of the constant the codegen will create, and a source (`-f`, `-w`, `-c`, `-n`, or `--wasm`). The command download the fresh metadata for that chain and stores this information for later use into a `.papi` folder, with a configuration file `polkadot-api.json` and the metadata file `${key}.scale`.
+
+You can add as many chains as you want, but each has to have a unique `key` (which must be a valid JS variable name).
 
 ```sh
 > npx papi add --help
@@ -13,25 +19,22 @@ Usage: polkadot-api add [options] <key>
 Add a new chain spec to the list
 
 Arguments:
-  key                         Key identifier for the chain spec
+  key                          Key identifier for the chain spec
 
 Options:
-  --config <filename>         Source for the config file
-  -f, --file <filename>       Source from metadata encoded file
-  -w, --wsUrl <URL>           Source from websocket url
-  -c, --chainSpec <filename>  Source from chain spec file
-  -n, --name <name>           Source from a well-known chain (choices: "ksmcc3", "paseo",
-                              "polkadot", "polkadot_collectives", "rococo_v2_2", "westend2", [...]")
-  --wasm <filename>           Source from runtime wasm file
-  --no-persist                Do not persist the metadata as a file
-  --skip-codegen              Skip running codegen after adding
-  --whitelist <filename>      Use whitelist file to reduce descriptor size
-  -h, --help                  display help for command
+  --config <filename>          Source for the config file
+  -f, --file <filename>        Source from metadata encoded file
+  -w, --wsUrl <URL>            Source from websocket url
+  -c, --chainSpec <filename>   Source from chain spec file
+  -n, --name <name>            Source from a well-known chain (choices: "ksmcc3", "paseo",
+                               "polkadot", "polkadot_collectives", "rococo_v2_2", "westend2", [...]")
+  --wasm <filename>            Source from runtime wasm file
+  --at <block hash or number>  Only for -w/--wsUrl. Fetch the metadata for a specific block or hash
+  --no-persist                 Do not persist the metadata as a file
+  --skip-codegen               Skip running codegen after adding
+  --whitelist <filename>       Use whitelist file to reduce descriptor size
+  -h, --help                   display help for command
 ```
-
-`papi add` registers a new chain. It requires a key, which is the name of the constant the codegen will create, and a source (`-f`, `-w`, `-c`, `-n`, or `--wasm`). The command download the fresh metadata for that chain and stores this information for later use into a `.papi` folder, with a configuration file `polkadot-api.json` and the metadata file `${key}.scale`.
-
-You can add as many chains as you want, but each has to have a unique `key` (which must be a valid JS variable name).
 
 `papi add` by default runs codegen automatically. If you want to add multiple chains without having to rerun codegen, you can use the flag `--skip-codegen`, and then run `papi generate` command once you want to run the codegen.
 
@@ -41,6 +44,7 @@ npx papi generate
 npx papi
 ```
 
+:::info
 It's recommended to add `papi` to the `postinstall` script in package.json to have it automatically generate the code after installation:
 
 ```js
@@ -53,9 +57,13 @@ It's recommended to add `papi` to the `postinstall` script in package.json to ha
 }
 ```
 
+:::
+
+## `papi generate` (or `papi`)
+
 The code is generated into a [local package](https://docs.npmjs.com/cli/v9/configuring-npm/package-json/#local-paths) located in `.papi/descriptors`, which gets installed as a regular `@polkadot-api/descriptors` node modules package.
 
-The folder `.papi` should be added to your source control repository. The only thing that should be ignored are the generated files from the codegen (`.papi/descriptors/dist`), but for git, that's already ignored by a pre-configured `.gitignore` inside `.papi`.
+The folder `.papi` should be added to your source control repository. PAPI already handles the ignored files, you don't need to ignore anything.
 
 When the metadata is updated, the codegen will update the generated code and also the package version, to have package managers update the `@polkadot-api/descriptors` package.
 
@@ -63,7 +71,7 @@ When the metadata is updated, the codegen will update the generated code and als
 If you're using yarn v1, you might need to run `yarn --force` after a codegen for it to detect the change.
 :::
 
-## Contents
+## Descriptors content
 
 The generated code contains all of the types extracted from the metadata of all chains:
 
@@ -73,9 +81,10 @@ The generated code contains all of the types extracted from the metadata of all 
   - Events
   - Errors
   - Constants
+  - View Functions
 - Every runtime call
 
-These are consumed by `getTypedApi()`, which allows the IDE to reference any of these calls with autocompletion, etc. At runtime, it also contains a representation of the type for each of these calls, so that it can detect incompatibilities with the chain it's connected to.
+These are consumed by `getTypedApi()` or `getUnsafeApi()`, which allows the IDE to reference any of these calls with autocompletion, etc. At runtime, it also contains a representation of the type for each of these calls, so that it can detect incompatibilities with the chain it's connected to.
 
 The types are anonymous (they don't have a name in the metadata), but PolkadotAPI has a directory of well-known types for some of the most widely used Enums. If a chain is using one of these well-known types, it's also generated and exported.
 
@@ -87,35 +96,24 @@ It's important to know that the descriptors exported by the codegen **should be 
 
 Import from `@polkadot-api/descriptors` every chain and type that you need, then use it through `getTypedApi()`.
 
-```ts
-import {
-  dot,
-  ksm,
-  XcmVersionedMultiLocation,
-  XcmVersionedXcm,
-  XcmV2Instruction,
-  XcmV2MultilocationJunctions,
-} from "@polkadot-api/descriptors"
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+import { getSmProvider } from "polkadot-api/sm-provider"
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { createClient } from "polkadot-api"
+// ---cut---
+import { dot, MultiAddress } from "@polkadot-api/descriptors"
 
-// ...
-
-const dotClient = createClient(scProvider(WellKnownChain.polkadot).relayChain)
-const ksmClient = createClient(scProvider(WellKnownChain.ksmcc3).relayChain)
+const dotClient = createClient(getSmProvider(smoldot.addChain({ chainSpec })))
 
 const dotApi = dotClient.getTypedApi(dot)
-const ksmApi = ksmClient.getTypedApi(ksm)
 
-const xcmSendTx = dotApi.tx.XcmPallet.send({
-  dest: XcmVersionedMultiLocation.V2({
-    parents: 0,
-    interior: XcmV2MultilocationJunctions.Here(),
-  }),
-  message: XcmVersionedXcm.V2([XcmV2Instruction.ClearOrigin()]),
+const tx = dotApi.tx.Balances.transfer_keep_alive({
+  dest: MultiAddress.Id("SS58ADDR"),
+  value: 10n,
 })
 
-const encodedData = await xcmSendTx.getEncodedData()
-
-const finalizedCall = await xcmSendTx.signAndSubmit(signer)
+const encodedData = await tx.getEncodedData()
 ```
 
 :::info
@@ -128,7 +126,7 @@ In order to reduce the size of PAPI descriptors bundle, one could filter which c
 
 In order to enable the whitelist feature of the codegen, one has to write a `whitelist.ts` file that our CLI can understand. The shape is as follows:
 
-```ts
+```ts twoslash
 import type { DotWhitelistEntry } from "@polkadot-api/descriptors"
 
 const dotWhitelist: DotWhitelistEntry[] = [

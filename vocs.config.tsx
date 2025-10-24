@@ -58,7 +58,12 @@ export default defineConfig({
       ],
     },
     {
+      text: "CLI & Codegen",
+      link: "/codegen",
+    },
+    {
       text: "Providers",
+      collapsed: true,
       items: [
         { text: "Introduction", link: "/providers" },
         { text: "Smoldot", link: "/providers/sm" },
@@ -69,16 +74,13 @@ export default defineConfig({
     },
     {
       text: "Signers",
+      collapsed: true,
       items: [
         { text: "Introduction", link: "/signers" },
         { text: "Browser extensions", link: "/signers/extensions" },
         { text: "Raw signers", link: "/signers/raw" },
         { text: "PolkadotSigner", link: "/signers/polkadot-signer" },
       ],
-    },
-    {
-      text: "Codegen",
-      link: "/codegen",
     },
     {
       text: "Types",
