@@ -19,18 +19,18 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@scure/sr25519": "^0.3.0",
     "@types/react": "^19.2.2",
-    "polkadot-api": "^1.20.0",
+    "polkadot-api": "^1.20.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
-    "vocs": "1.0.13"
+    "vocs": "1.0.16"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^10.0.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.3",
+    "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.16"
   },
   "prettier": {
     "printWidth": 80,
@@ -43,5 +43,5 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md,mdx,css,cjs}": "prettier --write"
   },
-  "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34"
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
 }
