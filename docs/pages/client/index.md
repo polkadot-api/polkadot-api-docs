@@ -118,3 +118,4 @@ Explore the detailed documentation:
 - [Transactions](/client/transactions) - Submit and track transactions
 - [API Access](/client/api-access) - Generate typed and unsafe APIs
 - [Advanced Usage](/client/advanced) - Storage queries, raw RPC, and best practices
+- [API Reference](/client/api-reference) - Complete reference for all methods and types

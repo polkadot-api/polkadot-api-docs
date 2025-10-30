@@ -115,6 +115,10 @@ export default defineConfig({
               text: "Advanced Usage",
               link: "/client/advanced",
             },
+            {
+              text: "API Reference",
+              link: "/client/api-reference",
+            },
           ],
         },
         {
