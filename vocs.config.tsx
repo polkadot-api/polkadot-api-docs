@@ -90,36 +90,6 @@ export default defineConfig({
         {
           text: "PolkadotClient",
           link: "/client",
-          items: [
-            {
-              text: "Creating Clients",
-              link: "/client/creating-clients",
-            },
-            {
-              text: "Metadata",
-              link: "/client/metadata",
-            },
-            {
-              text: "Blocks",
-              link: "/client/blocks",
-            },
-            {
-              text: "Transactions",
-              link: "/client/transactions",
-            },
-            {
-              text: "API Access",
-              link: "/client/api-access",
-            },
-            {
-              text: "Advanced Usage",
-              link: "/client/advanced",
-            },
-            {
-              text: "API Reference",
-              link: "/client/api-reference",
-            },
-          ],
         },
         {
           text: "Typed API",
