@@ -17,6 +17,7 @@ interface GetWsProvider {
       onStatusChanged: (status: StatusChange) => void
       innerEnhancer: (input: JsonRpcProvider) => JsonRpcProvider
       timeout: number
+      heartbeatTimeout: number
       websocketClass: WebSocketClass
     }>,
   ): WsJsonRpcProvider
@@ -86,6 +87,12 @@ class WSForPapi extends WebSocket {
 
 const provider = getWsProvider("wss://myws.com", { websocketClass: WSForPapi })
 ```
+
+## Heartbeat
+
+The provider will try to figure out if the ws connection became stale, and it needs to be closed and reopened to continue working.
+
+PAPI uses the heartbeat feature to accomplish this purpose. You can customize the heartbeat timeout with `heartbeatTimeout` option (in milliseconds). Its default is `40_000`.
 
 ## Connection status
 
