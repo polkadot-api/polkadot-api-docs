@@ -55,11 +55,15 @@ export default defineConfig({
           text: "Requirements and Compatibility",
           link: "/requirements",
         },
+        {
+          text: "CLI & Codegen",
+          link: "/codegen",
+        },
+        {
+          text: "Types",
+          link: "/types",
+        },
       ],
-    },
-    {
-      text: "CLI & Codegen",
-      link: "/codegen",
     },
     {
       text: "Providers",
@@ -81,10 +85,6 @@ export default defineConfig({
         { text: "Raw signers", link: "/signers/raw" },
         { text: "PolkadotSigner", link: "/signers/polkadot-signer" },
       ],
-    },
-    {
-      text: "Types",
-      link: "/types",
     },
     {
       text: "Top-level client",

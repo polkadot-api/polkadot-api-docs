@@ -10,11 +10,18 @@ Binary values tagged as a accounts are abstracted as `SS58String`. The type `SS5
 
 When PolkadotAPI receives an `SS58String` as a parameter, it can be in any valid format. But the `SS58String` returned from any of the methods will always be in the format declared by the chain's metadata.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+import { dot } from "@polkadot-api/descriptors"
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { createClient } from "polkadot-api"
+import { getSmProvider } from "polkadot-api/sm-provider"
+const client = createClient(getSmProvider(smoldot.addChain({ chainSpec })))
+// ---cut---
 const dotApi = client.getTypedApi(dot)
 
 const [proxies, deposit] = await dotApi.query.Proxy.Proxies.getValue(
-  // HDX format (for demo purposes that it accepts any SS58 string, regardless of the chain)
+  // HDX format (for demo purposes that it accepts any SS58 prefix, regardless of the chain)
   "7LE64AxmGixNsxFs1rdsDkER5nuuQ28MbrSS7JtHwRmdcdam",
 )
 
@@ -24,7 +31,9 @@ console.log(proxies[0].delegate)
 
 ## HexString
 
-Another alias of `string`, but indicates that the value is a valid hexadecimal string. It accepts the string with or without the `0x` prefix, but `HexString` returned from methods always have `0x`.
+Another alias of `string`, but indicates that the value is a valid hexadecimal string.
+
+As input, it accepts both with or without the `0x` prefix, and upper or lowercase. As output, it is always lowercase and has `0x`.
 
 ## Enum
 
@@ -58,24 +67,29 @@ The enums that are not well-known types, they are anonymous. In that case, you w
 
 This indicates that the parameter value is an enum, whose key will be either one of the keys of the object type (i.e. `transfer_allow_death`, `force_transfer`, ..., `force_set_balance`), and the type will be the value for that particular key.
 
-For these cases, you should use the function `Enum(type, value)`, imported from `polkadot-api`. This has full type inference support, and creates an Enum object that can be used as a parameter of a call:
+For these cases, you should use the function `Enum(type, value)`, imported from `polkadot-api`. This has full type inference support, and creates an Enum object that can be used as a parameter of a call.
 
-```ts
-dotApi.apis.TransactionPaymentCallApi.query_call_info(
-  PolkadotRuntimeRuntimeCall.Balances(
-    Enum("transfer_allow_death", { dest: MultiAddress.Id(address), value: 3n }),
-  ),
-  10,
-)
+Let's see two equivalents, with the PAPI "known type" and the generic `Enum` helper.
+
+```ts twoslash
+import { Enum } from "polkadot-api"
+import { XcmV5Junction } from "@polkadot-api/descriptors"
+
+const knownType = XcmV5Junction.Parachain(1000)
+// PAPI will autocomplete for you!
+const generic: XcmV5Junction = Enum("Parachain", 1000)
+//                                   ^|
 ```
 
 When reading from Enums, these are objects with `{ type: string, value: unknown }` with discriminated types based on the `type` (so if you do `switch (enum.type) {` you will have the correct value for the `type`).
 
 ## Binary
 
-Any array of u8's is represented as Binary. This is a utility type that has a few functions to easily create binary data:
+Any array of u8's is represented as `Binary`. This is a utility type that has a few functions to easily create binary data:
 
-```ts
+```ts twoslash
+import { Binary } from "polkadot-api"
+
 Binary.fromBytes(new Uint8Array())
 Binary.fromHex("0b187a23c4f65d86c9a324b56f7e81aa")
 const binary = Binary.fromText("Text that will be turned into binary")
@@ -93,53 +107,59 @@ Same as `Binary`, but when the chain metadata specifies a length. The length is 
 
 When the metadata has a type that's an array of a specific length, that's also shown as a `FixedSizeArray<L, T>`, which is a superset of `Array<T>`, except that it checks that the length must be `L`.
 
-## Interface types
+## Runtime-specific interface types
 
-The types returned from any call are available through the top-level exports
+Every chain added to the descriptors will export a set of types matching the expected types in the metadata. They are prepended by the key of the chain, given in the CLI.
 
-```ts
-import {
-  dot,
-  DotQueries,
-  DotCalls,
-  DotConstants,
-  DotErrors,
-  DotEvents,
-} from "@polkadot-api/descriptors"
+### Calls
 
-// Storage queries
-function processAccount(account: DotQueries["System"]["Account"]["Value"]) {
-  // ...
-}
-processAccount(await dotApi.query.System.Account.getValue("SS58Account"))
+Call data (i.e. transaction) parameters.
 
-// Constants
-function formatSS58Account(
-  value: DotConstants["System"]["SS58Prefix"],
-  account: Uint8Array,
-) {
-  // ...
-}
-formatSS58Account(await dotApi.constants.System.SS58Prefix(), new Uint8Array())
+```ts twoslash
+import { DotCalls } from "@polkadot-api/descriptors"
+type TransferType = DotCalls["Balances"]["transfer_allow_death"]
 
-// Transactions
-function performTransfer(
-  transfer: DotCalls["Balances"]["transfer_allow_death"],
-) {
-  return dotApi.tx.Balances.transfer_allow_death(transfer).signAndSubmit(signer)
-}
-performTransfer({
-  dest: MultiAddress.Id("SS58Account"),
-  value: 100n,
-})
+// hint: try to hover on the types above!
+```
 
-// Events
-function reactToNewAccount(event: DotEvents["System"]["NewAccount"]) {
-  // ...
-}
+### Queries
 
-// Errors
-function logError(error: DotErrors["System"]["InvalidSpecName"]) {
-  // ...
-}
+Key and value types for storage entries.
+
+```ts twoslash
+import { DotQueries } from "@polkadot-api/descriptors"
+type AccountKey = DotQueries["System"]["Account"]["KeyArgs"]
+type AccountValue = DotQueries["System"]["Account"]["Value"]
+```
+
+### Constants
+
+Value for metadata constants.
+
+```ts twoslash
+import { DotConstants } from "@polkadot-api/descriptors"
+type ChainVersion = DotConstants["System"]["Version"]
+```
+
+### Apis & ViewFns
+
+Args and return value for Runtime Apis and View Functions.
+
+```ts twoslash
+import { DotApis, DotViewFns } from "@polkadot-api/descriptors"
+type NonceArgs = DotApis["AccountNonceApi"]["account_nonce"]["Args"]
+type NonceValue = DotApis["AccountNonceApi"]["account_nonce"]["Value"]
+type ProxyArgs = DotViewFns["Proxy"]["check_permissions"]["Args"]
+type ProxyValue = DotViewFns["Proxy"]["check_permissions"]["Value"]
+```
+
+### Errors & Events
+
+Types for every event and error in the runtime.
+
+```ts twoslash
+import { DotErrors, DotEvents } from "@polkadot-api/descriptors"
+
+type BalanceErrors = DotErrors["Balances"]
+type TransferEvent = DotEvents["Balances"]["Transfer"]
 ```
