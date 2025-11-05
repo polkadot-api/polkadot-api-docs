@@ -170,8 +170,15 @@ export default defineConfig({
     {
       text: "PAPI SDKs",
       collapsed: true,
-      link: "/sdks/intro",
       items: [
+        {
+          text: "Introduction",
+          link: "/sdks",
+        },
+        {
+          text: "Ink! SDK",
+          link: "/sdks/ink-sdk",
+        },
         {
           text: "Accounts SDK",
           items: [
@@ -184,10 +191,6 @@ export default defineConfig({
               link: "/sdks/accounts/linked-accounts",
             },
           ],
-        },
-        {
-          text: "Ink! SDK",
-          link: "/sdks/ink-sdk",
         },
         {
           text: "Governance SDK",
