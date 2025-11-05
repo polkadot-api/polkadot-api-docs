@@ -45,7 +45,7 @@ It's a really good idea to add papi to the "postinstall" script in package.json 
 
 Now you can create a `PolkadotClient` instance with a [provider](/providers) of your choice and start interacting with the API:
 
-### 1. Create the provider and Start the client
+## 1. Create the provider and Start the client
 
 :::code-group
 
@@ -61,7 +61,7 @@ Now you can create a `PolkadotClient` instance with a [provider](/providers) of 
 
 :::
 
-### 2. Start consuming the client!
+## 2. Start consuming the client!
 
 ```typescript twoslash
 // [!include ~/snippets/gettingStarted.ts:import]
@@ -71,7 +71,7 @@ Now you can create a `PolkadotClient` instance with a [provider](/providers) of 
 // [!include ~/snippets/gettingStarted.ts:usage]
 ```
 
-### 3. Discover our documentation!
+## 3. Discover our documentation!
 
 To continue learning about PAPI, we recommend reading about:
 
