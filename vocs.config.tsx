@@ -210,6 +210,10 @@ export default defineConfig({
           ],
         },
         {
+          text: "Staking SDK",
+          link: "/sdks/staking-sdk",
+        },
+        {
           text: "Multisig SDK",
           link: "/sdks/multisig-sdk",
         },
