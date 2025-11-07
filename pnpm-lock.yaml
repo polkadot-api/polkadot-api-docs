@@ -22,6 +22,9 @@ importers:
       '@polkadot-api/descriptors':
         specifier: file:.papi/descriptors
         version: file:.papi/descriptors(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))
+      '@polkadot-api/sdk-staking':
+        specifier: ^0.3.2
+        version: 0.3.2(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))(rxjs@7.8.2)
       '@polkadot-labs/hdkd':
         specifier: ^0.0.25
         version: 0.0.25
@@ -46,6 +49,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -463,6 +469,12 @@ packages:
   '@polkadot-api/codegen@0.19.3':
     resolution: {integrity: sha512-BBqbN/BkCT0UfAMRpZg08lrbgMjsgMya1bMsa0YNPR4krnpJHbaigKjHhHJt/QuJ1kBfYRffOfppqb1OFVZDVA==}
 
+  '@polkadot-api/common-sdk-utils@0.1.0':
+    resolution: {integrity: sha512-cgA9fh8dfBai9b46XaaQmj9vwzyHStQjc/xrAvQksgF6SqvZ0yAfxVqLvGrsz/Xi3dsAdKLg09PybC7MUAMv9w==}
+    peerDependencies:
+      polkadot-api: ^1.8.1
+      rxjs: '>=7.8.1'
+
   '@polkadot-api/descriptors@file:.papi/descriptors':
     resolution: {directory: .papi/descriptors, type: directory}
     peerDependencies:
@@ -513,6 +525,12 @@ packages:
 
   '@polkadot-api/raw-client@0.1.1':
     resolution: {integrity: sha512-HxalpNEo8JCYXfxKM5p3TrK8sEasTGMkGjBNLzD4TLye9IK2smdb5oTvp2yfkU1iuVBdmjr69uif4NaukOYo2g==}
+
+  '@polkadot-api/sdk-staking@0.3.2':
+    resolution: {integrity: sha512-bKNVj2aIiDxqrm0DsZn2x+8SqQIQ4EZzEwmpwcbTfd0M0ez1PaTD46NvD9bLDZLuGfLy5HTyg7TSh7dchd6NVA==}
+    peerDependencies:
+      polkadot-api: '>=1.12.0'
+      rxjs: '>=7.8.0'
 
   '@polkadot-api/signer@0.2.11':
     resolution: {integrity: sha512-32tqbJo6JDfc/lHg+nTveeunFRULonWoTQX9xbs70arr/tAyyZfljupdECRK8CVRx1777es/CQO3QVj8EpWtYg==}
@@ -4426,6 +4444,11 @@ snapshots:
       '@polkadot-api/substrate-bindings': 0.16.5
       '@polkadot-api/utils': 0.2.0
 
+  '@polkadot-api/common-sdk-utils@0.1.0(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))(rxjs@7.8.2)':
+    dependencies:
+      polkadot-api: 1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1)
+      rxjs: 7.8.2
+
   '@polkadot-api/descriptors@file:.papi/descriptors(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))':
     dependencies:
       polkadot-api: 1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1)
@@ -4495,6 +4518,13 @@ snapshots:
   '@polkadot-api/raw-client@0.1.1':
     dependencies:
       '@polkadot-api/json-rpc-provider': 0.0.4
+
+  '@polkadot-api/sdk-staking@0.3.2(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))(rxjs@7.8.2)':
+    dependencies:
+      '@polkadot-api/common-sdk-utils': 0.1.0(polkadot-api@1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1))(rxjs@7.8.2)
+      '@polkadot-api/substrate-bindings': 0.16.5
+      polkadot-api: 1.20.1(jiti@2.6.1)(postcss@8.5.6)(rxjs@7.8.2)(yaml@2.8.1)
+      rxjs: 7.8.2
 
   '@polkadot-api/signer@0.2.11':
     dependencies:

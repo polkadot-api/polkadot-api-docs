@@ -18,21 +18,8 @@ npm i @polkadot-api/sdk-staking
 
 Then, create a client and pass it to `createStakingSdk`.
 
-```ts
-import { createStakingSdk } from "@polkadot-api/sdk-staking"
-import { dot } from "@polkadot-api/descriptors"
-import { createClient } from "polkadot-api"
-import { getSmProvider } from "polkadot-api/sm-provider"
-import { chainSpec } from "polkadot-api/chains/polkadot"
-import { start } from "polkadot-api/smoldot"
-
-const smoldot = start()
-const chain = await smoldot.addChain({ chainSpec })
-
-const client = createClient(getSmProvider(chain))
-const typedApi = client.getTypedApi(dot)
-
-const stakingSdk = createStakingSdk(client)
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
 ```
 
 ## Validators
@@ -60,7 +47,11 @@ It provides two methods:
 - `getEraValidators(era)`: Gets all the validators for a specific era.
 - `getValidatorRewards(addr, era)`: Gets the information for one specific validator.
 
-```ts
+### `getEraValidators`
+
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+//---cut---
 const activeEra = await typedApi.query.Staking.ActiveEra.getValue()
 const prevEra = activeEra!.index - 1
 const { validators, totalRewards, totalBond } =
@@ -74,9 +65,15 @@ console.log("Era reward pool:", totalRewards.toString())
 console.log("Total active bond:", totalBond.toString())
 ```
 
+### `getValidatorRewards`
+
 Use `getValidatorRewards` when you only need a single validator.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+const activeEra = await typedApi.query.Staking.ActiveEra.getValue()
+const prevEra = activeEra!.index - 1
+//---cut---
 const validatorRewards = await stakingSdk.getValidatorRewards(
   "13UVJyLnbVp8c4FQeiGRMVBP7xph2wHCuf2RzvyxJomXJ7RL",
   prevEra,
@@ -98,39 +95,60 @@ Due to the storage structure of the pallet, getting the nomination information f
 
 The SDK adds a caching mechanism per-era, so that the same work can be reused across different requests.
 
+### `getNominatorActiveValidators`
+
 `getNominatorActiveValidators` fetches the validators where a nominator’s stake was active during the era, including its effective bond per validator.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+const activeEra = await typedApi.query.Staking.ActiveEra.getValue()
+const prevEra = activeEra!.index - 1
+//---cut---
 const active = await stakingSdk.getNominatorActiveValidators(
   "1zugcUbZDfeG...",
   prevEra,
 )
 console.log(active)
-// [{ validator, activeBond }]
 ```
+
+### `getNominatorRewards`
 
 `getNominatorRewards` summarizes the rewards and commission attributed to the nominator in the chosen era. It contains a super-set of information from `getNominatorActiveValidators`, since it combines it with the rewards for each validator.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+const activeEra = await typedApi.query.Staking.ActiveEra.getValue()
+const prevEra = activeEra!.index - 1
+//---cut---
 const rewards = await stakingSdk.getNominatorRewards("1zugcUbZDfeG...", prevEra)
 console.log("Total era reward:", rewards.total.toString())
 console.log("Per validator:", rewards.byValidator)
 ```
 
+### `getActiveNominators`
+
 You can also query for the list of all nominators with `getActiveNominators`.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+const activeEra = await typedApi.query.Staking.ActiveEra.getValue()
+const prevEra = activeEra!.index - 1
+//---cut---
 const nominators = await stakingSdk.getActiveNominators(prevEra)
 console.log("Unique active nominators:", nominators.length)
 ```
 
-### Manage Nominations
+## Manage Nominations
 
 The SDK provides transaction builders that batch the required staking calls based on the current state of the account.
 
+### `upsertNomination`
+
 Use `upsertNomination` to adjust bond size, validator targets, or reward destination in a single callable batch. The helper will look at the current status of that nominator and only apply the appropriate changes. It will also first try to rebond unbonding funds before bonding unlocked ones.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+//---cut---
 const tx = await stakingSdk.upsertNomination("1zugcUbZDfeG...", {
   bond: 50_000_000_000n,
   validators: [
@@ -138,13 +156,19 @@ const tx = await stakingSdk.upsertNomination("1zugcUbZDfeG...", {
     "13UVJyLnbVp8c4FQeiGRMVBP7xph2wHCuf2RzvyxJomXJ7RL",
   ],
 })
+// @noErrors: 2304
 await tx.signAndSubmit(signer)
 ```
 
+### `stopNomination`
+
 `stopNomination` performs three actions into a single batch: `chill` (remove all nominated validators), `unbond` and sets the payee to `Stash` if it was compounding. But it's also smart about it: only performs the transactions that are needed based on the current account's state.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+//---cut---
 const unwind = await stakingSdk.stopNomination("1zugcUbZDfeG...")
+// @noErrors: 2304
 await unwind.signAndSubmit(signer)
 ```
 
@@ -217,7 +241,9 @@ interface NominationPool {
 
 As a small example:
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+// ---cut---
 import { filter, map } from "rxjs"
 
 const subscription = stakingSdk
@@ -237,9 +263,13 @@ subscription.unsubscribe()
 
 ## Nomination Pools
 
+### `getNominationPools`
+
 List the current nomination pools with `getNominationPools`. Each entry contains addresses, commission policies, active nominations, and state.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+// ---cut---
 const pools = await stakingSdk.getNominationPools()
 const openPools = pools.filter((pool) => pool.state === "Open")
 
@@ -254,23 +284,33 @@ console.table(
 )
 ```
 
+### `getNominationPool$`
+
 You can also subscribe to a single pool using `getNominationPool$`, which keeps track of ledger changes and parameter updates.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+// ---cut---
 const pool$ = stakingSdk.getNominationPool$(123)
 const poolSub = pool$.subscribe((pool) => console.log("Pool 123 update", pool))
 
-// poolSub.unsubscribe() when no longer needed
+// Later, when done
+poolSub.unsubscribe()
 ```
+
+### `unbondNominationPool`
 
 Unbonding from a nomination pool is not straight-forward, since it deals with `points` instead of tokens.
 
 For this reason, the SDK exports the function `unbondNominationPool`. The helper computes the correct unbonding points and creates the appropriate transaction.
 
-```ts
+```ts twoslash
+// [!include ~/snippets/createStakingSdk.ts]
+// ---cut---
 const tx = await stakingSdk.unbondNominationPool(
   "1zugcUbZDfeG...",
   10_000_000_000n,
 )
+// @noErrors: 2304
 await tx.signAndSubmit(signer)
 ```
