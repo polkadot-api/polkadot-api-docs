@@ -134,7 +134,7 @@ const dotWhitelist: DotWhitelistEntry[] = [
   "*.Balances",
 
   // this just a specific tx
-  "tx.XcmPallet.transfer_assets",
+  "tx.PolkadotXcm.transfer_assets",
 
   // all queries inside system pallet
   "query.System.*",
