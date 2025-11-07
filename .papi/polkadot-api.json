@@ -3,10 +3,10 @@
   "descriptorPath": ".papi/descriptors",
   "entries": {
     "dot": {
-      "chain": "polkadot",
+      "chain": "polkadot_asset_hub",
       "metadata": ".papi/metadata/dot.scale",
-      "genesis": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
-      "codeHash": "0x625e4190035e51bfaa349c61bc198ed4103658fb4bd5f6716015a4a7f0412bdd"
+      "genesis": "0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f",
+      "codeHash": "0x3581345028abc07243eb48840fbb333637b0ddeec2a9210d370207148022abaa"
     }
   }
 }
