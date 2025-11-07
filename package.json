@@ -23,14 +23,14 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",
-    "vocs": "1.0.16"
+    "vocs": "1.1.0"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^10.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
-    "tailwindcss": "^4.1.16"
+    "tailwindcss": "^4.1.17"
   },
   "prettier": {
     "printWidth": 80,

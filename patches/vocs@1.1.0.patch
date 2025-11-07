@@ -1,0 +1,21 @@
+diff --git a/_lib/app/components/Outline.js b/_lib/app/components/Outline.js
+index 05c17ca656f7418f9e1415aa103397955960d669..728c1bb0617e04080f38db9310161d35ac7414ce 100644
+--- a/_lib/app/components/Outline.js
++++ b/_lib/app/components/Outline.js
+@@ -17,14 +17,14 @@ export function Outline({ minLevel = 2, maxLevel: maxLevel_ = 3, highlightActive
+         return maxLevel_;
+     })();
+     const active = useRef(true);
+-    const { hash } = useLocation();
++    const { hash, pathname } = useLocation();
+     const [headingElements, setHeadingElements] = useState([]);
+     useEffect(() => {
+         if (typeof window === 'undefined')
+             return;
+         const elements = Array.from(document.querySelectorAll(`.${Heading}`));
+         setHeadingElements(elements);
+-    }, []);
++    }, [pathname]);
+     const items = useMemo(() => {
+         if (!headingElements)
+             return [];
