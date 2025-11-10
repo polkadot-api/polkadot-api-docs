@@ -10,23 +10,25 @@ Install the sdk through your package manager:
 pnpm i @polkadot-api/sdk-statement
 ```
 
-Here is an example of using the Statement-SDK with a `PolkadotClient`. The SDK however is built agnostic to the Polkadot Client and does just require function to interact with a nodes JSON RPC interface.
+Here is an example of using the Statement-SDK with a `PolkadotClient`. The SDK, however, is built agnostic to the PAPI and does just require function to interact with a nodes JSON RPC interface.
 
 ```ts
 import { createStatementSdk } from "@polkadot-api/sdk-statement"
 import { createClient } from "polkadot-api"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
 import { getWsProvider } from "polkadot-api/ws-provider"
 
-const client = createClient(
-  withPolkadotSdkCompat(
-    getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
-  ),
-)
+const provider = getWsProvider("wss://paseo-people-next-rpc.polkadot.io")
+const client = createClient(provider)
 const statementSdk = createStatementSdk(client._request)
 ```
 
 ## Fetching Statements
+
+The actual Statement Store API is currently still under development. As of now there are only 3 ways to query the data.
+
+If your used node allows it, you can just `dump()` all statements available for this node.
+
+Another option is to query statements `getStatements` based on given `topics` and destination, `dest`.
 
 ```ts
 // all currently available statements of that node.
@@ -36,8 +38,23 @@ const statements = await statementSdk.dump()
 const topic1 = FixedSizeBinary.fromHex(
   "0xDEADBEEF0000000000000000000000000000000000000000000000000000000000",
 )
-const statementsWithTopic1 = sdkStatementApi.getStatements({
+const destinationPublicKey = FixedSizeBinary.fromHex(
+  "0xDEAFBEEF0000000000000000000000000000000000000000000000000000000000",
+)
+
+const encryptedStatements = await sdkStatementApi.getStatements({
   topics: [topic1],
+  dest: destinationPublicKey, // only encrypted statements for this public key
+})
+
+const unencryptedStatements = await sdkStatementApi.getStatements({
+  topics: [topic1],
+  dest: null, // indicates to only return unencrypted statements
+})
+
+const encryptedAndUnencryptedStatements = await sdkStatementApi.getStatements({
+  topics: [topic1],
+  dest: undefined, // returned statements can be encrypted or unencrypted
 })
 ```
 
@@ -74,7 +91,7 @@ const publicKey = sr25519.getPublicKey(secretKey)
 const statementSigner = getStatementSigner(publicKey, "sr25519", (payload) => {
   return sr25519.sign(secretKey, payload)
 })
-
 const signedStatement = statementSigner.sign()
+
 await sdkStatementApi.submit(signedStatement)
 ```
