@@ -293,6 +293,10 @@ export default defineConfig({
           text: "DOTConnect",
           link: "https://dotconnect.dev",
         },
+        {
+          text: "PolkaHub",
+          link: "https://github.com/polkadot-api/polkahub",
+        },
       ],
     },
   ],
