@@ -165,6 +165,10 @@ export default defineConfig({
           text: "Caching the metadata",
           link: "/recipes/metadata-caching",
         },
+        {
+          text: "Custom Codecs and Types",
+          link: "/recipes/custom-codecs-and-types",
+        },
       ],
     },
     {
