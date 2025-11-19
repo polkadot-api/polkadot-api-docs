@@ -14,18 +14,18 @@
     "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "@polkadot-api/sdk-staking": "^0.3.2",
+    "@polkadot-api/sdk-staking": "^0.3.5",
     "@polkadot-labs/hdkd": "^0.0.25",
     "@polkadot-labs/hdkd-helpers": "^0.0.26",
     "@radix-ui/react-tabs": "^1.1.13",
     "@scure/sr25519": "^0.3.0",
-    "@types/react": "^19.2.2",
-    "polkadot-api": "^1.20.1",
+    "@types/react": "^19.2.6",
+    "polkadot-api": "^1.20.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "rxjs": "^7.8.2",
     "typescript": "^5.9.3",
-    "vocs": "1.1.0"
+    "vocs": "1.1.4"
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^10.0.0",
@@ -45,5 +45,5 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md,mdx,css,cjs}": "prettier --write"
   },
-  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
+  "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
 }
