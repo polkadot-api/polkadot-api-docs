@@ -92,6 +92,30 @@ The types are anonymous (they don't have a name in the metadata), but PolkadotAP
 It's important to know that the descriptors exported by the codegen **should be treated as a black box**. When importing the descriptors of a chain, the type might not actually match what's in runtime, and its internals are subject to change. It has to be treated as an opaque token, passing it directly to `.getTypedApi()`.
 :::
 
+## `papi update`
+
+`papi update` refreshes the stored metadata for one or more previously registered chains. It re-downloads the metadata from the original source (WebSocket, chain-spec, or well-known chain) and overwrites the persisted `${key}.scale` file. For those entries generated from WASM, or directly from a metadata file, it is a no-op.
+
+```sh
+> npx papi update --help
+Usage: polkadot-api update [options] [keys]
+
+Update the metadata files and generate descriptor files
+
+Arguments:
+  keys                    Keys of the metadata files to update, separated by commas. Leave empty for all
+
+Options:
+  --config <filename>     Source for the config file
+  --skip-codegen          Skip running codegen after adding
+  --whitelist <filename>  Use whitelist file to reduce descriptor size
+  -h, --help              display help for command
+```
+
+If you provide one or more `keys` (comma-separated), only those chains are updated. If you omit `keys`, `papi update` will attempt to update all chains.
+
+After it, [papi generate](/codegen#papi-generate-or-papi) runs by default. Pass `--skip-codegen` to avoid this step.
+
 ## Usage
 
 Import from `@polkadot-api/descriptors` every chain and type that you need, then use it through `getTypedApi()`.

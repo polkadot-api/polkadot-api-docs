@@ -1,5 +1,2 @@
 onlyBuiltDependencies:
   - esbuild
-
-patchedDependencies:
-  vocs@1.1.0: patches/vocs@1.1.0.patch
