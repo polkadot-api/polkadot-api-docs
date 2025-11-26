@@ -1,97 +1,155 @@
 # Statement SDK
 
-The statement SDK is a lower level library for interacting with a nodes RPC calls related to the [Statement-Store](https://github.com/paritytech/polkadot-sdk/tree/master/substrate/primitives/statement-store) primitive.
+The [Statement Store](https://github.com/paritytech/polkadot-sdk/tree/49bd017a06989799141af0809c0fbdd48d67b733/substrate/primitives/statement-store) primitive is an off-chain data store for signed messages (known as statements) accessible via RPC.
 
 ## Getting Started
 
-Install the sdk through your package manager:
+Install the Statement SDK using your package manager:
 
 ```sh
 pnpm i @polkadot-api/sdk-statement
 ```
 
-Here is an example of using the Statement-SDK with a `PolkadotClient`. The SDK, however, is built agnostic to the PAPI and does just require function to interact with a nodes JSON RPC interface.
+The function `createStatementSdk` takes a simple request-response function, which is expected to implement the [Statement JSON-RPC API](https://github.com/paritytech/polkadot-sdk/tree/49bd017a06989799141af0809c0fbdd48d67b733/substrate/client/rpc-api/src/statement).
+
+The actual interface of the function is
 
 ```ts
-import { createStatementSdk } from "@polkadot-api/sdk-statement"
+type RequestFn = (method: string, params: Array<any>) => Promise<any>
+```
+
+The property `_request` of a [client](/client) can be used for this matter.
+
+```ts twoslash
 import { createClient } from "polkadot-api"
 import { getWsProvider } from "polkadot-api/ws-provider"
 
-const provider = getWsProvider("wss://paseo-people-next-rpc.polkadot.io")
-const client = createClient(provider)
-const statementSdk = createStatementSdk(client._request)
+const client = createClient(
+  getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
+)
+
+import { createStatementSdk } from "@polkadot-api/sdk-statement" // [!code focus]
+
+const statementSdk = createStatementSdk(client._request) // [!code focus]
 ```
 
-## Fetching Statements
+## Get Statements
 
-The actual Statement Store API is currently still under development. As of now there are only 3 ways to query the data.
+### Get Complete Store (`dump`)
 
-If your used node allows it, you can just `dump()` all statements available for this node.
+The function dump will get all statements from the provider's store. Note that this endpoint might be rate-limited in some cases.
 
-Another option is to query statements `getStatements` based on given `topics` and destination, `dest`.
-
-```ts
+```ts twoslash
+import { createClient } from "polkadot-api"
+import { getWsProvider } from "polkadot-api/ws-provider"
+import { createStatementSdk } from "@polkadot-api/sdk-statement" // [!code focus]
+const client = createClient(
+  getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
+)
+const statementSdk = createStatementSdk(client._request) // [!code focus]
+// ---cut---
 // all currently available statements of that node.
 const statements = await statementSdk.dump()
+```
 
-// get statements by topic
-const topic1 = FixedSizeBinary.fromHex(
-  "0xDEADBEEF0000000000000000000000000000000000000000000000000000000000",
+### Get Filtered Statements (`getStatements`)
+
+This function will query for filtered statements by `topic` and/or `dest` key (find meaning in [Statement Store docs](https://github.com/paritytech/polkadot-sdk/tree/49bd017a06989799141af0809c0fbdd48d67b733/substrate/primitives/statement-store).
+
+#### Parameters
+
+- `dest`: `Binary` for specific dest key. `null` for no dest key. `undefined` to disable filtering by `dest`
+- `topics`: Array of up to 4 topics to filter by.
+
+```ts twoslash
+import { createClient, Binary } from "polkadot-api"
+import { getWsProvider } from "polkadot-api/ws-provider"
+import { createStatementSdk } from "@polkadot-api/sdk-statement"
+const client = createClient(
+  getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
 )
-const destinationPublicKey = FixedSizeBinary.fromHex(
-  "0xDEAFBEEF0000000000000000000000000000000000000000000000000000000000",
-)
+const statementSdk = createStatementSdk(client._request)
+// ---cut---
+import { stringToTopic } from "@polkadot-api/sdk-statement"
 
-const encryptedStatements = await sdkStatementApi.getStatements({
-  topics: [topic1],
-  dest: destinationPublicKey, // only encrypted statements for this public key
-})
-
-const unencryptedStatements = await sdkStatementApi.getStatements({
-  topics: [topic1],
-  dest: null, // indicates to only return unencrypted statements
-})
-
-const encryptedAndUnencryptedStatements = await sdkStatementApi.getStatements({
-  topics: [topic1],
-  dest: undefined, // returned statements can be encrypted or unencrypted
+// statements with specific topics and specific decryptionkey.
+const statements = await statementSdk.getStatements({
+  topics: [stringToTopic("pop"), stringToTopic("chat"), stringToTopic("v1")],
+  dest: Binary.fromHex(
+    "0xf0673d30606ee26672707e4fd2bc8b58d3becb7aba2d5f60add64abb5fea4710",
+  ),
 })
 ```
 
-## Creating and Submitting a Statement
+## Submit Statements
 
-Creating a Statement is as simple as defining a `UnsignedStatement` object. However, for it to be accepted by the chain you normally have to sign it as well. For this you should create a `StatementSigner`. This signer needs to be able to sign raw bytes. You can define on by using the `getStatementSigner()` function.
+### Create Statement Signer
 
-Following is a complete example showing you how to define, sign and submit a `Statement`.
+In order to sign a Statement, we need to create a signer. This can be done with the helper `getStatementSigner`, taking:
 
-```ts
-import {
-  UnsignedStatement,
-  getStatementSigner,
-} from "@polkadot-api/sdk-statement"
-import * as sr25519 from "@scure/sr25519"
+- `publicKey`: Pubkey of the signer
+- `type`: `ed25519`, `sr25519`, `ecdsa` signature type.
+- `signFn`: `(payload: Uint8Array) => Uint8Array | Promise<Uint8Array>` Cryptographic signing function.
 
-const unsignedStatement: UnsignedStatement = {
+As one can notice, this is very similar to the [`PolkadotSigner`](/signers) interface. Check those docs to learn more!
+
+```ts twoslash
+import { getStatementSigner } from "@polkadot-api/sdk-statement"
+import { ed25519 } from "@noble/curves/ed25519.js"
+
+const SECRET_KEY = new Uint8Array() // get your key
+
+const signer = getStatementSigner(
+  ed25519.getPublicKey(SECRET_KEY),
+  "ed25519",
+  (i) => ed25519.sign(i, SECRET_KEY),
+)
+```
+
+### Create Statement
+
+In order to create a statement, it is as simple as creating an `UnsignedStatement` object.
+
+```ts twoslash
+import { Binary } from "polkadot-api"
+import type { UnsignedStatement } from "@polkadot-api/sdk-statement"
+
+const statement: UnsignedStatement = {
+  data: Binary.fromHex("0xDEADBEEF"),
   priority: 1,
-  channel: FixedSizeBinary.fromHex(
-    "0x0000000000000000000000000000000000000000000000000000000000000000",
-  ),
-  topics: [
-    FixedSizeBinary.fromHex(
-      "0xDEADBEEF0000000000000000000000000000000000000000000000000000000000",
-    ),
-  ],
-  data: Binary.fromHex("0xCAFE"),
+}
+```
+
+### Submit Statement
+
+Once we have the signer and the statement, we can go to sign and submit it to the store!
+
+```ts twoslash
+import { createClient } from "polkadot-api"
+import { getWsProvider } from "polkadot-api/ws-provider"
+import { createStatementSdk } from "@polkadot-api/sdk-statement"
+const client = createClient(
+  getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
+)
+const statementSdk = createStatementSdk(client._request)
+import { getStatementSigner } from "@polkadot-api/sdk-statement"
+import { ed25519 } from "@noble/curves/ed25519.js"
+const SECRET_KEY = new Uint8Array()
+import { Binary } from "polkadot-api"
+import type { UnsignedStatement } from "@polkadot-api/sdk-statement"
+// ---cut---
+const signer = getStatementSigner(
+  ed25519.getPublicKey(SECRET_KEY),
+  "ed25519",
+  (i) => ed25519.sign(i, SECRET_KEY),
+)
+
+const statement: UnsignedStatement = {
+  data: Binary.fromHex("0xDEADBEEF"),
+  priority: 1,
 }
 
-const seed = new Uint8Array()
-const secretKey = sr25519.secretFromSeed(seed)
-const publicKey = sr25519.getPublicKey(secretKey)
+const signed = await signer.sign(statement)
 
-const statementSigner = getStatementSigner(publicKey, "sr25519", (payload) => {
-  return sr25519.sign(secretKey, payload)
-})
-const signedStatement = statementSigner.sign()
-
-await sdkStatementApi.submit(signedStatement)
+await statementSdk.submit(signed)
 ```
