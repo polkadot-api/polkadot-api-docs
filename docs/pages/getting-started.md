@@ -1,5 +1,16 @@
 # Getting Started
 
+## Community templates
+
+If you want to quickly get a project up and running, check out the following community templates:
+
+- [PAPI Starter Template](https://github.com/polkadot-api/starter-template): React, shadcn/ui, PolkaHub, React Query
+- [Create Polkadot dApp](https://github.com/paritytech/create-polkadot-dapp): React, tailwind, ReactiveDot, DOTConnect
+- [Create Dot App](https://github.com/preschian/create-dot-app): Many different template stacks, including React or Vue.
+- [POP CLI](https://github.com/r0gue-io/pop-cli): Ink! smart contracts with frontend integration.
+
+## Installation
+
 Start by installing `polkadot-api`, and download the latest metadata from the chain you want to connect to and generate the types:
 
 :::code-group
