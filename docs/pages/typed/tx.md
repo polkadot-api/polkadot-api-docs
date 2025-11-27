@@ -152,7 +152,7 @@ type TxOptions<Asset> = Partial<{
 - `nonce`: this is meant for advanced users that submit several transactions in a row, it allows to modify the default `nonce`. Default: highest nonce found in any known block.
 - `tip`: add tip to transaction. Default: `0`
 - `asset`: there're several chains that allow you to choose which asset to use to pay for the fees and tip. This field will be strongly typed as well and will adapt to every chain used in the `dApp`. Default: `undefined`. This means to use the native token from the chain.
-- `customSignedExtensions`: gives the option to define the value of "custom" signed extensions, understood as signed extensions that PAPI is not aware of. One can define either one of `value` or `additionalSigned`, or both of them. Their type should be either SCALE-encoded `Uint8Array` or the JS type that PAPI's dynamic codecs infer. The default behaviour for unknown signed extensions is to throw an error, unless the type of it is an `Option`, in that case the default is `None`.
+- `customSignedExtensions`: gives the option to define the value of "custom" signed extensions, understood as signed extensions that PAPI is not aware of. One can define either one of `value` or `additionalSigned`, or both of them.
 
 ### `getEstimatedFees`
 
@@ -164,6 +164,19 @@ type TxEstimateFees = (
   txOptions?: TxOptions<Asset>,
 ) => Promise<bigint>
 ```
+
+### `getBareTx`
+
+This method packs the transaction as a `Bare`/`Unsigned` transaction. It will prefer Extrinsic V5 if available, and fall back to Extrinsic V4. You can pass a `compatibilityToken` to make it synchronous, or it will be promise-based. Its interface is straight-forward:
+
+```ts
+interface TxBare {
+  (): Promise<HexString>
+  (compatibilityToken: CompatibilityToken): HexString
+}
+```
+
+It'll get back the `BareExtrinsic` ready to be broadcasted.
 
 ### `sign`
 
