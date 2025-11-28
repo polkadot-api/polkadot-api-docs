@@ -95,8 +95,12 @@ export default defineConfig({
         },
         {
           text: "Typed API",
-          link: "/typed",
+          collapsed: true,
           items: [
+            {
+              text: "Introduction",
+              link: "/typed",
+            },
             {
               text: "Constants",
               link: "/typed/constants",
