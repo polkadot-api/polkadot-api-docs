@@ -4,6 +4,28 @@ All the types defined in the metadata of a chain are anonymous: They represent t
 
 Polkadot-API has some types defined that make it easier working with chain data.
 
+## BlockInfo
+
+When Polkadot-API client returns you an information of a block, it will always do it in this format. For example, [`finalized$` API](/client#finalizedblock).
+
+Interface:
+
+```ts
+interface BlockInfo {
+  hash: string
+  number: number
+  parent: string
+  hasNewRuntime: boolean
+}
+```
+
+It has the following fields:
+
+- `hash`: 0x-prefixed hash of the block.
+- `number`: block height.
+- `parent`: 0x-prefixed hash of the block parent.
+- `hasNewRuntime`: `true{:ts}` if block carries a runtime update, `false{:ts}` otherwise.
+
 ## SS58String
 
 Binary values tagged as a accounts are abstracted as `SS58String`. The type `SS58String` exported by Polkadot-API is an alias of `string`, but it's indicative that the string that it expects is an SS58-formatted string. The value will be encoded to the public address in binary.
