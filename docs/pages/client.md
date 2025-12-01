@@ -89,7 +89,7 @@ This observable emits [`BlockInfo`](/types#blockinfo) for every block the client
 
 Type: `(blockHash: HexString) => () => void{:ts}`
 
-This function allows to override PAPI's unpinning strategy. When calling this function you will ensure a block stays available and you'll get a release function. The block will stay pinned until you call it.
+This function prevents the block from being unpinned. Returns a function that releases the hold, allowing the block to be unpinned once no other operations remain.
 
 ```ts twoslash
 import type { PolkadotClient } from "polkadot-api"
