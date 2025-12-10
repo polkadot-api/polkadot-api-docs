@@ -146,14 +146,13 @@ const encodedData = await tx.getEncodedData()
 
 ## Whitelist
 
-In order to reduce the size of PAPI descriptors bundle, one could filter which calls, queries, etc wants to use and ship with the dApp. This part is particularly interesting when developing web-based dApps, rather than NodeJS or Desktop apps, where bundle size is less critical.
-
-In order to enable the whitelist feature of the codegen, one has to write a `whitelist.ts` file that our CLI can understand. The shape is as follows:
+By default, PAPI generates the descriptors for every possible interaction for each chain. These are 50~150KB files that are lazy-loaded, and it's possible to optimize them by whitelisting which calls you'll be using in your dApp.
 
 ```ts twoslash
-import type { DotWhitelistEntry } from "@polkadot-api/descriptors"
+import type { WhitelistEntry } from "@polkadot-api/descriptors"
 
-const dotWhitelist: DotWhitelistEntry[] = [
+// the export name has to *EXACTLY* match `whitelist`
+export const whitelist: WhitelistEntry[] = [
   // this will get all calls, queries, and consts inside Balances pallet
   "*.Balances",
 
@@ -166,29 +165,53 @@ const dotWhitelist: DotWhitelistEntry[] = [
   // all constants
   "const.*",
 ]
-
-// the export name has to *EXACTLY* match `whitelist`
-export const whitelist = [...dotWhitelist]
 ```
 
-If you generated descriptors for key `dot` (or any other `key` you used to generate the descriptors) you will have that `<Key>WhitelistEntry` helper type that will provide type checking for your whitelist. You can explore all options that you can choose in your IDE. Of course, this can be multichain, let's see an example of it (for `dot` and `dotAh` descriptor keys).
+For projects that use more than one chain definition, you can choose to have different whitelisted entries per each key by using `WhitelistEntriesByChain`. This is an object interface which takes each chain for each key, and also has a "common" key `"*"` for a global one. The whitelist is additive: Each chain will have the interactions of their own key plus the common key.
 
-```ts
+The `WhitelistEntriesByChain` accepts every interaction from every chain. The descriptors package also exports a `<Key>WhitelistEntry` helper type for each defined chain that can be used to help better narrow down those types.
+
+In the following example we have two chains defined: `dot` for Polkadot Asset Hub and `dotRelay` for Polkadot Relay Chain.
+
+```ts twoslash
 import type {
-  DotAhWhitelistEntry,
+  WhitelistEntriesByChain,
+  DotRelayWhitelistEntry,
   DotWhitelistEntry,
 } from "@polkadot-api/descriptors"
 
-const dotWhitelist: DotWhitelistEntry[] = ["tx.XcmPallet.transfer_assets"]
-
-const ahWhitelist: DotAhWhitelistEntry[] = ["tx.PolkadotXcm.transfer_assets"]
-
-export const whitelist = [...dotWhitelist, ...ahWhitelist]
+export const whitelist: WhitelistEntriesByChain = {
+  // Applies to every chain
+  "*": [
+    "query.System.Account",
+    "tx.Balances.transfer_keep_alive",
+    "tx.Balances.transfer_allow_death",
+  ],
+  dotRelay: [
+    "tx.XcmPallet.transfer_assets",
+    // Optional. Typescript trick to get better narrowing down.
+  ] satisfies DotRelayWhitelistEntry[],
+  dot: ["tx.PolkadotXcm.transfer_assets"] satisfies DotWhitelistEntry[],
+}
 ```
 
-This file could be placed anywhere, but we recommend placing it at `.papi/whitelist.ts`.
+Any chain not specified in the object will just inherit the whitelist from the common key `*`. If neither the common key or the chain key is specified, it will result in an empty chain with no interactions.
 
-In order to generate descriptors taking into account the whitelist, the command should be `papi generate --whitelist .papi/whitelist.ts` (or just `papi --whitelist .papi/whitelist.ts`), or any other directory you chose to save your file. We recommend setting a script in your `package.json` that takes care of it.
+To have papi use the whitelist, save it somewhere in your project (suggestion: `.papi/whitelist.ts`), and then add the option in the papi config file in `.papi/polkadot-api.json`:
+
+```json
+{
+  "descriptorPath": …,
+  "entries": { … },
+  "options": {
+    "whitelist": ".papi/whitelist.ts"
+  }
+}
+```
+
+The path is relative to where the `papi` command is called from, usually in the root of your project.
+
+Optionally, the CLI has a flag to specify a different path `papi --whitelist .papi/whitelist.ts`.
 
 A full working example of a dApp with whitelist could be found at [our repo](https://github.com/polkadot-api/polkadot-api/tree/main/examples/vite).
 
