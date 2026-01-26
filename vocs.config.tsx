@@ -66,6 +66,10 @@ export default defineConfig({
       ],
     },
     {
+      text: "V2 Migration",
+      link: "/v2migration",
+    },
+    {
       text: "Providers",
       collapsed: true,
       items: [
