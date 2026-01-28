@@ -74,7 +74,7 @@ Once that block runtime is loaded, then you have synchronous access to anything 
 
 ### Compatibility
 
-Previously, compatibility APIs were integrated within the TypedAPI. To make it clearer that they are compared against a specific runtime.
+Previously, compatibility APIs were integrated within the TypedAPI. This has been moved in v2 to `getStaticApis`, to make it clearer that they are compared against a specific runtime.
 
 The new API allows to have better control on runtime upgrades, but could require a bit of refactoring. If you want a quick 1-to-1 update on inline compatibility checks, it's more simple:
 
@@ -158,3 +158,110 @@ const callData = staticApis.tx.System.remark(
 // Reverse it
 const { pallet, name, input } = staticApis.decodeCallData(callData)
 ```
+
+## WatchValue
+
+The `watchValue` method of storage queries now returns on observable with an object with the value and the block that it was last found.
+
+Also, the API changes to be more consistent with other methods: The second optional argument now takes the `at: HexString | 'finalized' | 'best'` as a property of an object.
+
+##### v1
+
+```ts
+const typedApi = client.getTypedApi(dot)
+const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+
+typedApi.query.System.Account.watchValue(ALICE, "best").subscribe(
+  (accountValue) => {
+    console.log("value", accountValue)
+  },
+)
+```
+
+##### v2
+
+```ts
+const typedApi = client.getTypedApi(dot)
+const ALICE = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+
+typedApi.query.System.Account.watchValue(ALICE, { at: "best" }).subscribe(
+  (update) => {
+    console.log("block", update.block)
+    console.log("value", update.value)
+  },
+)
+
+// If you want the exact behaviour as before
+import { distinctUntilChanged, map } from "rxjs"
+typedApi.query.System.Account.watchValue(ALICE, { at: "best" })
+  .pipe(
+    map((v) => v.value),
+    // The reference of `value` will be kept if it didn't change
+    distinctUntilChanged(),
+  )
+  .subscribe((accountValue) => {
+    console.log("value", accountValue)
+  })
+```
+
+## Utility function and overload changes
+
+### Transaction at
+
+The `at: BlockHash` parameter when creating a transaction now only accepts a specific block hash.
+
+It's important to understand that this parameter only affects the mortality of the transaction: It will only be valid on that specific block or its children, up to the configured mortality period. For this reason, using `at: 'best'` was often problematic since the tx wouldn't be included after a re-org.
+
+If omitted, it will be the finalized block. If you were passing `best` and you are aware of the consequences of re-orgs, then get a blockHash from `client.getBestBlocks()` and pass it to the `at` parameter.
+
+### `watchBlockBody`
+
+`client.watchBlockBody` has been renamed to `client.getBlockBody$`
+
+### `jsonPrint`
+
+The `jsonPrint` function has been removed. Instead, the `polkadot-api/utils` package now exports a `jsonSerialize` and `jsonDeserialize` replacer functions to be used with the browser's `JSON.stringify` and `JSON.parse` functions.
+
+This is a bit more flexible since it can be now composed with other JSON replacer functions, as well as allows for a 1-line JSON string.
+
+##### v1
+
+```ts
+import { jsonPrint } from "polkadot-api/utils"
+
+// ...
+
+console.log(jsonPrint(systemAccount))
+```
+
+##### v2
+
+```ts
+import { jsonSerialize } from "polkadot-api/utils"
+
+// ...
+
+console.log(JSON.stringify(systemAccount, jsonSerialize))
+```
+
+### `mergeUint8(...args)`
+
+`mergeUint8` utility function now only accepts one argument which must be an array. To migrate, simply wrap the arguments with an array.
+
+### `getBlockBody` and `getBlockHeader`
+
+`getBlockBody` and `getBlockHeader` took an optional argument `hash?: HexString`, which defaulted to the finalized block.
+
+However, it doesn't make sense to get a random body or header, so now it requires passing in a specific block.
+
+If you need that, get the hash from `client.getBestBlocks()` or `client.getFinalizedBlock()`
+
+## Chain renames
+
+Chain names have changed to become easier to use:
+
+- Westend: All `westend2` prefix have changed to `westend`: `westend`, `westend_asset_hub`, etc.
+- Kusama: All `ksmcc3` prefix have changed to `kusama`: `kusama`, `kusama_asset_hub`, etc.
+- Rococo: Rococo has been dropped, as it was sunset.
+
+The CLI will auto-migrate the config for existing projects with this change, but it will only accept the new chain names for newly added chains.
