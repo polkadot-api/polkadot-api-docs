@@ -64,6 +64,58 @@ The `JsonRpcProvider` interface has changed: instead of using stringified messag
 
 All of the providers and enhancers provided by polkadot-api have been migrated, so it shouldn't require any change. If you were using custom enhancers, then you can omit parsing/stringifying, or add a `JSON.stringify` if you are expecting strings.
 
+## Binary
+
+The `Binary` class has been removed. Now PAPI works with `Uint8Array`s, the native primitive for binary data.
+
+Instead, `Binary` is a set of utilities to easily convert various formats (hex, text, opaque) with `Uint8Array`.
+
+##### v1
+
+```ts
+import { Binary } from "polkadot-api"
+
+const myBytes = Binary.fromText("I'm migrating to PAPI v2!")
+console.log("bytes", myBytes.asBytes())
+console.log("hex", myBytes.asHex())
+console.log("text", myBytes.asText())
+```
+
+##### v2
+
+```ts
+import { Binary } from "polkadot-api"
+
+const myBytes = Binary.fromText("I'm migrating to PAPI v2!")
+console.log("bytes", myBytes)
+console.log("hex", Binary.toHex(myBytes))
+console.log("text", Binary.toText(myBytes))
+```
+
+## FixedSizeBinary
+
+Fixed-size binaries are usually more convenient to be expressed as Hex, as they often represent hashes or addresses. For this reason, they are not `Uint8Array`s, but just hex strings typed as `SizedHex<number>`. The generic in `SizedHex` is only to show information about the expected length for that parameter.
+
+##### v1
+
+```ts
+import { FixedSizeBinary } from "polkadot-api"
+
+const myHash = FixedSizeBinary.fromHex("0x1234567890")
+console.log("bytes", myHash.asBytes())
+console.log("hex", myHash.asHex())
+```
+
+##### v2
+
+```ts
+import { Binary, SizedHex } from "polkadot-api"
+
+const myHash: SizedHex<5> = "0x1234567890"
+console.log("bytes", Binary.fromHex(myHash))
+console.log("hex", myHash)
+```
+
 ## Compatibility API & RuntimeToken
 
 The compatibility API has changed significantly. The runtime and compatibility token has been removed, and the function to check the compatibility is now in a separate `typedApi.getStaticApis()`
@@ -201,6 +253,79 @@ typedApi.query.System.Account.watchValue(ALICE, { at: "best" })
   )
   .subscribe((accountValue) => {
     console.log("value", accountValue)
+  })
+```
+
+## Events
+
+### Pulling events
+
+The events API has been reworked. Instead of `pull(): Promise<Event[]>`, which returned the list of events in the latest finalized, v2 has `get(blockHash: HexString): Promise<Event[]>`, which is more explicit over which block you want to get the events from.
+
+Additionally, some return values were inconsistent: Some methods returned the inner value of the event, others returned an object with `{ meta: { block, phase }, payload: T }`, others included the topics, etc. This has changed so that every method returns the same interface: `{ original: SystemEvent, payload: T }`. The original event keeps the same structure from SystemEvents, which include topics and phase.
+
+##### v1
+
+```ts
+const typedApi = client.getTypedApi(dot)
+
+const events = await typedApi.event.Balances.Transfer.pull()
+events.forEach((evt) => {
+  console.log(evt.meta.block, evt.meta.phase, evt.payload)
+})
+```
+
+##### v2
+
+```ts
+const typedApi = client.getTypedApi(dot)
+
+const finalizedBlock = await client.getFinalizedBlock()
+const events = await typedApi.event.Balances.Transfer.get(finalizedBlock.hash)
+events.forEach((evt) => {
+  console.log(
+    finalizedBlock.hash,
+    evt.original.phase,
+    evt.original.topics,
+    evt.payload,
+  )
+})
+```
+
+### Watching events
+
+`watch(filter): Observable<{ meta, payload }>` has also changed significantly. The filter parameter is removed, as it can easily be achieved by composing observables with the `filter` operator.
+
+The observable used to return the events flattened out. This has changed so that it performs one single emission per block, with the hash that it was found `{ block: BlockInfo, events: Array<{ original: SystemEvent, payload: T }>}`.
+
+##### v1
+
+```ts
+const typedApi = client.getTypedApi(dot)
+
+typedApi.event.Balances.Transfer.watch((evt) => evt.from === ALICE).subscribe(
+  (evt) => {
+    console.log(evt.meta.block, evt.meta.phase, evt.payload)
+  },
+)
+```
+
+##### v2
+
+```ts
+const typedApi = client.getTypedApi(dot)
+
+// This is more versatile, but this will be a copy-paste of the original behavior (except for the event object shape)
+typedApi.event.Balances.Transfer.watch()
+  .pipe(
+    mergeMap(({ block, events }) =>
+      events
+        .filter((evt) => evt.from === ALICE)
+        .map((evt) => ({ ...evt, block })),
+    ),
+  )
+  .subscribe((evt) => {
+    console.log(evt.block, evt.original.phase, evt.original.topics, evt.payload)
   })
 ```
 
