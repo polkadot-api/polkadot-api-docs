@@ -58,11 +58,121 @@ import { createWsClient } from "polkadot-api/ws"
 const client = createWsClient("wss://rpc.ibp.network/polkadot")
 ```
 
+#### Config option changes
+
+**innerEnhancer**
+
+This configuration option has been removed.
+
+If you were using it for logging, the new property `logger` provides all events happening on the underlying websocket: connections, disconnections, errors and also in and out messages.
+
+If you were using it for more advanced use cases, it also accepts a `websocketClass` to customize the WebSocket class used by the provider.
+
+**Status change events:**
+
+The `WsEvent` enum is still available and exported from `polkadot-api/ws`. The only change is that the enum values (`CONNECTING`, `CONNECTED`, `CLOSE`, `ERROR`) now resolve to their string equivalents instead of numbers. If you were using `WsEvent.CONNECTING`, etc. then it should continue to work without changes.
+
+### Smoldot Provider
+
+When a smoldot chain is destroyed it can't be reused. In v1 there were some edge cases where a smoldot provider would stop working because it required a new smoldot chain to be instantiated.
+
+For this reason, in v2 now `getSmProvider` takes a factory function instead. It's important to note that you should create the smoldot chain inside that function, as re-using the same chain could end up with the same issue.
+
+##### v1
+
+```ts
+import { createClient } from "polkadot-api"
+import { getSmProvider } from "polkadot-api/sm-provider"
+import { start } from "polkadot-api/smoldot"
+import { chainSpec } from "polkadot-api/chains/westend"
+
+const smoldot = start()
+
+const westendChain = smoldot.addChain({ chainSpec })
+const client = createClient(getSmProvider(westendChain))
+```
+
+##### v2
+
+```ts
+import { createClient } from "polkadot-api"
+import { getSmProvider } from "polkadot-api/sm-provider"
+import { start } from "polkadot-api/smoldot"
+import { chainSpec } from "polkadot-api/chains/westend"
+
+const smoldot = start()
+
+const client = createClient(
+  getSmProvider(() => smoldot.addChain({ chainSpec })),
+)
+```
+
 ### JsonRpcProvider
 
 The `JsonRpcProvider` interface has changed: instead of using stringified messages, it has them parsed, for both input and output.
 
-All of the providers and enhancers provided by polkadot-api have been migrated, so it shouldn't require any change. If you were using custom enhancers, then you can omit parsing/stringifying, or add a `JSON.stringify` if you are expecting strings.
+All of the providers and enhancers provided by polkadot-api have been migrated, so it shouldn't require any change. If you were using custom enhancers, then you can omit parsing/stringifying.
+
+#### Custom Enhancers and Providers
+
+If you have custom providers or enhancers, you need to update them to work with parsed messages:
+
+##### v1
+
+```ts
+import type { JsonRpcProvider } from "polkadot-api/ws-provider"
+
+const myEnhancer =
+  (parent: JsonRpcProvider): JsonRpcProvider =>
+  (onMessage) => {
+    const inner = parent((msg) => {
+      const parsed = JSON.parse(msg) // ❌ Messages were strings
+      // ... process parsed
+      onMessage(JSON.stringify(parsed)) // ❌ Send stringified
+    })
+
+    return {
+      send(message) {
+        inner.send(message) // ❌ Message was a string
+      },
+      disconnect() {
+        inner.disconnect()
+      },
+    }
+  }
+```
+
+##### v2
+
+```ts
+import type { JsonRpcProvider } from "polkadot-api" // ✅ Import from main package
+
+const myEnhancer =
+  (parent: JsonRpcProvider): JsonRpcProvider =>
+  (onMessage) => {
+    const inner = parent((msg) => {
+      // ✅ msg is already parsed - no JSON.parse needed
+      // ... process msg directly
+      onMessage(msg) // ✅ Send parsed object directly
+    })
+
+    return {
+      send(message) {
+        inner.send(message) // ✅ message is parsed object
+      },
+      disconnect() {
+        inner.disconnect()
+      },
+    }
+  }
+```
+
+**Key differences:**
+
+- Import `JsonRpcProvider` from `"polkadot-api"` (not `"polkadot-api/ws"`)
+- Remove all `JSON.parse()` calls - messages are already parsed
+- Remove all `JSON.stringify()` calls - send parsed objects
+- If interfacing with workers or external systems that use strings, parse/stringify at the boundary
 
 ## Binary
 
@@ -91,6 +201,20 @@ console.log("bytes", myBytes)
 console.log("hex", Binary.toHex(myBytes))
 console.log("text", Binary.toText(myBytes))
 ```
+
+**Important notes:**
+
+- The pattern changed from `instance.asMethod()` to `Binary.toMethod(instance)`
+- `Uint8Array` is used directly - no wrapping needed
+- `Binary.fromBytes()` **does not exist** in v2 - just use the `Uint8Array` directly:
+
+  ```ts
+  // v1
+  Binary.fromBytes(myUint8Array).asHex()
+
+  // v2
+  Binary.toHex(myUint8Array) // Pass Uint8Array directly
+  ```
 
 ## FixedSizeBinary
 
@@ -149,7 +273,7 @@ const typedApi = client.getTypedApi(dot)
 const staticApis = await typedApi.getStaticApis()
 
 const isCompatible =
-  await staticApis.compat.apis.StakingApi.nominations_quota.isCompatible()
+  staticApis.compat.apis.StakingApi.nominations_quota.isCompatible()
 if (isCompatible) {
   typedApi.apis.StakingApi.nominations_quota(123n)
 }
@@ -213,7 +337,7 @@ const { pallet, name, input } = staticApis.decodeCallData(callData)
 
 ## WatchValue
 
-The `watchValue` method of storage queries now returns on observable with an object with the value and the block that it was last found.
+The `watchValue` method of storage queries now returns an observable with an object containing both the value and the block information: `{ value: T, block: BlockInfo }`.
 
 Also, the API changes to be more consistent with other methods: The second optional argument now takes the `at: HexString | 'finalized' | 'best'` as a property of an object.
 
@@ -262,7 +386,7 @@ typedApi.query.System.Account.watchValue(ALICE, { at: "best" })
 
 The events API has been reworked. Instead of `pull(): Promise<Event[]>`, which returned the list of events in the latest finalized, v2 has `get(blockHash: HexString): Promise<Event[]>`, which is more explicit over which block you want to get the events from.
 
-Additionally, some return values were inconsistent: Some methods returned the inner value of the event, others returned an object with `{ meta: { block, phase }, payload: T }`, others included the topics, etc. This has changed so that every method returns the same interface: `{ original: SystemEvent, payload: T }`. The original event keeps the same structure from SystemEvents, which include topics and phase.
+Additionally, some return values were inconsistent: Some methods returned the inner value of the event, others returned an object with `{ meta: { block, phase }, payload: T }`, others included the topics, etc. This has changed so that every method returns the same interface: `{ original: SystemEvent, payload: T }`. The original event keeps the same structure from SystemEvents, which include topics and phase.
 
 ##### v1
 
@@ -390,3 +514,56 @@ Chain names have changed to become easier to use:
 - Rococo: Rococo has been dropped, as it was sunset.
 
 The CLI will auto-migrate the config for existing projects with this change, but it will only accept the new chain names for newly added chains.
+
+## Troubleshooting
+
+### TypeScript Errors
+
+**Error: `Property 'isCompatible' does not exist`**
+
+You need to use `getStaticApis()`:
+
+```ts
+// Before
+await api.apis.SomeApi.someCall.isCompatible()
+
+// After
+const staticApis = await api.getStaticApis()
+await staticApis.compat.apis.SomeApi.someCall.isCompatible()
+```
+
+**Error: `'JsonRpcProvider' is not exported by "polkadot-api/ws"`**
+
+For custom providers/enhancers, import from the main package:
+
+```ts
+// Wrong
+import type { JsonRpcProvider } from "polkadot-api/ws"
+
+// Correct
+import type { JsonRpcProvider } from "polkadot-api"
+```
+
+**Error: `Property 'fromBytes' does not exist on type 'Binary'`**
+
+`Binary.fromBytes()` doesn't exist in v2. Pass `Uint8Array` directly:
+
+```ts
+// Before
+Binary.fromBytes(myUint8Array).asHex()
+
+// After
+Binary.toHex(myUint8Array)
+```
+
+**Error: `Argument of type 'Promise<Chain>' is not assignable to parameter`**
+
+`getSmProvider` now expects a function:
+
+```ts
+// Before
+getSmProvider(Promise.all([...]))
+
+// After
+getSmProvider(() => Promise.all([...]))
+```
