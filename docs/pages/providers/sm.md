@@ -97,9 +97,8 @@ import { chainSpec } from "polkadot-api/chains/polkadot"
 import { createClient } from "polkadot-api"
 import { getSmProvider } from "polkadot-api/sm-provider"
 
-const chain = smoldot.addChain({ chainSpec })
 // no need to await!
-const provider = getSmProvider(chain)
+const provider = getSmProvider(() => smoldot.addChain({ chainSpec }))
 
 const client = createClient(provider)
 ```
