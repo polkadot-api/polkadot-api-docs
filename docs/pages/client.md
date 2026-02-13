@@ -10,7 +10,7 @@ Optionally, you can pass `getMetadata` and `setMetadata` functions, useful for m
 ```ts twoslash
 // [!include ~/snippets/startSm.ts]
 import { getSmProvider } from "polkadot-api/sm-provider"
-const provider = getSmProvider(smoldot.addChain({ chainSpec: "" }))
+const provider = getSmProvider(() => smoldot.addChain({ chainSpec: "" }))
 //---cut---
 import { createClient } from "polkadot-api"
 
@@ -105,7 +105,7 @@ setTimeout(async () => {
 }, 100_000)
 ```
 
-### `watchBlockBody`
+### `getBlockBody$`
 
 Type: `(hash: string) => Observable<HexString[]>{:ts}`
 

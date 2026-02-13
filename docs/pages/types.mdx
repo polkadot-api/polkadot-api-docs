@@ -38,7 +38,9 @@ import { dot } from "@polkadot-api/descriptors"
 import { chainSpec } from "polkadot-api/chains/polkadot"
 import { createClient } from "polkadot-api"
 import { getSmProvider } from "polkadot-api/sm-provider"
-const client = createClient(getSmProvider(smoldot.addChain({ chainSpec })))
+const client = createClient(
+  getSmProvider(() => smoldot.addChain({ chainSpec })),
+)
 // ---cut---
 const dotApi = client.getTypedApi(dot)
 
@@ -56,6 +58,12 @@ console.log(proxies[0].delegate)
 Another alias of `string`, but indicates that the value is a valid hexadecimal string.
 
 As input, it accepts both with or without the `0x` prefix, and upper or lowercase. As output, it is always lowercase and has `0x`.
+
+## SizedHex\<T>
+
+Similar to `HexString`, but has a generic that indicates the length of the bytes it represents.
+
+It's meant to aid in understanding the semantic meaning of some types: A `SizedHex<32>` means a hexadecimal string of 32 bytes, which could hint to a 32-byte hash. Note that the length of the string in this example will be 66 (`0x` + 2 characters per byte).
 
 ## Enum
 
@@ -107,23 +115,17 @@ When reading from Enums, these are objects with `{ type: string, value: unknown 
 
 ## Binary
 
-Any array of u8's is represented as `Binary`. This is a utility type that has a few functions to easily create binary data:
+Binaries in PAPIv2 are represented as `Uint8Array`s. `Binary` is now a utility type that has a few functions to easily deal with binary data:
 
 ```ts twoslash
 import { Binary } from "polkadot-api"
 
-Binary.fromBytes(new Uint8Array())
 Binary.fromHex("0b187a23c4f65d86c9a324b56f7e81aa")
 const binary = Binary.fromText("Text that will be turned into binary")
 
-binary.asBytes() // Uint8Array
-binary.asHex() // "0x5465787420746861742077696c6c206265207475726e656420696e746f2062696e617279"
-binary.asText() // "Text that will be turned into binary"
+Binary.toHex(binary) // "0x5465787420746861742077696c6c206265207475726e656420696e746f2062696e617279"
+Binary.toText(binary) // "Text that will be turned into binary"
 ```
-
-## FixedSizeBinary&lt;L&gt;
-
-Same as `Binary`, but when the chain metadata specifies a length. The length is shown as a type parameter, for reference.
 
 ## FixedSizeArray&lt;L, T&gt;
 
