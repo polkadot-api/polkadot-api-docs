@@ -27,29 +27,35 @@ import { dot, people, IdentityData } from "@polkadot-api/descriptors"
 
 /// Start smoldot and setup its chains
 const smoldot = start()
-const dotChain = smoldot.addChain({ chainSpec: dotChainSpec })
-
-// When adding a parachain to smoldot we need to pass its relay chain in "potentialRelayChains". This is the awaited value from `smoldot.addChain`.
-// We could use `await`, but if we want the dApp to not block we can use simple promise chaining.
-const peopleChain = dotChain.then((chain) =>
-  smoldot.addChain({
-    chainSpec: peopleChainSpec,
-    potentialRelayChains: [chain],
-  }),
-)
 
 /// Create the clients and their typedApis
 console.log("Initializing…")
-const dotClient = createClient(getSmProvider(dotChain))
+const dotClient = createClient(
+  getSmProvider(() => smoldot.addChain({ chainSpec: dotChainSpec })),
+)
 const dotApi = dotClient.getTypedApi(dot)
 
-const peopleClient = createClient(getSmProvider(peopleChain))
+// When adding a parachain to smoldot we need to pass its relay chain in "potentialRelayChains".
+// getSmProvider takes a factory function that returns the chain (or a promise of the chain).
+const peopleClient = createClient(
+  getSmProvider(async () => {
+    const relayChain = await smoldot.addChain({ chainSpec: dotChainSpec })
+    return smoldot.addChain({
+      chainSpec: peopleChainSpec,
+      potentialRelayChains: [relayChain],
+    })
+  }),
+)
 const peopleApi = peopleClient.getTypedApi(people)
 
 // dotApi and peopleApi can now be used simultaneously. Both are using the same smoldot instance, and work as two separate clients.
 
 // Optionally, wait until we have received the initial block for both chains
-await Promise.all([dotApi.compatibilityToken, peopleApi.compatibilityToken])
+console.log("Waiting for initial block…")
+await Promise.all([
+  dotClient.getFinalizedBlock(),
+  peopleApi.getFinalizedBlock(),
+])
 
 // to complete the example, let's check the balance and identity of one account.
 const ADDRESS = "16JGzEsi8gcySKjpmxHVrkLTHdFHodRepEz8n244gNZpr9J"
@@ -64,9 +70,8 @@ const [account, identity] = await Promise.all([
 // Identity unfortunately comes with a format that can't be parsed directly
 const identityDataToString = (data: IdentityData | undefined) => {
   if (!data || data.type === "None" || data.type === "Raw0") return null
-  if (data.type === "Raw1")
-    return Binary.fromBytes(new Uint8Array(data.value)).asText()
-  return data.value.asText()
+  if (data.type === "Raw1") return Binary.toText(new Uint8Array(data.value))
+  return Binary.toText(data.value)
 }
 const name = identityDataToString(identity?.info.display) ?? ADDRESS
 const freeBalance = Number(account.data.free) / Math.pow(10, DECIMALS)
@@ -132,8 +137,9 @@ async function approveBountyWithCurator(
   fee: bigint,
 ) {
   const ksmApi = typedApi as TypedApi<typeof ksm>
+  const staticApis = await ksmApi.getStaticApis()
   if (
-    await ksmApi.tx.Bounties.approve_bounty_with_curator.isCompatible(
+    staticApis.compat.tx.Bounties.approve_bounty_with_curator.isCompatible(
       CompatibilityLevel.Partial,
     )
   ) {

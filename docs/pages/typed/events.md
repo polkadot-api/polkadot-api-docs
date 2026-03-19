@@ -42,7 +42,7 @@ type EvClient<T> = {
 }
 ```
 
-## Pull
+## Get
 
 This is the simpler method. It'll allow us to fetch (Promise-based) all events (matching the event kind chosen) available for a given block. Let's see its interface and an example:
 
@@ -51,7 +51,7 @@ function get(blockHash: HexString): Promise<Array<PalletEvent<T>>>
 
 const block = await client.getFinalizedBlock()
 // this is an array of `Balances.Burned` events
-const burnedEvents = await typedApi.events.Balances.Burned.pull(block.hash)
+const burnedEvents = await typedApi.event.Balances.Burned.get(block.hash)
 ```
 
 ## Watch

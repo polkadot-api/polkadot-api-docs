@@ -25,7 +25,7 @@ interface GetWsProvider {
 In order to create the provider, you can pass one (or more) websocket `uri`s. For example:
 
 ```ts
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 
 // one option
 getWsProvider("wss://myws.com")
@@ -46,7 +46,7 @@ Mainly, there are two to observe the underlying websocket status:
 - `logger` is more verbose: also notifies any time the underlying websocket emits or receives something.
 
 ```ts
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider, WsEvent, SocketEvents } from "polkadot-api/ws"
 
 const provider = getWsProvider("wss://myws.com", {
   timeout: 10_000,

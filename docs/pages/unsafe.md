@@ -1,6 +1,10 @@
 # UnsafeApi
 
-The `UnsafeApi` enables interaction with the chain easily to the same extend [TypedApi](/typed) does, but it does not requires any descriptors. It is an advanced method and should only be used if you really know what you are doing. In order to create it, you can still pass a descriptors' type to get the same type inference as in the `typedApi`, but the shape of the entries at runtime level is not guaranteed.
+The `UnsafeApi` enables interaction with the chain easily to the same extend [TypedApi](/typed) does, but it does not requires any descriptors. It is an advanced method and should only be used if you really know what you are doing.
+
+In order to create it, you can still pass a descriptors' type to get the same type inference as in the `typedApi`, but the shape of the entries at runtime level is not guaranteed.
+
+Its primary use cases are applications that make no assumptions about the current runtime (e.g., a dev console that reads the latest metadata and exposes interactions dynamically, rather than relying on hard-coded calls), or environments where generating descriptors is not possible.
 
 :::warning
 The `UnsafeApi` does not provide any compatibility checks protection as `TypedApi` does.
@@ -16,7 +20,7 @@ type UnsafeApi = {
   event: EvApi
   apis: RuntimeCallsApi
   constants: ConstApi
-  runtimeToken: Promise<RuntimeToken>
+  getStaticApis: (at?: HexString | "finalized" | "best") => Promise<StaticApis>
 }
 ```
 
@@ -30,4 +34,4 @@ import { dot } from "@polkadot-api/descriptors"
 const unsafeApi = client.getUnsafeApi<typeof dot>() // with typings
 ```
 
-One can notice the API is actually very similar to the `TypedApi`, check [its docs](/typed) for the API reference since it behaves the exact same way.
+One can notice the API is actually very similar to the `TypedApi`, check [its docs](/typed) for the API reference since it behaves the same way, except that it doesn't perform any compatibility check.

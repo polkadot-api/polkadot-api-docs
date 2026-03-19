@@ -23,13 +23,11 @@ If you're using the PAPI CLI to generate type descriptors for your chain, you ca
 ```ts
 import { dot, getMetadata } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
+import { getWsProvider } from "polkadot-api/ws"
 
-const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://dot-rpc.stakeworld.io")),
-  { getMetadata },
-)
+const client = createClient(getWsProvider("wss://dot-rpc.stakeworld.io"), {
+  getMetadata,
+})
 
 const dotApi = client.getTypedApi(dot)
 const accountInfo = await dotApi.query.System.Account.getValue(
@@ -51,8 +49,7 @@ import {
   getMetadata as getDescriptorsMetadata,
 } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
+import { getWsProvider } from "polkadot-api/ws"
 import { toHex, fromHex } from "@polkadot-api/utils" // Ensure hex helpers are imported
 
 const setMetadata = (key: string, value: Uint8Array) => {
@@ -68,10 +65,10 @@ const getMetadata = async (key: string) => {
   return metadata
 }
 
-const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://dot-rpc.stakeworld.io")),
-  { getMetadata, setMetadata },
-)
+const client = createClient(getWsProvider("wss://dot-rpc.stakeworld.io"), {
+  getMetadata,
+  setMetadata,
+})
 
 const dotApi = client.getTypedApi(dot)
 const accountInfo = await dotApi.query.System.Account.getValue(
@@ -89,8 +86,7 @@ import {
   getMetadata as getDescriptorsMetadata,
 } from "@polkadot-api/descriptors"
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
+import { getWsProvider } from "polkadot-api/ws"
 
 const setMetadata = (key: string, value: Uint8Array) => {
   Bun.write(Bun.file(`./cache/${key}.bin`), value)
@@ -105,10 +101,10 @@ const getMetadata = async (key: string) => {
   return metadata
 }
 
-const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://dot-rpc.stakeworld.io")),
-  { getMetadata, setMetadata },
-)
+const client = createClient(getWsProvider("wss://dot-rpc.stakeworld.io"), {
+  getMetadata,
+  setMetadata,
+})
 
 const dotApi = client.getTypedApi(dot)
 const accountInfo = await dotApi.query.System.Account.getValue(

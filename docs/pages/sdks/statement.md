@@ -22,7 +22,7 @@ The property `_request` of a [client](/client) can be used for this matter.
 
 ```ts twoslash
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 
 const client = createClient(
   getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
@@ -41,7 +41,7 @@ The function dump will get all statements from the provider's store. Note that t
 
 ```ts twoslash
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 import { createStatementSdk } from "@polkadot-api/sdk-statement" // [!code focus]
 const client = createClient(
   getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
@@ -63,7 +63,7 @@ This function will query for filtered statements by `topic` and/or `dest` key (f
 
 ```ts twoslash
 import { createClient, Binary } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 import { createStatementSdk } from "@polkadot-api/sdk-statement"
 const client = createClient(
   getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),
@@ -126,7 +126,7 @@ Once we have the signer and the statement, we can go to sign and submit it to th
 
 ```ts twoslash
 import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 import { createStatementSdk } from "@polkadot-api/sdk-statement"
 const client = createClient(
   getWsProvider("wss://paseo-people-next-rpc.polkadot.io"),

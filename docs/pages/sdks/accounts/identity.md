@@ -17,7 +17,7 @@ Then, initialize it by passing in the `typedApi` for your chain:
 ```ts
 import { createIdentitySdk } from "@polkadot-api/sdk-accounts"
 import { dot } from "@polkadot-api/descriptors"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 import { createClient } from "polkadot-api"
 
 const client = createClient(

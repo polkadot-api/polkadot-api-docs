@@ -53,21 +53,49 @@ const callData = Binary.fromHex("0x00002c50415049203c3320444f54")
 const tx: Transaction = await api.txFromCallData(callData)
 ```
 
+A synchronous version of this method is available in [Static APIs](/static#txfromcalldata).
+
 ## `Transaction` type
 
 Both methods of creating transactions in PAPI output a `Transaction` type, that has the following interface:
 
 ```ts
 type Transaction = {
-  sign: TxSignFn
-  signSubmitAndWatch: TxObservable
-  signAndSubmit: TxPromise
-  getEncodedData: TxCall
+  // Sign the transaction using the signer, get the signed transaction
+  sign(from: PolkadotSigner, txOptions?: TxOptions): Promise<Uint8Array>
+
+  // Sign the transaction using the signer, submit it and get submission progress events
+  signSubmitAndWatch(
+    from: PolkadotSigner,
+    txOptions?: TxOptions,
+  ): Observable<TxEvent>
+
+  // Sign the transaction using the signer, submit it and get the finalized result.
+  signAndSubmit(
+    from: PolkadotSigner,
+    txOptions?: TxOptions,
+  ): Promise<TxFinalizedPayload>
+
+  // Get the callData encoded in SCALE using the chain's metadata
+  getEncodedData(): Promise<Uint8Array>
+
+  // Get the unsigned extrinsic
+  getBareTx(): Promise<Uint8Array>
+
+  // Get the estimated weight, class, fees, etc. of the transaction
+  getPaymentInfo: (
+    from: Uint8Array | SS58String,
+    txOptions?: TxOptions<Asset, Ext>,
+  ) => Promise<PaymentInfo>
+
+  // Get the estimated fees of the transaction
   getEstimatedFees: (
     from: Uint8Array | SS58String,
     txOptions?: TxOptions,
   ) => Promise<bigint>
-  decodedCall: Enum
+
+  // Decoded call data: { type: string, value: { type: string, value: T }}
+  decodedCall: TxCallData
 }
 ```
 
@@ -75,7 +103,7 @@ We will see item by item its content.
 
 ### `decodedCall`
 
-The `decodedCall` field holds the `papi` way of expressing an extrinsic, decoded in an `Enum` type. It could be useful to pass it as call data to a `proxy.proxy` call, for example, that takes another call as a parameter:
+The `decodedCall` field holds the `papi` way of expressing an extrinsic, decoded in an `Enum` type. It could be useful to pass it as call data to a `proxy.proxy` call, or a batch call, for example, that takes another call as a parameter:
 
 ```ts
 import { MultiAddress } from "@polkadot-api/descriptors"
@@ -94,7 +122,7 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 
 ### `getEncodedData`
 
-`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It also runs the compatibility check, so it needs the runtime and descriptors loaded. Let's see an example:
+`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. Let's see an example:
 
 ```ts
 import { MultiAddress } from "@polkadot-api/descriptors"
@@ -106,6 +134,8 @@ const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
 
 const encodedTx = await tx.getEncodedData()
 ```
+
+A synchronous version of this method is available in [Static APIs](/static#tx).
 
 ### `TxOptions`
 
@@ -156,11 +186,11 @@ interface TxBare {
 }
 ```
 
-It'll get back the `BareExtrinsic` ready to be broadcasted.
+It'll get back the `BareExtrinsic` ready to be broadcasted. Extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
 ### `sign`
 
-As simple as it seems, this method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`](/signers), we saw them in another section of the docs. Let's see its interface:
+This method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`](/signers), we saw them in another section of the docs. Let's see its interface:
 
 ```ts
 type TxSignFn = (
@@ -170,6 +200,8 @@ type TxSignFn = (
 ```
 
 It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the signer fails (or the user cancels the signature) it'll throw an error.
+
+Signed extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
 ### `signAndSubmit`
 
@@ -181,7 +213,7 @@ It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the 
 Note that this promise is not abortable. Let's see the interface:
 
 ```ts
-type TxPromise = (
+type TxSignAndSubmitFn = (
   from: PolkadotSigner,
   txOptions?: TxOptions,
 ) => Promise<TxFinalized>

@@ -7,7 +7,7 @@ mkdir papi-simple-transfer
 cd papi-simple-transfer
 bun init -y
 bun i polkadot-api @polkadot-labs/hdkd @polkadot-labs/hdkd-helpers
-bun papi add -n westend2 wnd
+bun papi add -n westend wnd
 ```
 
 This sample shows how to create a transaction on Westend,
@@ -25,7 +25,7 @@ import {
 import { getPolkadotSigner } from "polkadot-api/signer"
 import { createClient } from "polkadot-api"
 import { MultiAddress, wnd } from "@polkadot-api/descriptors"
-import { chainSpec } from "polkadot-api/chains/westend2"
+import { chainSpec } from "polkadot-api/chains/westend"
 import { getSmProvider } from "polkadot-api/sm-provider"
 import { start } from "polkadot-api/smoldot"
 

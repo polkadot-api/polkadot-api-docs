@@ -11,11 +11,9 @@ We have mainly two first-class providers:
 
 ## Enhancers
 
-Besides providers, we offer some enhancers (aka middlewares) for JSON-RPC providers, some of them increasing capabilities, and others fixing external issues.
+The `JsonRpcProvider` interface is simple and unopinionated. This lets you create enhancers that add functionality, which might be useful for observability, debugging, etc.
 
-- [Polkadot-SDK Compatibility Enhancer](/providers/enhancers#polkadot-sdk-compatibility-layer), fixing common pitfalls among JSON-RPC servers running over Polkadot-SDK nodes.
-- [Legacy Provider](/providers/enhancers#legacy-provider), a compliant middleware that exposes the modern [JSON-RPC APIs](https://paritytech.github.io/json-rpc-interface-spec/) while delegating calls to the legacy JSON-RPC APIs.
-- [Logs Provider and Recorder](/providers/enhancers#logs-provider), allowing to capture JSON-RPC messaging logs, useful for debugging and/or analytics.
+PAPI has a [Logs Provider and Recorder](/providers/enhancers#logs-provider), allowing to capture JSON-RPC messaging logs, useful for debugging and/or analytics.
 
 ## JSON-RPC providers in-depth
 

@@ -24,8 +24,6 @@ Different bundlers have slightly different ways of creating workers, let's see t
 
 - Vite:
 
-This option is only guaranteed to work on Vite, but might work on other bundlers.
-
 ```ts
 import { startFromWorker } from "polkadot-api/smoldot/from-worker"
 import SmWorker from "polkadot-api/smoldot/worker?worker"
@@ -35,8 +33,6 @@ const smoldot = startFromWorker(new SmWorker())
 
 - Bun
 
-This option is safer than the previous one and could work in other bundlers as well.
-
 ```ts
 import { startFromWorker } from "polkadot-api/smoldot/from-worker"
 
@@ -45,8 +41,6 @@ const smoldot = startFromWorker(smWorker)
 ```
 
 - Webpack
-
-This option is the safest and should work in (almost) every bundler.
 
 ```ts
 import { startFromWorker } from "polkadot-api/smoldot/from-worker"
@@ -59,7 +53,7 @@ const smoldot = startFromWorker(smWorker)
 
 ## Adding a chain
 
-Once we have an instance of smoldot, we need to tell smoldot to connect to the chain we want. For that, we need the `chainSpec` of the chain. With `polkadot-api` we bundle chainspecs for certain well-known chains. We try to keep all 5 relay chains (Polkadot, Kusama, Westend, Paseo, and Rococo) and its system chains.
+Once we have an instance of smoldot, we need to tell smoldot to connect to the chain we want. For that, we need the `chainSpec` of the chain. With `polkadot-api` we bundle chainspecs for certain well-known chains: All 5 relay chains (Polkadot, Kusama, Westend, Paseo, and Rococo) and its system chains (AssetHub, People, Coretime, Collectives, etc.).
 
 In order to add a solo-chain (or a relay chain), it is very simple:
 
@@ -97,8 +91,41 @@ import { chainSpec } from "polkadot-api/chains/polkadot"
 import { createClient } from "polkadot-api"
 import { getSmProvider } from "polkadot-api/sm-provider"
 
-// no need to await!
+// No need to await: the provider accepts promises as well.
 const provider = getSmProvider(() => smoldot.addChain({ chainSpec }))
 
 const client = createClient(provider)
+```
+
+**Important:** `getSmProvider` expects a function that creates a new chain instance. Smoldot may destroy a chain, and destroyed chains cannot be reused. The provider detects this and calls the function again to obtain a fresh chain, recovering transparently for the rest of the application. Returning the same chain instance will break this behavior.
+
+```ts twoslash
+// [!include ~/snippets/startSm.ts]
+// ---cut---
+import { chainSpec } from "polkadot-api/chains/polkadot"
+import { chainSpec as ahChainSpec } from "polkadot-api/chains/polkadot_asset_hub"
+import { createClient } from "polkadot-api"
+import { getSmProvider } from "polkadot-api/sm-provider"
+
+// ❌ Wrong: creating the chain outside and returning the same instance.
+// If `dotChain` is destroyed, the provider cannot recover.
+const dotChain = smoldot.addChain({ chainSpec })
+const wrongImplementedProvider = getSmProvider(() => dotChain)
+
+// ✅ Correct: the chain is recreated on demand.
+// The provider can recover from a destroyed chain.
+const provider = getSmProvider(() => smoldot.addChain({ chainSpec }))
+
+// ✅ Same principle applies to relay chains + parachains:
+// create them inside the function.
+const ahProvider = getSmProvider(async () => {
+  const relayChain = await smoldot.addChain({ chainSpec })
+  return smoldot.addChain({
+    chainSpec: ahChainSpec,
+    potentialRelayChains: [relayChain],
+  })
+})
+
+// Creating multiple references with the same chainSpec is safe:
+// smoldot reuses them internally.
 ```
