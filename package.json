@@ -21,7 +21,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@scure/sr25519": "^0.3.0",
     "@types/react": "^19.2.7",
-    "polkadot-api": "^1.23.0",
+    "polkadot-api": "2.0.0-canary.baa4c8e",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "rxjs": "^7.8.2",

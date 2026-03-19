@@ -71,8 +71,7 @@ Use the `inkClient.constructor(label: string)` to get the functions to encode an
 For example, a dry-run of a psp22 contract deployment:
 
 ```ts
-const wasmBlob = ...; // read the contract wasm to deploy as a Uint8Array based on your JS runtime.
-const code = Binary.fromBytes(wasmBlob)
+const code = ...; // read the contract wasm to deploy as a Uint8Array based on your JS runtime.
 
 // Takes in the constructor name (TS suggests the ones available)
 const psp22Constructor = psp22Client.constructor("new")
@@ -162,7 +161,7 @@ Ink! has its own SystemEvent, `Contracts.ContractEmitted` (or `Revive.ContractEm
 Polkadot-API's inkClient offers an API to decode a specific ink! event, and also to filter all the `Contracts.ContractEmitted` events from a list and return them already decoded:
 
 ```ts
-type InkEvent = { data: Binary }
+type InkEvent = { data: Uint8Array }
 type SystemEvent = { type: string; value: unknown }
 interface InkEventInterface<E> {
   // For v5 events, we need the event's `signatureTopic` to decode it.
@@ -174,9 +173,9 @@ interface InkEventInterface<E> {
     address: string, // Contract address
     events: Array<
       // Accepts events coming from Runtime-APIs.
-      | { event: SystemEvent; topics: Binary[] }
+      | { event: SystemEvent; topics: Uint8Array[] }
       // Also accepts events coming from transactions.
-      | (SystemEvent & { topics: Binary[] })
+      | (SystemEvent & { topics: Uint8Array[] })
     >,
   ) => Array<E>
 }
@@ -199,8 +198,8 @@ To get the codecs for a specific storage query, use `inkClient.storage()`:
 ```ts
 interface StorageCodecs<K, V> {
   // key arg can be omitted if that storage entry takes no keys
-  encode: (key: K) => Binary
-  decode: (data: Binary) => V
+  encode: (key: K) => Uint8Array
+  decode: (data: Uint8Array) => V
 }
 interface StorageInterface<D extends StorageDescriptors> {
   // path can be omitted to target the root storage (equivalent to path = "")

@@ -9,12 +9,10 @@ In order to create a transaction directly in PAPI (without a pre-made call data)
 ```ts
 interface TxEntry<Arg> {
   (data: Arg): Transaction
-  isCompatible: IsCompatible
-  getCompatibilityLevel: GetCompatibilityLevel
 }
 ```
 
-[We already know how `isCompatible` and `getCompatibilityLevel` works](/typed#getcompatibilitylevel). In order to get a `Transaction` object, we need to pass all arguments required by the extrinsic. Let's see two examples, `Balances.transfer_keep_alive` and `NominationPools.claim_payout`.
+In order to get a `Transaction` object, we need to pass all arguments required by the extrinsic. Let's see two examples, `Balances.transfer_keep_alive` and `NominationPools.claim_payout`.
 
 The case of `claim_payout` is the simplest one, since it doesn't take any arguments. Simply as
 
@@ -37,14 +35,13 @@ const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
 
 ## `txFromCallData`
 
-This option will just take a `Binary` call data and pack the transaction from it. It will validate the input when creating it, throwing an error otherwise. It will create the transaction asynchronously if you just pass the call data, and synchronously if you pass an already awaited compatibility token!
+This option will just take a binary call data and pack the transaction from it. It will validate the input when creating it, throwing an error otherwise.
 
 Its interface is:
 
 ```ts
 interface TxFromBinary {
-  (callData: Binary): Promise<Transaction>
-  (callData: Binary, compatibilityToken: CompatibilityToken): Transaction
+  (callData: Uint8Array): Promise<Transaction>
 }
 ```
 
@@ -53,12 +50,7 @@ Very simple. Let's see it with an example:
 ```ts
 const callData = Binary.fromHex("0x00002c50415049203c3320444f54")
 
-// without compatibility token it's a promise
 const tx: Transaction = await api.txFromCallData(callData)
-
-const token = await api.compatibilityToken
-// with token is sync!
-const txSync: Transaction = api.txFromCallData(callData, token)
 ```
 
 ## `Transaction` type
@@ -102,15 +94,9 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 
 ### `getEncodedData`
 
-`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It also runs the compatibility check, so it needs the runtime and descriptors loaded. As we've seen with `getCompatibilityLevel`, if you call it directly it'll be a `Promise`-based call, or you can pass in a `compatibilityToken` you've previously awaited for and it'll answer synchronously. Let's see an example:
+`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. It also runs the compatibility check, so it needs the runtime and descriptors loaded. Let's see an example:
 
 ```ts
-// `getEncodedData` has this interface
-interface TxCall {
-  (): Promise<Binary>
-  (compatibilityToken: CompatibilityToken): Binary
-}
-
 import { MultiAddress } from "@polkadot-api/descriptors"
 
 const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
@@ -118,12 +104,7 @@ const tx: Transaction = typedApi.tx.Balances.transfer_keep_alive({
   value: 10n ** 10n, // 1 DOT
 })
 
-// without argument it's async!
 const encodedTx = await tx.getEncodedData()
-
-// with compatibilityToken argument it's sync!
-const compatibilityToken = await typedApi.compatibilityToken
-const encodedTx = tx.getEncodedData(compatibilityToken)
 ```
 
 ### `TxOptions`
@@ -132,7 +113,7 @@ All the methods that will follow sign the transaction (or fake-sign in the case 
 
 ```ts
 type TxOptions<Asset> = Partial<{
-  at: HexString | "best" | "finalized"
+  at: HexString
   tip: bigint
   mortality: { mortal: false } | { mortal: true; period: number }
   asset: Asset
@@ -147,7 +128,7 @@ type TxOptions<Asset> = Partial<{
 }>
 ```
 
-- `at`: gives the option to choose which block to target when creating the transaction. Default: `finalized`
+- `at`: gives the option to choose which block to target the mortality when creating the transaction. This means that the transaction will be valid only on descendants of that block. Defaults to the latest finalized block.
 - `mortality`: gives the option to choose the mortality for the transaction. Default: `{ mortal: true, period: 64 }`. The `period` will be rounded to the first power of two greater or equal to it.
 - `nonce`: this is meant for advanced users that submit several transactions in a row, it allows to modify the default `nonce`. Default: highest nonce found in any known block.
 - `tip`: add tip to transaction. Default: `0`
@@ -167,12 +148,11 @@ type TxEstimateFees = (
 
 ### `getBareTx`
 
-This method packs the transaction as a `Bare`/`Unsigned` transaction. It will prefer Extrinsic V5 if available, and fall back to Extrinsic V4. You can pass a `compatibilityToken` to make it synchronous, or it will be promise-based. Its interface is straight-forward:
+This method packs the transaction as a `Bare`/`Unsigned` transaction. It will prefer Extrinsic V5 if available, and fall back to Extrinsic V4. Its interface is straight-forward:
 
 ```ts
 interface TxBare {
   (): Promise<HexString>
-  (compatibilityToken: CompatibilityToken): HexString
 }
 ```
 

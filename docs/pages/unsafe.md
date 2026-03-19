@@ -30,20 +30,4 @@ import { dot } from "@polkadot-api/descriptors"
 const unsafeApi = client.getUnsafeApi<typeof dot>() // with typings
 ```
 
-One can notice the API is actually very similar to the `TypedApi`, check [its docs](/typed) for the API reference since it behaves the exact same way. The only difference is that interactions do not include [compatibility methods](/typed#getcompatibilitylevel), and any reference to `compatibilityToken` in the typedApi is here a `runtimeToken`. For example:
-
-```ts
-const typedApi = client.getTypedApi(descriptors)
-const unsafeApi = client.getUnsafeApi()
-
-// in typed is `compatibilityToken`
-const typedToken = await typedApi.compatibilityToken
-// in unsafe is `runtimeToken`
-const unsafeToken = await unsafeApi.runtimeToken
-
-// typed version
-typedApi.consts.System.SS58Prefix(typedToken)
-
-// unsafe
-unsafeApi.consts.System.SS58Prefix(unsafeToken)
-```
+One can notice the API is actually very similar to the `TypedApi`, check [its docs](/typed) for the API reference since it behaves the exact same way.

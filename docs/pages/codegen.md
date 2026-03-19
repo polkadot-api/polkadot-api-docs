@@ -32,7 +32,6 @@ Options:
   --at <block hash or number>  Only for -w/--wsUrl. Fetch the metadata for a specific block or hash
   --no-persist                 Do not persist the metadata as a file
   --skip-codegen               Skip running codegen after adding
-  --whitelist <filename>       Use whitelist file to reduce descriptor size
   -h, --help                   display help for command
 ```
 
@@ -108,7 +107,6 @@ Arguments:
 Options:
   --config <filename>     Source for the config file
   --skip-codegen          Skip running codegen after adding
-  --whitelist <filename>  Use whitelist file to reduce descriptor size
   -h, --help              display help for command
 ```
 
@@ -128,7 +126,9 @@ import { createClient } from "polkadot-api"
 // ---cut---
 import { dot, MultiAddress } from "@polkadot-api/descriptors"
 
-const dotClient = createClient(getSmProvider(smoldot.addChain({ chainSpec })))
+const dotClient = createClient(
+  getSmProvider(() => smoldot.addChain({ chainSpec })),
+)
 
 const dotApi = dotClient.getTypedApi(dot)
 
@@ -149,6 +149,8 @@ const encodedData = await tx.getEncodedData()
 By default, PAPI generates the descriptors for every possible interaction for each chain. These are 50~150KB files that are lazy-loaded, and it's possible to optimize them by whitelisting which calls you'll be using in your dApp.
 
 ```ts twoslash
+// .papi/whitelist.ts
+
 import type { WhitelistEntry } from "@polkadot-api/descriptors"
 
 // the export name has to *EXACTLY* match `whitelist`
@@ -166,6 +168,8 @@ export const whitelist: WhitelistEntry[] = [
   "const.*",
 ]
 ```
+
+The whitelist file should be placed in `.papi/whitelist.ts` from the root of your npm package.
 
 For projects that use more than one chain definition, you can choose to have different whitelisted entries per each key by using `WhitelistEntriesByChain`. This is an object interface which takes each chain for each key, and also has a "common" key `"*"` for a global one. The whitelist is additive: Each chain will have the interactions of their own key plus the common key.
 
@@ -197,23 +201,7 @@ export const whitelist: WhitelistEntriesByChain = {
 
 Any chain not specified in the object will just inherit the whitelist from the common key `*`. If neither the common key or the chain key is specified, it will result in an empty chain with no interactions.
 
-To have papi use the whitelist, save it somewhere in your project (suggestion: `.papi/whitelist.ts`), and then add the option in the papi config file in `.papi/polkadot-api.json`:
-
-```json
-{
-  "descriptorPath": …,
-  "entries": { … },
-  "options": {
-    "whitelist": ".papi/whitelist.ts"
-  }
-}
-```
-
-The path is relative to where the `papi` command is called from, usually in the root of your project.
-
-Optionally, the CLI has a flag to specify a different path `papi --whitelist .papi/whitelist.ts`.
-
-A full working example of a dApp with whitelist could be found at [our repo](https://github.com/polkadot-api/polkadot-api/tree/main/examples/vite).
+A full working example of a dApp with whitelist could be found at [our repo](https://github.com/polkadot-api/polkadot-api/tree/main/examples/vite/.papi/whitelist.ts).
 
 ## Codegen without descriptors package
 

@@ -1,75 +1,78 @@
-## Polkadot-SDK Compatibility Layer
+# Enhancers
 
-If using Polkadot-API client through Smoldot provider (light client) there are no specific requirements.
-
-Nevertheless, some [WS Providers](/providers/ws) over a [Paritytech Polkadot-SDK](https://github.com/paritytech/polkadot-sdk) based node offer a flawed version of the JSON-RPC API Spec, which can be solved in the client in some cases.
-
-:::warning
-If you are using [`@polkadot-api/legacy-provider`](/providers/enhancers#legacy-provider), **DO NOT** use `withPolkadotSdkCompat`. `withLegacy` already tackles every bit to offer a spec compliant JSON-RPC server.
-:::
-
-Our recommendation is to **always use** `withPolkadotSdkCompat` to avoid any issues, but there are three cases:
-
-#### Polkadot-SDK `>= 1.16` (`stable-2409`)
-
-Polkadot-API will work without any issues. The WebSocket provider could be used without further issues:
+The JSON-RPC interface is completely unopinionated, which makes it simple to create and use middlewares that deal with the JSON-RPC connection.
 
 ```ts
-import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
+interface JsonRpcProvider {
+  (onMessage: (message: JsonRpcMessage) => void) => JsonRpcConnection;
+}
 
-const client = createClient(getWsProvider("wss://your-rpc.your-url.xyz"))
-```
+interface JsonRpcConnection {
+  send: (message: JsonRpcRequest) => void;
+  disconnect: () => void;
+}
 
-#### Polkadot-SDK `1.1 <= x < 1.16`
-
-If your node uses versions between `1.1` and `1.11`, you are still good to go with Polkadot-API. The node implements the JSON-RPC spec wrongly, but we provide some enhancers to workaround these flaws. You need to start the connection as follows:
-
-```ts
-import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
-
-const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://your-rpc.your-url.xyz")),
+type JsonRpcId = string | number | null
+type JsonRpcRequest = {
+  jsonrpc: "2.0"
+  method: string
+  params?: any
+  id?: JsonRpcId
+}
+type JsonRpcResponse = {
+  jsonrpc: "2.0"
+  id: JsonRpcId
+} & (
+  | {
+      result: any
+    }
+  | {
+      error: {
+        code: number
+        message: string
+        data?: any
+      }
+    }
 )
+type JsonRpcMessage = JsonRpcRequest | JsonRpcResponse
 ```
 
-#### Polkadot-SDK `< 1.1.0`
+Simply explained, a `JsonRpcProvider` is a function that when called, will initiate a connection with a server. It takes in a callback function, where server messages will be emitted, and returns a `JsonRpcConnection`, which is used to either send messages or disconnect from the server.
 
-The JSON-RPC spec implemented prior `1.1` was really poor and we cannot feasibly workaround it. Polkadot-API does not support those nodes.
-
-## Legacy Provider
-
-The `@polkadot-api/legacy-provider` enhancer acts as a transparent compatibility layer and exposes the new JSON-RPC endpoints while internally translating calls to the legacy RPC APIs.
-
-All PAPI providers assume that they are interacting with the new JSON-RPC spec. For this reason, legacy-provider-enhancer **must be applied before any other enhancer**. To make this possible, the ws-provider supports an `innerEnhancer` option, which allows enhancers to be applied at the lowest possible level.
-
-```ts
-import { createClient } from "polkadot-api"
-import { getWsProvider } from "polkadot-api/ws-provider"
-import { withLegacy } from "@polkadot-api/legacy-provider"
-
-const client = createClient(
-  getWsProvider("wss://your-rpc.your-url.xyz", {
-    innerEnhancer: withLegacy(),
-  }),
-)
-```
-
-:::info
-`withLegacy` is not exported from top-level `polkadot-api` package. You should install `@polkadot-api/legacy-provider` with the package manager of your preference to access it.
-:::
+If the connection is dropped, this is handled in a different layer: e.g. the WebSocket will notify the connection is dropped. This is what lets the provider stay unopinionated from the transport layer, since there are transports that don't rely on network connections.
 
 ## Logs Provider
 
-One of the enhancers that we created is `polkadot-api/logs-provider`, that can be used to create a provider that will replay node messages from a log file (`logsProvider`), along with a provider enhancer that can be used to generate the logs consumed by `logsProvider`: `withLogsRecorder`.
+For instance, we can easily create a JsonRPC enhancer that logs the message sent and received from the server:
+
+```ts
+const logProvider = (inner: JsonRpcProvider): JsonRpcProvider => {
+  return (onMsg) => {
+    const { send: innerSend, disconnect: innerDisconnect } = inner((msg) => {
+      console.log(`MSG IN: ${msg}`)
+      onMsg(msg)
+    })
+    return {
+      send(msg) {
+        console.log(`MSG OUT: ${msg}`)
+        innerSend(msg)
+      },
+      disconnect() {
+        console.log(`DISCONNECTED`)
+        innerDisconnect()
+      },
+    }
+  }
+}
+```
+
+As this is a rather useful utility, it's one of the enhancers that we created is `polkadot-api/logs-provider`, that can be used to create a provider that will replay node messages from a log file (`logsProvider`), along with a provider enhancer that can be used to generate the logs consumed by `logsProvider`: `withLogsRecorder`.
 
 ```ts
 // 1. recording logs
 import { createClient } from "polkadot-api"
 import { withLogsRecorder } from "polkadot-api/logs-provider"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 
 const wsProvider = getWsProvider("wss://example.url")
 // Using console.log to output each line, but you could e.g. write it directly to a

@@ -13,10 +13,11 @@ type CallOptions = Partial<{
 }>
 
 type StorageEntryWithoutKeys<Payload> = {
-  isCompatible: IsCompatible
-  getCompatibilityLevel: GetCompatibilityLevel
   getValue: (options?: CallOptions) => Promise<Payload>
-  watchValue: (bestOrFinalized?: "best" | "finalized") => Observable<Payload>
+  watchValue: (options?: { at: "best" | "finalized" }) => Observable<{
+    value: Payload
+    block: BlockInfo
+  }>
 
   getKey: () => Promise<HexString>
   getKey: (token: CompatibilityToken) => HexString
@@ -39,8 +40,11 @@ type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
   getCompatibilityLevel: GetCompatibilityLevel
   getValue: (...args: [...Args, options?: CallOptions]) => Promise<Payload>
   watchValue: (
-    ...args: [...Args, bestOrFinalized?: "best" | "finalized"]
-  ) => Observable<Payload>
+    ...args: [...Args, options?: { at: "best" | "finalized" }]
+  ) => Observable<{
+    value: Payload
+    block: BlockInfo
+  }>
   getValues: (
     keys: Array<[...Args]>,
     options?: CallOptions,

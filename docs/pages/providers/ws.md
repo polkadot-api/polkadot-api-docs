@@ -4,27 +4,25 @@ The WS provider enables PAPI to interact with JSON-RPC servers via WebSocket con
 
 ```ts
 interface WsJsonRpcProvider extends JsonRpcProvider {
-  switch: (uri?: string, protocol?: string[]) => void
+  switch: (uri?: string) => void
   getStatus: () => StatusChange
 }
 
 interface GetWsProvider {
   (
-    endpoints:
-      | string
-      | Array<string | { uri: string; protocol: string | string[] }>,
+    endpoints: string | string[],
     config?: Partial<{
       onStatusChanged: (status: StatusChange) => void
-      innerEnhancer: (input: JsonRpcProvider) => JsonRpcProvider
       timeout: number
       heartbeatTimeout: number
       websocketClass: WebSocketClass
+      logger: SocketLoggerFn
     }>,
   ): WsJsonRpcProvider
 }
 ```
 
-In order to create the provider, you can pass one (or more) websocket `uri`s with its optional supported protocols. For example:
+In order to create the provider, you can pass one (or more) websocket `uri`s. For example:
 
 ```ts
 import { getWsProvider } from "polkadot-api/ws-provider"
@@ -42,17 +40,16 @@ Passing more than one websocket `uri` allows the provider to switch in case one 
 
 When creating the provider, you can also pass additional configuration.
 
-Use `innerEnhancer` to pass in enhancers that must be applied before any other enhancers (like [`legacy-provider`](/providers#legacy-provider)).
+Mainly, there are two to observe the underlying websocket status:
 
-You can also pass a callback to `onStatusChanged` that will be called every time the status changes.
+- `onStatusChanged` is a simple callback that emits anytime the websocket's status changes.
+- `logger` is more verbose: also notifies any time the underlying websocket emits or receives something.
 
 ```ts
 import { getWsProvider } from "polkadot-api/ws-provider"
-import { withLegacy } from "@polkadot-api/legacy-provider"
 
 const provider = getWsProvider("wss://myws.com", {
   timeout: 10_000,
-  innerEnhancer: withLegacy(),
   onStatusChange: (status) => {
     switch (status.type) {
       case WsEvent.CONNECTING:
@@ -69,10 +66,28 @@ const provider = getWsProvider("wss://myws.com", {
         break
     }
   },
+  logger: (evt) => {
+    switch (evt.type) {
+      // Has status changes
+      case SocketEvents.CONNECTING:
+        console.log("Connecting... 🔌")
+        break
+      // etc.
+      // and also more verbose emissions
+      case SocketEvents.STALE:
+        break
+      case SocketEvents.IN:
+        console.log("Received", evt.msg)
+        break
+      case SocketEvents.OUT:
+        console.log("Sent", evt.msg)
+        break
+    }
+  },
 })
 ```
 
-You can even bring your own WebSocket implementation using `websocketClass` if you prefer. By default, it uses the global WebSocket available in browsers, Node.js >=22.4.0, and Bun.
+You can also bring your own WebSocket implementation using `websocketClass` if you prefer. By default, it uses the global WebSocket available in browsers, Node.js >=22.4.0, and Bun.
 For example, for NodeJS 20 and `ws` library:
 
 ```typescript
@@ -100,20 +115,18 @@ The provider also has a `getStatus` method that returns the current status of th
 
 ```ts
 enum WsEvent {
-  CONNECTING,
-  CONNECTED,
-  ERROR,
-  CLOSE,
+  CONNECTING = "CONNECTING",
+  CONNECTED = "CONNECTED",
+  ERROR = "ERROR",
+  CLOSE = "CLOSE",
 }
 type WsConnecting = {
   type: WsEvent.CONNECTING
   uri: string
-  protocols?: string | string[]
 }
 type WsConnected = {
   type: WsEvent.CONNECTED
   uri: string
-  protocols?: string | string[]
 }
 type WsError = {
   type: WsEvent.ERROR
