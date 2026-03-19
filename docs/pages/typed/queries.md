@@ -20,15 +20,14 @@ type StorageEntryWithoutKeys<Payload> = {
   }>
 
   getKey: () => Promise<HexString>
-  getKey: (token: CompatibilityToken) => HexString
 }
 ```
 
-`getKey` builds the storage key for a specific query. It optionally takes a [`CompatibilityToken`](/typed), making it synchronous if passed.
-
 As you might expect, `getValue` returns you the `Payload` for that particular query, allowing you to choose which block to query (`at` can be a blockHash, `"finalized"` (the default), or `"best"`).
 
-On the other hand, `watchValue` function returns an Observable allows you to check the changes of a particular storage entry in `"best"` or `"finalized"` (the default) block.
+On the other hand, `watchValue` function returns an Observable allows you to check the changes of a particular storage entry in `"best"` or `"finalized"` (the default) block. The Observable will make one emission for every block it has checked, keeping the same `value` reference if the value hasn't changed between emissions.
+
+`getKey` builds the storage key for a specific query. A synchronous version of this method is available in [Static APIs](/static#query).
 
 ## Entries with keys
 
@@ -36,8 +35,6 @@ Similarly, we'll use the example of `System.Account` query (it returns the infor
 
 ```ts
 type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
-  isCompatible: IsCompatible
-  getCompatibilityLevel: GetCompatibilityLevel
   getValue: (...args: [...Args, options?: CallOptions]) => Promise<Payload>
   watchValue: (
     ...args: [...Args, options?: { at: "best" | "finalized" }]
@@ -69,11 +66,8 @@ type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
   }>
 
   getKey: (...args: PossibleArgs) => Promise<HexString>
-  getKey: (...args: PossibleArgs, token: CompatibilityToken) => HexString
 }
 ```
-
-`getKey` builds the storage key for a specific query and set of arguments. You can pass all args just a subset of them. It optionally takes a [`CompatibilityToken`](/typed), making it synchronous if passed.
 
 Both `getValue` and `watchValue` have the same behaviour as in the previous case, but they require you to pass all keys required for that storage query (in our example, an address). The same function arguments that are found in the no-keys situation can be passed at the end of the call to modify which block to query, etc. For example, a query with 3 args:
 
@@ -100,3 +94,5 @@ typedApi.query.Pallet.Query.getEntries(arg1, arg2, { at: "0x12345678" }) // 2/3 
 - `block`: Block hash, block number, and parent block hash; to identify how updated the information is.
 - `deltas`: In case there were any changes to `entries` since the previous event, `upserted` (meaning added or changed) and `deleted` entries. `upserted` always contains all entries in the first event, as `entries` is initially populated. If `deltas` were to be `null`, then no changes happened since the last emission.
 - `entries`: Immutable data-structure with the whole bunch of entries, updated to that block.
+
+`getKey` builds the storage key for a specific query and set of arguments. You can pass all args or just a subset of them. A synchronous version of this method is available in [Static APIs](/static#query).

@@ -48,13 +48,10 @@ Start by creating the ink client from `polkadot-api/ink`. In the following examp
 import { contracts, testAzero } from "@polkadot-api/descriptors"
 import { getInkClient } from "polkadot-api/ink"
 import { createClient } from "polkadot-api"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 
 const client = createClient(
-  withPolkadotSdkCompat(
-    getWsProvider("wss://aleph-zero-testnet-rpc.dwellir.com"),
-  ),
+  getWsProvider("wss://aleph-zero-testnet-rpc.dwellir.com"),
 )
 
 // Create a psp22 ink! client

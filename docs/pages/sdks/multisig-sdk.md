@@ -14,7 +14,7 @@ Then, initialize it by passing in the `client` for your chain:
 
 ```ts
 import { createMultisigSdk } from "@polkadot-api/sdk-multisig"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 import { createClient } from "polkadot-api"
 
 const client = createClient(getWsProvider("wss://rpc.ibp.network/polkadot"))

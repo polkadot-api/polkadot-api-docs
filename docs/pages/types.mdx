@@ -113,9 +113,9 @@ const generic: XcmV5Junction = Enum("Parachain", 1000)
 
 When reading from Enums, these are objects with `{ type: string, value: unknown }` with discriminated types based on the `type` (so if you do `switch (enum.type) {` you will have the correct value for the `type`).
 
-## Binary
+## Binary data
 
-Binaries in PAPIv2 are represented as `Uint8Array`s. `Binary` is now a utility type that has a few functions to easily deal with binary data:
+Binaries are represented as `Uint8Array`s. PAPI exports a `Binary` utility type that has a few functions to easily deal with binary data:
 
 ```ts twoslash
 import { Binary } from "polkadot-api"

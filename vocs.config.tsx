@@ -134,6 +134,10 @@ export default defineConfig({
           text: "Unsafe API",
           link: "/unsafe",
         },
+        {
+          text: "Static APIs",
+          link: "/static",
+        },
       ],
     },
     {

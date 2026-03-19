@@ -246,7 +246,7 @@ The compatibility API has changed significantly. The runtime and compatibility t
 
 `typedApi.getStaticApis()` returns a promise of a set of APIs that target one specific runtime. Once the runtime is loaded, the promise resolves and you have access to a few APIs that can run synchronously. You can optionally pass in the block you want to use for that, but it defaults to `finalized`.
 
-Once that block runtime is loaded, then you have synchronous access to anything that's inside: `decodeCallData(callData)` to decode a call data, `constants` to access the constants, `tx` to get call data, and `compat` to check compatibility across all APIs.
+Once that block runtime is loaded, then you have synchronous access to anything that's inside: `txFromCallData(callData)` to create a tx from a call data, `constants` to access the constants, `tx` to get call data, and `compat` to check compatibility across all APIs.
 
 ### Compatibility
 
@@ -332,7 +332,8 @@ const callData = staticApis.tx.System.remark(
 ).getCallData()
 
 // Reverse it
-const { pallet, name, input } = staticApis.decodeCallData(callData)
+const tx = staticApis.txFromCallData(callData)
+console.log(tx.decodedCall)
 ```
 
 ## WatchValue

@@ -26,8 +26,8 @@ Options:
   -f, --file <filename>        Source from metadata encoded file
   -w, --wsUrl <URL>            Source from websocket url
   -c, --chainSpec <filename>   Source from chain spec file
-  -n, --name <name>            Source from a well-known chain (choices: "ksmcc3", "paseo",
-                               "polkadot", "polkadot_collectives", "rococo_v2_2", "westend2", [...]")
+  -n, --name <name>            Source from a well-known chain (choices: "kusama", "paseo",
+                               "polkadot", "polkadot_collectives", "westend", [...]")
   --wasm <filename>            Source from runtime wasm file
   --at <block hash or number>  Only for -w/--wsUrl. Fetch the metadata for a specific block or hash
   --no-persist                 Do not persist the metadata as a file

@@ -28,11 +28,10 @@ This process uses the name defined in the contract metadata to export it as a pr
 ```ts
 import { createInkSdk } from "@polkadot-api/sdk-ink"
 import { createClient } from "polkadot-api"
-import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat"
-import { getWsProvider } from "polkadot-api/ws-provider"
+import { getWsProvider } from "polkadot-api/ws"
 
 const client = createClient(
-  withPolkadotSdkCompat(getWsProvider("wss://testnet-passet-hub.polkadot.io")),
+  getWsProvider("wss://testnet-passet-hub.polkadot.io"),
 )
 const inkSdk = createInkSdk(client)
 ```
@@ -46,10 +45,8 @@ The SDK provides two main functions for different workflows:
 
 ```ts
 import { contracts } from '@polkadot-api/descriptors'
-import { Binary } from "polkadot-api";
 
-const codeBlob = ...; // Uint8Array of the contract WASM (v5-) or PolkaVM (v6+) blob.
-const code = Binary.fromBytes(codeBlob);
+const code = ...; // Uint8Array of the contract WASM (v5-) or PolkaVM (v6+) blob.
 
 const flipperDeployer = inkSdk.getDeployer(contracts.flipper, code);
 ```

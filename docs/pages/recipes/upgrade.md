@@ -24,23 +24,26 @@ Now on the code you can create two typed APIs for the same chain, and then use t
 To make it clear, the `client` is connected to one chain that's using one specific version of the runtime. You can create multiple typedApis for that connection, which just give you the types for each possible version of the runtime. Then you can use runtime compatibility checks to perform the operation on the correct descriptor.
 
 ```ts
-import { createClient } from "polkadot-api"
+import { createClient, CompatibilityLevel } from "polkadot-api"
 import { dot, nextDot, MultiAddress } from "@polkadot-api/descriptors"
 import { chainSpec } from "polkadot-api/chains/polkadot"
+import { getSmProvider } from "polkadot-api/sm-provider"
 import { startFromWorker } from "polkadot-api/smoldot/from-worker"
 import SmWorker from "polkadot-api/smoldot/worker?worker"
 
 const smoldot = startFromWorker(new SmWorker())
-const chain = await smoldot.addChain({ chainSpec })
-const client = createClient(getSmProvider(chain))
+const client = createClient(
+  getSmProvider(() => smoldot.addChain({ chainSpec })),
+)
 
 const dotApi = client.getTypedApi(dot)
 const nextApi = client.getTypedApi(nextDot)
 
-function performTransfer() {
+async function performTransfer() {
+  const staticApis = await nextApi.getStaticApis()
   // check if we're running on the next version to run that first
   if (
-    await nextApi.tx.Balances.new_fancy_transfer.isCompatible(
+    staticApis.compat.tx.Balances.new_fancy_transfer.isCompatible(
       CompatibilityLevel.Partial,
     )
   ) {
@@ -60,6 +63,6 @@ function performTransfer() {
 
 Furthermore, the runtime upgrade might happen while the dApp is running, and this will still work without needing to redo the connection. As soon as the upgrade is received, the compatible check will work as expected and the dApp will start using the next runtime.
 
-As a note, `isCompatible` is a function available on every interaction on the typedApi (queries, apis, constants, events, transactions). It needs a compatibility threshold. If used without any other parameter it will return a `Promise<boolean>`, because it needs to wait for the runtime to be loaded before it can tell whether it's compatible or not.
+As a note, `isCompatible` is a function available on `staticApis.compat` for every interaction (queries, apis, constants, events, transactions). It needs a compatibility threshold. The function returns a `boolean` synchronously because `getStaticApis()` already waits for the runtime to be loaded.
 
-If you have multiple `isCompatible` checks and don't want to wait for each one individually, you can first wait for the descriptors to be loaded with `await dotApi.compatibilityToken`, and then pass this result to `isCompatible` as the second parameter, allowing it to return synchronously. See [TypedApi getCompatibilityLevel](/typed#getcompatibilitylevel) for a deeper explanation.
+If you have multiple `isCompatible` checks you can call them all synchronously once you have awaited `getStaticApis()`. See [Static APIs](/static#compat) for more details.
