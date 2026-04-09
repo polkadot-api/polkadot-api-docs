@@ -20,7 +20,10 @@ type UnsafeApi = {
   event: EvApi
   apis: RuntimeCallsApi
   constants: ConstApi
-  getStaticApis: (at?: HexString | "finalized" | "best") => Promise<StaticApis>
+  getStaticApis: (options?: {
+    at?: HexString | "finalized" | "best"
+    signal?: AbortSignal
+  }) => Promise<StaticApis>
 }
 ```
 

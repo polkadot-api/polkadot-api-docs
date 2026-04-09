@@ -11,11 +11,11 @@ import { dotDescriptors } from "@polkadot-api/descriptors" // you'll need them!
 const offline = await getOfflineApi(dotDescriptors) // it is async!
 
 // metadata constants can be easily accessed
-const prefix = api.constants.System.SS58Prefix // directly the value; e.g. `0`
-const { spec_name, spec_version } = api.constants.System.Version
+const prefix = offline.constants.System.SS58Prefix // directly the value; e.g. `0`
+const { spec_name, spec_version } = offline.constants.System.Version
 
 // transactions can be created and signed
-const tx = api.tx.Balances.transfer_keep_alive({
+const tx = offline.tx.Balances.transfer_keep_alive({
   dest: MultiAddress.Id(myAddr),
   value: amount,
 })
@@ -39,7 +39,7 @@ const signedTx = await tx2.sign(signer, {
 
 ## Constants
 
-Constants can be accessed easily having the metadata. `api.constants.Pallet.Entry` already gives the decoded value.
+Constants can be accessed easily having the metadata. `offline.constants.Pallet.Entry` already gives the decoded value.
 
 ## Transactions
 
@@ -47,7 +47,7 @@ This is the main usecase of offline api. It allows to create and encode transact
 The transactions are created in the exact same way as in the regular API ([see docs](/typed/tx)). Nevertheless, only a subset of the fields are exposed:
 
 - `decodedCall`: it enables to get the _PAPI decoded_ transaction. It is helpful to create other txs that require them as a parameter (e.g. `Utility.batch`).
-- `encodedData`: a `Binary` with the encoded call data.
+- `encodedData`: a `Uint8Array` with the encoded call data.
 - `sign`: it takes the same arguments as the regular API, but there are two compulsory signed extensions:
   - `nonce`: nonce cannot be retrieved anymore from the chain, and therefore has to be passed
   - `mortality`: transactions can be signed either mortal or immortal. In case the tx were to be mortal, the block information has to be passed as well.

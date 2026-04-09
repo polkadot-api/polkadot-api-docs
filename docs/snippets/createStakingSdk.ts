@@ -6,13 +6,16 @@ import { start } from "polkadot-api/smoldot"
 import { dot } from "@polkadot-api/descriptors"
 
 const smoldot = start()
-const chain = smoldot.addChain({ chainSpec: polkadot }).then((relay) =>
-  smoldot.addChain({
-    chainSpec: polkadot_asset_hub,
-    potentialRelayChains: [relay],
-  }),
-)
 
-const client = createClient(getSmProvider(chain))
+const client = createClient(
+  getSmProvider(() =>
+    smoldot.addChain({ chainSpec: polkadot }).then((relay) =>
+      smoldot.addChain({
+        chainSpec: polkadot_asset_hub,
+        potentialRelayChains: [relay],
+      }),
+    ),
+  ),
+)
 const typedApi = client.getTypedApi(dot)
 const stakingSdk = createStakingSdk(client)

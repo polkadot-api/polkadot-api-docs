@@ -182,11 +182,11 @@ This method packs the transaction as a `Bare`/`Unsigned` transaction. It will pr
 
 ```ts
 interface TxBare {
-  (): Promise<HexString>
+  (): Promise<Uint8Array>
 }
 ```
 
-It'll get back the `BareExtrinsic` ready to be broadcasted. Extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
+It'll get back the `BareExtrinsic` ready to be broadcasted as a `Uint8Array`. Extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
 ### `sign`
 
@@ -196,10 +196,10 @@ This method packs the transaction, sends it to the signer, and receives the sign
 type TxSignFn = (
   from: PolkadotSigner,
   txOptions?: TxOptions,
-) => Promise<HexString>
+) => Promise<Uint8Array>
 ```
 
-It'll get back the whole `SignedExtrinsic` that needs to be broadcasted. If the signer fails (or the user cancels the signature) it'll throw an error.
+It'll get back the whole `SignedExtrinsic` as a `Uint8Array` that needs to be broadcasted. If the signer fails (or the user cancels the signature) it'll throw an error.
 
 Signed extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
