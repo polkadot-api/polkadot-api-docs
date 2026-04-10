@@ -1,6 +1,6 @@
 import { defineConfig } from "vocs"
 
-const version = "1.22.0"
+const version = "2.0.0"
 
 export default defineConfig({
   title: "Polkadot-API",
