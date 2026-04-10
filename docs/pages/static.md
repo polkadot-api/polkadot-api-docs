@@ -13,8 +13,8 @@ const typedApi = client.getTypedApi(dot)
 const staticApis = await typedApi.getStaticApis()
 
 // Or target a specific block
-const staticApis = await typedApi.getStaticApis("best")
-const staticApis = await typedApi.getStaticApis("0x1234...") // block hash
+const staticApis = await typedApi.getStaticApis({ at: "best" })
+const staticApis = await typedApi.getStaticApis({ at: "0x1234..." }) // block hash
 ```
 
 The promise resolves once the runtime metadata for that block is loaded. After that, all operations on `staticApis` are synchronous.

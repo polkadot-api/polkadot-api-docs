@@ -7,13 +7,13 @@ For `query` we have mainly two different situations. There're two kinds of stora
 For example, `System.Number` query (it returns the block number) has no keys to index it with. Therefore, under `typedApi.System.Number` we have the following structure:
 
 ```ts
-type CallOptions = Partial<{
-  at: string
+type PullOptions = Partial<{
+  at: "best" | "finalized" | HexString
   signal: AbortSignal
 }>
 
 type StorageEntryWithoutKeys<Payload> = {
-  getValue: (options?: CallOptions) => Promise<Payload>
+  getValue: (options?: PullOptions) => Promise<Payload>
   watchValue: (options?: { at: "best" | "finalized" }) => Observable<{
     value: Payload
     block: BlockInfo
@@ -35,7 +35,7 @@ Similarly, we'll use the example of `System.Account` query (it returns the infor
 
 ```ts
 type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
-  getValue: (...args: [...Args, options?: CallOptions]) => Promise<Payload>
+  getValue: (...args: [...Args, options?: PullOptions]) => Promise<Payload>
   watchValue: (
     ...args: [...Args, options?: { at: "best" | "finalized" }]
   ) => Observable<{
@@ -44,10 +44,10 @@ type StorageEntryWithKeys<Args, Payload, ArgsOut> = {
   }>
   getValues: (
     keys: Array<[...Args]>,
-    options?: CallOptions,
+    options?: PullOptions,
   ) => Promise<Array<Payload>>
   getEntries: (
-    ...args: [PossibleParents<Args>, options?: CallOptions]
+    ...args: [PossibleParents<Args>, options?: PullOptions]
   ) => Promise<
     Array<{
       keyArgs: ArgsOut

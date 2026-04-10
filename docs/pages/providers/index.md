@@ -14,7 +14,3 @@ We have mainly two first-class providers:
 The `JsonRpcProvider` interface is simple and unopinionated. This lets you create enhancers that add functionality, which might be useful for observability, debugging, etc.
 
 PAPI has a [Logs Provider and Recorder](/providers/enhancers#logs-provider), allowing to capture JSON-RPC messaging logs, useful for debugging and/or analytics.
-
-## JSON-RPC providers in-depth
-
-For a description of the provider interface, behaviour and advanced use cases such as building your own providers, check out our [JSON-RPC Provider Interface Docs](/providers/json-rpc).

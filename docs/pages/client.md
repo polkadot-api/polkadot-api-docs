@@ -107,27 +107,37 @@ setTimeout(async () => {
 
 ### `getBlockBody$`
 
-Type: `(hash: string) => Observable<HexString[]>{:ts}`
+Type: `(hash: HexString) => Observable<Uint8Array[]>{:ts}`
 
-Retrieves the body of the block given; which can be a block hash, `"finalized"{:ts}` or `"best"{:ts}`.
+Retrieves the body of the block given by its hash. Each entry is a SCALE-encoded extrinsic as `Uint8Array`.
 
 The observable will emit once, and immediately complete.
 
 ### `getBlockBody`
 
-Type: `(hash: string) => Promise<HexString[]>{:ts}`
+Type: `(hash: HexString, signal?: AbortSignal) => Promise<Uint8Array[]>{:ts}`
 
-Retrieves the body of the block given; which can be a block hash, `"finalized"{:ts}` or `"best"{:ts}`.
+Retrieves the body of the block given by its hash. Each entry is a SCALE-encoded extrinsic as `Uint8Array`.
+
+### `getBlockHeader$`
+
+Type: `(hash: HexString) => Observable<BlockHeader>{:ts}`
+
+Retrieves the decoded header of the block given by its hash.
+
+Use `getFinalizedBlock()` or `getBestBlocks()` to obtain a block hash.
+
+The observable will emit once, and immediately complete.
 
 ### `getBlockHeader`
 
-Type: `(hash?: string) => Promise<BlockHeader>{:ts}`
+Type: `(hash: HexString, signal?: AbortSignal) => Promise<BlockHeader>{:ts}`
 
-Retrieves the decoded header of the block given; which can be a block hash, `"finalized"{:ts}` (default) or `"best"{:ts}`.
+Retrieves the decoded header of the block given by its hash.
 
 ### `submit`
 
-Type: `(transaction: HexString, at?: HexString) => Promise<TxFinalizedPayload>{:ts}`
+Type: `(transaction: Uint8Array, at?: HexString) => Promise<TxFinalizedPayload>{:ts}`
 
 Broadcasts a transaction. The promise will resolve when the transaction is found in a finalized block, and will reject if the transaction is deemed invalid (either before or after broadcasting).
 
@@ -135,7 +145,7 @@ This function follows the same logic as the [transaction API `submitAndWatch` fu
 
 ### `submitAndWatch`
 
-Type: `(transaction: HexString, at?: HexString) => Observable<TxBroadcastEvent>{:ts}`
+Type: `(transaction: Uint8Array, at?: HexString) => Observable<TxBroadcastEvent>{:ts}`
 
 Broadcasts a transaction. This function follows the same logic as the [transaction API `signSubmitAndWatch` function](/typed/tx#signsubmitandwatch), find more information about the emitted events there.
 
@@ -162,7 +172,7 @@ Type:
 ```ts
 rawQuery: (
   storageKey: HexString | string,
-  options?: { at: string; signal: AbortSignal },
+  options?: { at: "best" | "finalized" | HexString; signal?: AbortSignal },
 ) => Promise<HexString | null>
 ```
 
@@ -194,3 +204,17 @@ const client: PolkadotClient = null as any
 const nodeVersion = await client._request<string, []>("system_version", [])
 //    ^?
 ```
+
+### `_subscribe`
+
+Type:
+
+```ts
+_subscribe: <Reply = any, Params extends Array<any> = any[]>(
+  method: string,
+  unsubscribeMethod: string,
+  params: Params,
+) => Observable<Reply>
+```
+
+This function allows to call subscription endpoints through the JSON-RPC provider. This API is meant as an escape hatch, and its stability is not guaranteed across minor versions.

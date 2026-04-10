@@ -36,6 +36,28 @@ getWsProvider(["wss://myws.com", "wss://myfallbackws.com"])
 
 Passing more than one websocket `uri` allows the provider to switch in case one particular websocket is down or has a wrong behavior. Besides that, the consumer can also force the switch with the exposed `switch` method, where they can specify optionally which socket to use instead.
 
+## `createWsClient`
+
+If you want a PAPI client directly from a WebSocket URL, use `createWsClient`:
+
+```ts
+import { createWsClient } from "polkadot-api/ws"
+
+const client = createWsClient("wss://myws.com")
+```
+
+It returns a `PolkadotClient` extended with `switch` and `getStatus` from the underlying WS provider.
+
+## `getWsRawProvider`
+
+`getWsRawProvider` returns the WS provider without any middleware applied. Use it only if you know the endpoint is fully compliant with the JSON-RPC spec.
+
+```ts
+import { getWsRawProvider } from "polkadot-api/ws"
+
+const provider = getWsRawProvider("wss://myws.com")
+```
+
 ## Additional configuration
 
 When creating the provider, you can also pass additional configuration.
@@ -50,7 +72,7 @@ import { getWsProvider, WsEvent, SocketEvents } from "polkadot-api/ws"
 
 const provider = getWsProvider("wss://myws.com", {
   timeout: 10_000,
-  onStatusChange: (status) => {
+  onStatusChanged: (status) => {
     switch (status.type) {
       case WsEvent.CONNECTING:
         console.log("Connecting... 🔌")

@@ -58,11 +58,11 @@ This function will query for filtered statements by `topic` and/or `dest` key (f
 
 #### Parameters
 
-- `dest`: `Binary` for specific dest key. `null` for no dest key. `undefined` to disable filtering by `dest`
+- `dest`: `SizedHex<32>` for specific dest key. `null` for no dest key. `undefined` to disable filtering by `dest`
 - `topics`: Array of up to 4 topics to filter by.
 
 ```ts twoslash
-import { createClient, Binary } from "polkadot-api"
+import { createClient } from "polkadot-api"
 import { getWsProvider } from "polkadot-api/ws"
 import { createStatementSdk } from "@polkadot-api/sdk-statement"
 const client = createClient(
@@ -75,9 +75,7 @@ import { stringToTopic } from "@polkadot-api/sdk-statement"
 // statements with specific topics and specific decryptionkey.
 const statements = await statementSdk.getStatements({
   topics: [stringToTopic("pop"), stringToTopic("chat"), stringToTopic("v1")],
-  dest: Binary.fromHex(
-    "0xf0673d30606ee26672707e4fd2bc8b58d3becb7aba2d5f60add64abb5fea4710",
-  ),
+  dest: "0xf0673d30606ee26672707e4fd2bc8b58d3becb7aba2d5f60add64abb5fea4710",
 })
 ```
 

@@ -10,7 +10,10 @@ type TypedApi = {
   apis: RuntimeCallsApi
   constants: ConstApi
   txFromCallData: TxFromBinary
-  getStaticApis: (at?: HexString | "finalized" | "best") => Promise<StaticApis>
+  getStaticApis: (options?: {
+    at?: HexString | "finalized" | "best"
+    signal?: AbortSignal
+  }) => Promise<StaticApis>
 }
 ```
 
