@@ -67,7 +67,7 @@ PAPI centers around `createClient(provider)`.
 
 First-class providers:
 
-- Smoldot provider from `polkadot-api/sm`: prefer when the user wants a light-client approach: Trustless, truly decentralised.
+- Smoldot provider from `polkadot-api/sm-provider`: prefer when the user wants a light-client approach: Trustless, truly decentralised.
 - WebSocket provider from `polkadot-api/ws`: prefer when the user prefers a centralized, trusted connection.
 
 If the user asks about middleware, logging, or observability, look at provider enhancers.
@@ -137,7 +137,7 @@ Practical guidance:
 - Do not pass `{ at: "finalized" }` just to repeat the default. Prefer `watchValue()` or `getValue()` with no options unless a non-default block target is actually needed.
 - Use `watchValue` and especially `watchEntries` sparingly: they create continuous subscriptions and are heavier than one-off reads. Consider whether a one-off query (`getValue`), polling (for example `getValue` on an interval), or a real-time subscription is the right fit for the dApp. For instance:
   - Subscribing to the user's balance to display it in the screen usually makes sense, as you want to always show the latest: `typedApi.query.System.Account.watchValue(accountId)`.
-  - Watching the current staking era maybe makes more sense polling, specially as it doesn't change often and you can predict when the next era will change.
+  - Watching the current staking era maybe makes more sense polling, especially as it doesn't change often and you can predict when the next era will change.
   - Querying the description for a bounty can usually get away with a one-off read: It's not critical, and it can get refreshed when the user changes screen.
 
 For low-level storage access:
