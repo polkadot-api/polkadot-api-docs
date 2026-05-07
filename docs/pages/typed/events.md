@@ -38,6 +38,11 @@ type EvClient<T> = {
     block: BlockInfo
     events: PalletEvent<T>[]
   }>
+  watchBest: () => Observable<{
+    type: "new" | "drop" | "finalized"
+    block: BlockInfo
+    events: PalletEvent<T>[]
+  }>
   filter: (collection: SystemEvent[]) => Array<PalletEvent<T>>
 }
 ```
@@ -58,6 +63,8 @@ const burnedEvents = await typedApi.event.Balances.Burned.get(block.hash)
 
 This method is similar to the previous one, but `Observable`-based. It'll allow us to subscribe to events (matching the event kind chosen) available on every `finalized` block. This observable is multicast (multiple subscriptions will share the execution and results) and stateful (once subscribing you'll get the latest state available). This subscription will never complete since events will be emitted every time a new block is finalized. Note that the events will come in order of block number. Let's see the interface and an example:
 
+It emits once per finalized block, even if that block has no matching events. In that case, `events` will be an empty array.
+
 ```ts
 function watch(): Observable<{
   block: BlockInfo
@@ -66,6 +73,40 @@ function watch(): Observable<{
 
 // we console.log the first 5 blocks and complete
 typedApi.event.Balances.Burned.watch().pipe(take(5)).forEach(console.log)
+```
+
+## Watch best
+
+`watchBest` is similar to `watch`, but it follows the current best-block chain instead of only finalized blocks. This means it can also report reorgs. Each emission includes the block and the typed events found in that block, plus a `type` describing what happened:
+
+- `new`: a block was added to the current best chain.
+- `drop`: a previously seen best block was removed from the best chain after a reorg.
+- `finalized`: a previously seen best block became finalized.
+
+For `new` blocks, events are emitted in increasing block number. For `drop` blocks, they are emitted in reverse block number, so the newest dropped block is emitted first.
+
+It emits notifications for every block, even if that block has no matching events. In that case, `events` will be an empty array.
+
+```ts
+function watchBest(): Observable<{
+  type: "new" | "drop" | "finalized"
+  block: BlockInfo
+  events: PalletEvent<T>[]
+}>
+
+typedApi.event.Balances.Burned.watchBest().subscribe((event) => {
+  switch (event.type) {
+    case "new":
+      console.log("Best block", event.block.number, event.events)
+      break
+    case "drop":
+      console.log("Reorg dropped block", event.block.number)
+      break
+    case "finalized":
+      console.log("Finalized block", event.block.number)
+      break
+  }
+})
 ```
 
 ## Filter
@@ -83,7 +124,7 @@ const finalizedTx = await typedApi.tx.Balances.transfer_keep_alive({
 
 // it's synchronous!
 // we have here the typed payload of the events
-const filteredEvents = typedApi.events.Balances.Transfer.filter(
+const filteredEvents = typedApi.event.Balances.Transfer.filter(
   finalizedTx.events,
 )
 ```
