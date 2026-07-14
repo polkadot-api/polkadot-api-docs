@@ -8,6 +8,7 @@ export default defineConfig({
   description: "Next-Gen TS API to interact with Polkadot-based chains",
   iconUrl: "/favicon.svg",
   accentColor: "light-dark(#e7007b, #ff2f92)",
+  renderStrategy: "full-static",
   editLink: {
     link: (path) =>
       `https://github.com/polkadot-api/polkadot-api-docs/edit/main/src/pages/${path}`,
