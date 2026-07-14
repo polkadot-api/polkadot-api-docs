@@ -11,29 +11,30 @@
     "postinstall": "papi"
   },
   "dependencies": {
-    "@noble/curves": "^2.0.1",
-    "@noble/hashes": "^2.0.1",
+    "@noble/curves": "^2.2.0",
+    "@noble/hashes": "^2.2.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@polkadot-api/sdk-staking": "^0.5.0",
     "@polkadot-api/sdk-statement": "^0.4.0",
-    "@polkadot-labs/hdkd": "^0.0.27",
-    "@polkadot-labs/hdkd-helpers": "^0.0.28",
-    "@radix-ui/react-tabs": "^1.1.13",
-    "@scure/sr25519": "^1.0.0",
-    "@types/react": "^19.2.14",
-    "polkadot-api": "2.0.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "@polkadot-labs/hdkd": "^0.0.29",
+    "@polkadot-labs/hdkd-helpers": "^0.0.31",
+    "@radix-ui/react-tabs": "^1.1.17",
+    "@scure/sr25519": "^2.2.0",
+    "@types/react": "^19.2.17",
+    "polkadot-api": "2.1.8",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "rxjs": "^7.8.2",
-    "typescript": "^6.0.2",
-    "vocs": "1.4.1"
+    "typescript": "^6.0.3",
+    "vocs": "2.5.3",
+    "waku": "1.0.0-beta.6"
   },
   "devDependencies": {
-    "@homer0/prettier-plugin-jsdoc": "^11.0.2",
+    "@homer0/prettier-plugin-jsdoc": "^12.0.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^4.2.2"
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.5",
+    "tailwindcss": "^4.3.2"
   },
   "prettier": {
     "printWidth": 80,
