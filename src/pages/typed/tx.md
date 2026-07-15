@@ -371,10 +371,7 @@ In Polkadot, a transaction can be valid (and therefore not to throw the `Invalid
 // in the codegen
 import { ChainDispatchError } from "@polkadot-api/descriptors"
 tx.createSubmitAndWatch(txCreator).subscribe((ev) => {
-  if (
-    ev.type === "finalized" ||
-    (ev.type === "txBestBlocksState" && ev.found)
-  ) {
+  if (ev.type === "finalized" || (ev.type === "inBestBlock" && ev.found)) {
     // here we are sure that the transaction is in a block (whether finalized or bestBlock)
     // with `ok` we know the extrinsic failed
     if (!ev.ok) {
