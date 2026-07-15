@@ -1,4 +1,4 @@
-import { defineConfig } from "vocs"
+import { defineConfig } from "vocs/config"
 
 const version = "2.0.0"
 
@@ -7,25 +7,18 @@ export default defineConfig({
   titleTemplate: "%s · PAPI",
   description: "Next-Gen TS API to interact with Polkadot-based chains",
   iconUrl: "/favicon.svg",
-  theme: {
-    accentColor: {
-      dark: "#ff2f92",
-      light: "#e7007b",
-    },
-  },
+  accentColor: "light-dark(#e7007b, #ff2f92)",
+  renderStrategy: "full-static",
   editLink: {
-    pattern:
-      "https://github.com/polkadot-api/polkadot-api-docs/edit/main/docs/pages/:path",
+    link: (path) =>
+      `https://github.com/polkadot-api/polkadot-api-docs/edit/main/src/pages/${path}`,
     text: "Suggest changes to this page",
   },
-  head() {
-    return (
-      <script
-        src="https://cdn.usefathom.com/script.js"
-        data-site="DTWNOCOD"
-        defer
-      />
-    )
+  head: {
+    script: [{ src: "https://cdn.usefathom.com/script.js", defer: true }],
+  },
+  twoslash: {
+    explicitTrigger: true,
   },
   topNav: [
     {
