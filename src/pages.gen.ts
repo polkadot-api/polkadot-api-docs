@@ -33,8 +33,8 @@ type Page =
   | { path: '/sdks/statement'; render: 'static' }
   | { path: '/signers/extensions'; render: 'static' }
   | { path: '/signers'; render: 'static' }
-  | { path: '/signers/polkadot-signer'; render: 'static' }
   | { path: '/signers/raw'; render: 'static' }
+  | { path: '/signers/tx-creator'; render: 'static' }
   | { path: '/static'; render: 'static' }
   | { path: '/typed/apis'; render: 'static' }
   | { path: '/typed/constants'; render: 'static' }

@@ -1,21 +1,19 @@
-# Polkadot Signer
+# Signers
 
-Polkadot-API uses a library-agnostic interface to interact with signers.
+Polkadot-API uses an interface called `TxCreator` to create transactions, both for signed and general transactions.
 
-## Signers
+## TxCreator
 
-There are different types of signers, and PAPI has the following signers implemented in the top-level library:
+There are different ways to create transactions, and PAPI has the following integrations implemented in the top-level library:
 
-- [Extension-based Signers](/signers/extensions), supporting browser extension wallets (e.g. Talisman, Polkadot.JS, SubWallet).
-- [Raw Signers](/signers/raw), a low-level helper to craft your own signers.
+- [Extension-based TxCreators](/signers/extensions), supporting browser extension wallets (e.g. Talisman, Polkadot.JS, SubWallet).
+- [Raw TxCreator](/signers/raw), a low-level helper to create your own TxCreator from a signing function.
 
-## `PolkadotSigner` Interface
+The `TxCreator` interface is built so that third parties can implement their own. [Check the documentation about it](/signers/tx-creator).
 
-The `PolkadotSigner` interface (implemented by our signers) is library-agnostic, and can be implemented and used outside PAPI. [Check the documentation about it](/signers/polkadot-signer).
+## Wallet integrations
 
-## Signer Integrations
-
-Looking for a simple way to integrate with different signers? Check out the following community projects:
+Looking for a simple way to integrate with different wallets? Check out the following community projects:
 
 - [PolkaHub](https://github.com/polkadot-api/polkahub)
 - [DOTConnect](https://github.com/buffed-labs/dot-connect): Wallet integration with ReactiveDOT

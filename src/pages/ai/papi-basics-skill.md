@@ -157,14 +157,14 @@ Use docs route:
 The normal flow is:
 
 1. Build a transaction from `typedApi.tx.Pallet.Call(...)`.
-2. Sign it with a `PolkadotSigner`.
-3. Submit it with `signAndSubmit` or `signSubmitAndWatch`.
+2. Sign it with a `TxCreator`.
+3. Submit it with `createAndSubmit` or `createSubmitAndWatch`.
 
 Important details:
 
 - `tx.decodedCall` is useful when another extrinsic needs a nested call, such as proxy or batch-style workflows.
 - `getEncodedData()` returns the call data as a `Promise<Uint8Array>`.
-- `getBareTx()` returns a bare/unsigned extrinsic ready for submission. This is the unsigned counterpart to `sign()`: both produce an extrinsic that can later be submitted with `client.submit(...)` or `client.submitAndWatch(...)`.
+- `getBareTx()` returns a bare/unsigned extrinsic ready for submission. This is the unsigned counterpart to `create()`: both produce an extrinsic that can later be submitted with `client.submit(...)` or `client.submitAndWatch(...)`.
 - `getEstimatedFees(...)` is used to get the estimated fees
 - `getPaymentInfo(...)` is a superset of `getEstimatedFees`: It also returns the weight.
 - `txFromCallData(...)` creates a `Transaction` object from a callData.
@@ -175,14 +175,14 @@ Use docs route:
 
 - `https://papi.how/typed/tx`
 
-### Signed vs unsigned submission
+### Created vs unsigned submission
 
 Keep this distinction clear:
 
-- `tx.sign(signer)` returns a signed extrinsic ready for submission. It is tied to a specific signer/account.
+- `tx.create(txCreator)` returns an extrinsic ready for submission. For account-based TxCreators this usually means a signed extrinsic, but general transactions may use other authorization methods.
 - `tx.getBareTx()` returns an unsigned extrinsic ready for submission. Unsigned transactions are much less common and are only valid for calls that the runtime accepts as unsigned/operational.
 - `client.submit(...)` and `client.submitAndWatch(...)` can submit either form, as long as the extrinsic itself is valid for the target chain/runtime.
-- Most of the time, prefer `tx.signAndSubmit(...)` or `tx.signSubmitAndWatch(...)` instead of splitting signing/building from submission.
+- Most of the time, prefer `tx.createAndSubmit(...)` or `tx.createSubmitAndWatch(...)` instead of splitting creation from submission.
 
 ## Binary data
 
@@ -201,30 +201,30 @@ Use docs routes:
 
 ## Signers
 
-PAPI uses the library-agnostic `PolkadotSigner` interface.
+PAPI uses the library-agnostic `TxCreator` interface.
 
 When users ask about wallet integration:
 
-- prefer extension-based signers for browser wallets
-- use raw signers for custom cryptographic integrations
+- prefer extension-based TxCreators for browser wallets
+- use raw TxCreators for custom cryptographic integrations
 
-Do not assume that an arbitrary wallet object is directly usable without adapting it to `PolkadotSigner`.
+Do not assume that an arbitrary wallet object is directly usable without adapting it to `TxCreator`.
 
 Use docs routes:
 
 - `https://papi.how/signers`
 - `https://papi.how/signers/extensions`
-- `https://papi.how/signers/polkadot-signer`
+- `https://papi.how/signers/tx-creator`
 
 ### Signer from private key
 
-If the user has a private key or seed phrase, use external tools combined with `getPolkadotSigner`.
+If the user has a private key or seed phrase, use external tools combined with `getTxCreator`.
 
-Remember that unencrypted private keys or seed phrases for real accounts should NEVER be stored in a file. The only exception is for test accounts or playgrounds, but any account whose private key or seed phrase is being used through `getPolkadotSigner` should be considered as if it was compromised.
+Remember that unencrypted private keys or seed phrases for real accounts should NEVER be stored in a file. The only exception is for test accounts or playgrounds, but any account whose private key or seed phrase is being used through `getTxCreator` should be considered as if it was compromised.
 
 If possible, prefer to use wallets instead: either browser extensions, applications, air-gapped devices or hardware wallets.
 
-To create the signing function required by `getPolkadotSigner`, use:
+To create the signing function required by `getTxCreator`, use:
 
 - From Ed25519 private-key: `@noble/curves/ed25519.js`
 - From Sr25519 private-key: `@scure/sr25519`
@@ -259,7 +259,7 @@ When you see these assumptions, correct them:
   It is an advanced escape hatch with fewer guarantees.
 
 - "Any signer object from another library should work directly."
-  The supported abstraction is `PolkadotSigner`.
+  The supported abstraction is `TxCreator`.
 
 - "`@polkadot/api` or other `@polkadot/*` packages are PAPI / Polkadot-API."
   Those are Polkadot.js / PJS packages. PAPI packages use `polkadot-api`, `polkadot-api/*`, or `@polkadot-api/*`.
