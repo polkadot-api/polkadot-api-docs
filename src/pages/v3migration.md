@@ -141,7 +141,7 @@ For normal applications this should only mean running codegen again. If you have
 
 ## Signer implementations
 
-Previously, `PolkadotSigner` was an interface containing three properties: `signTx`, `signBytes` and `publicKey`. This has been replaced by `TxCreator`, which is an enhanced version of [createTransaction](https://github.com/polkadot-js/api/issues/6213).
+This is for advanced use cases, for custom `PolkadotSigner` implementations. Previously, `PolkadotSigner` was an interface containing three properties: `signTx`, `signBytes` and `publicKey`. This has been replaced by `TxCreator`, which is an enhanced version of [createTransaction](https://github.com/polkadot-js/api/issues/6213).
 
 TxCreator doesn't assume the authorization method, so it doesn't have any of the sign-specific properties. When migrating, it's recommended that your signer exports a `TxCreator & { publicKey: Uint8Array, signBytes: SignFn }`, along with other properties that might be useful for a consumer.
 
@@ -152,3 +152,5 @@ The `TxCreator` interface provides all the information needed to fill in those v
 Additionally, the interface is fully typed. When the codegen generates the descriptors for a chain, it detects which transaction extensions are required and stores that in the descriptors. Then, by default, PAPI will require the developer to fill in all those extensions (even the well-known ones). `TxCreator` has a generic that tells which transaction extensions it knows about, so when using it PAPI will not require the user to provide the data for those transaction extensions.
 
 To support the well-known extensions when migrating, you should pass the common type from `@polkadot-api/signers-common` to the TxCreator generic: `TxCreator<CommonEnhancersSpecs>`.
+
+Check out the [TxCreator docs](/signers/tx-creator) for more info.

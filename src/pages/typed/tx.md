@@ -259,11 +259,11 @@ The Observable is single cast, and it's not stateful. The transaction will be se
 ```ts
 export type TxObservable = <T extends TxCreator>(
   creator: T,
-  txOptions: TxCreatorOptions<T, Chain>,
+  txOptions?: TxCreatorOptions<T, Chain>,
 ) => Observable<TxEvent>
 ```
 
-`TxEvent` is divided in 4 different events:
+`TxEvent` is divided in 5 different events:
 
 ```ts
 type TxEvent =
@@ -371,7 +371,7 @@ In Polkadot, a transaction can be valid (and therefore not to throw the `Invalid
 // in the codegen
 import { ChainDispatchError } from "@polkadot-api/descriptors"
 tx.createSubmitAndWatch(txCreator).subscribe((ev) => {
-  if (ev.type === "finalized" || (ev.type === "inBestBlock" && ev.found)) {
+  if (ev.type === "finalized" || ev.type === "inBestBlock") {
     // here we are sure that the transaction is in a block (whether finalized or bestBlock)
     // with `ok` we know the extrinsic failed
     if (!ev.ok) {
