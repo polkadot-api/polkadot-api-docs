@@ -145,7 +145,7 @@ Previously, `PolkadotSigner` was an interface containing three properties: `sign
 
 TxCreator doesn't assume the authorization method, so it doesn't have any of the sign-specific properties. When migrating, it's recommended that your signer exports a `TxCreator & { publicKey: Uint8Array, signBytes: SignFn }`, along with other properties that might be useful for a consumer.
 
-PAPI no longer supplies the information for well-known transaction extensions such as `CheckGenesis`, `CheckSpecVersion`, `CheckNonce` and any other. This is now the responsibility of the `TxCreator`.
+PAPI no longer supplies the data for well-known transaction extensions such as `CheckGenesis`, `CheckSpecVersion`, and `CheckNonce`. This is now the responsibility of the `TxCreator`.
 
 The `TxCreator` interface provides all the information needed to fill in those values, as well as access to runtime APIs and information about active blocks. `@polkadot-api/signers-common` exports the enhancers `withNonce(pubKey: Uint8Array)` and `withCommonExtensions` so you don't need to re-implement those well-known extensions, but it's built in a way that allows creating TxCreators with custom transaction extensions.
 
