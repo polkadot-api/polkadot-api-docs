@@ -47,6 +47,7 @@ type Page =
   | { path: '/types'; render: 'static' }
   | { path: '/unsafe'; render: 'static' }
   | { path: '/v2migration'; render: 'static' }
+  | { path: '/v3migration'; render: 'static' }
 
 // prettier-ignore
 declare module 'waku/router' {
