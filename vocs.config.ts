@@ -63,6 +63,10 @@ export default defineConfig({
       link: "/v2migration",
     },
     {
+      text: "V3 Migration",
+      link: "/v3migration",
+    },
+    {
       text: "Providers",
       collapsed: true,
       items: [
