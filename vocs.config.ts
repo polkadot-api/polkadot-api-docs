@@ -81,9 +81,9 @@ export default defineConfig({
       collapsed: true,
       items: [
         { text: "Introduction", link: "/signers" },
-        { text: "Browser extensions", link: "/signers/extensions" },
-        { text: "Raw signers", link: "/signers/raw" },
-        { text: "PolkadotSigner", link: "/signers/polkadot-signer" },
+        { text: "Browser Wallets", link: "/signers/extensions" },
+        { text: "Raw TxCreator", link: "/signers/raw" },
+        { text: "TxCreator", link: "/signers/tx-creator" },
       ],
     },
     {

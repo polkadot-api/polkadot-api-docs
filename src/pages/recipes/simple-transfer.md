@@ -55,12 +55,12 @@ const transfer = api.tx.Balances.transfer_allow_death({
   value: 12345n,
 })
 
-// sign and submit the transaction while looking at the
+// create and submit the transaction while looking at the
 // different events that will be emitted
-transfer.signSubmitAndWatch(alice).subscribe({
+transfer.createSubmitAndWatch(alice).subscribe({
   next: (event) => {
     console.log("Tx event: ", event.type)
-    if (event.type === "txBestBlocksState") {
+    if (event.type === "inBestBlock") {
       console.log("The tx is now in a best block, check it out:")
       console.log(`https://westend.subscan.io/extrinsic/${event.txHash}`)
     }

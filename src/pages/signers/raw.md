@@ -1,14 +1,14 @@
-# Raw signer
+# Raw TxCreator
 
-PAPI provides a helper to build a [`PolkadotSigner`](/signers/polkadot-signer) instance directly from a raw signing function, provided by a cryptographic library, a hardware wallet, etc. It just deals with the chain logic side and leaves to the consumer the cryptographic signature part.
+PAPI provides a helper to build a [`TxCreator`](/signers/tx-creator) directly from a raw signing function, provided by a cryptographic library, a hardware wallet, etc. It deals with the chain transaction side and leaves the cryptographic signature part to the consumer.
 
-## `getPolkadotSigner`
+## `getTxCreator`
 
-It is a function to get a signer.
+It is a function to get a TxCreator.
 
 ### Returns
 
-[`PolkadotSigner`](/signers/polkadot-signer)
+[`TxCreator`](/signers/tx-creator)
 
 ### Parameters
 
@@ -16,7 +16,7 @@ It is a function to get a signer.
 
 Type: `Uint8Array{:ts}`
 
-[`publicKey`](/signers/polkadot-signer#publickey) used to identify the signer.
+Public key or account identifier used to identify the account.
 
 #### `signingType`
 
@@ -34,24 +34,24 @@ Cryptographic signature function, signing with the `signingType` previously decl
 
 In these examples we use several libraries:
 
-- [`@noble/curves`](https://npmjs.com/package/@noble/curves) `2.0.1`
-- [`@noble/hashes`](https://npmjs.com/package/@noble/hashes) `2.0.1`
-- [`@polkadot-labs/hdkd-helpers`](https://npmjs.com/package/@polkadot-labs/hdkd-helpers) `0.0.26`
-- [`@polkadot-labs/hdkd`](https://npmjs.com/package/@polkadot-labs/hdkd) `0.0.25`
-- [`@scure/sr25519`](https://npmjs.com/package/@scure/sr25519) `0.3.0`.
-- [`polkadot-api`](https://npmjs.com/package/polkadot-api) `1.20.0`
+- [`@noble/curves`](https://npmjs.com/package/@noble/curves) `2.2.0`
+- [`@noble/hashes`](https://npmjs.com/package/@noble/hashes) `2.2.0`
+- [`@polkadot-labs/hdkd-helpers`](https://npmjs.com/package/@polkadot-labs/hdkd-helpers) `0.0.31`
+- [`@polkadot-labs/hdkd`](https://npmjs.com/package/@polkadot-labs/hdkd) `0.0.29`
+- [`@scure/sr25519`](https://npmjs.com/package/@scure/sr25519) `2.2.0`
+- [`polkadot-api`](https://npmjs.com/package/polkadot-api) `3.x`
 
 Some snippets might work in other versions.
 
 ### Ed25519
 
 ```ts twoslash
-import { getPolkadotSigner } from "polkadot-api/signer"
+import { getTxCreator } from "polkadot-api/tx-creator"
 import { ed25519 } from "@noble/curves/ed25519.js"
 
 const SECRET_KEY = new Uint8Array() // get your key
 
-const signer = getPolkadotSigner(
+const txCreator = getTxCreator(
   ed25519.getPublicKey(SECRET_KEY),
   "Ed25519",
   (i) => ed25519.sign(i, SECRET_KEY),
@@ -63,12 +63,12 @@ const signer = getPolkadotSigner(
 #### From private key
 
 ```ts twoslash
-import { getPolkadotSigner } from "polkadot-api/signer"
+import { getTxCreator } from "polkadot-api/tx-creator"
 import * as sr25519 from "@scure/sr25519"
 
 const SECRET_KEY = new Uint8Array() // get your key
 
-const signer = getPolkadotSigner(
+const txCreator = getTxCreator(
   sr25519.getPublicKey(SECRET_KEY),
   "Sr25519",
   (i) => sr25519.sign(SECRET_KEY, i),
@@ -77,7 +77,7 @@ const signer = getPolkadotSigner(
 
 #### From mnemonic phrase
 
-This snippet helps to create a signer for `Alice`, `Bob`, `Charlie`, etc.
+This snippet helps to create a TxCreator for `Alice`, `Bob`, `Charlie`, etc.
 
 You can replace by your own mnemonic phrase.
 
@@ -88,13 +88,13 @@ import {
   entropyToMiniSecret,
   mnemonicToEntropy,
 } from "@polkadot-labs/hdkd-helpers"
-import { getPolkadotSigner } from "polkadot-api/signer"
+import { getTxCreator } from "polkadot-api/tx-creator"
 
 const miniSecret = entropyToMiniSecret(mnemonicToEntropy(DEV_PHRASE))
 const derive = sr25519CreateDerive(miniSecret)
 const hdkdKeyPair = derive("//Alice") // or `//Bob`, `//Charlie`, etc
 
-const polkadotSigner = getPolkadotSigner(
+const txCreator = getTxCreator(
   hdkdKeyPair.publicKey,
   "Sr25519",
   hdkdKeyPair.sign,
@@ -103,23 +103,23 @@ const polkadotSigner = getPolkadotSigner(
 
 ### Ecdsa
 
-`Ecdsa` signer is an umbrella term for two types of signers using ECDSA signatures over Secpk1. In a glance, these are the two types:
+`Ecdsa` is an umbrella term for two types of TxCreators using ECDSA signatures over Secpk1. In a glance, these are the two types:
 
 - **EVM-like chains** (Moonbeam, Mythos, Darwinia, Crab, etc.) expect the signer to sign payloads using a **Keccak256 hash** and use **AccountId20** addresses (Ethereum-like addresses).
 - **Polkadot-like chains** (e.g., Polkadot, Kusama) expect the signer to sign payloads using **Blake2_256** and use **AccountId32** addresses (Polkadot-like addresses).
 
-With that distinction in mind, here's how you can create `Ecdsa` `PolkadotSigner`s for these different chain types:
+With that distinction in mind, here's how you can create `Ecdsa` `TxCreator`s for these different chain types:
 
 #### Polkadot-like chains
 
 ```ts twoslash
 import { secp256k1 } from "@noble/curves/secp256k1.js"
 import { blake2b } from "@noble/hashes/blake2.js"
-import { getPolkadotSigner } from "polkadot-api/signer"
+import { getTxCreator } from "polkadot-api/tx-creator"
 
 const SECRET_KEY = new Uint8Array() // get your key
 
-const signer = getPolkadotSigner(
+const txCreator = getTxCreator(
   blake2b(secp256k1.getPublicKey(SECRET_KEY), { dkLen: 32 }),
   "Ecdsa",
   (i) => {
@@ -137,11 +137,11 @@ const signer = getPolkadotSigner(
 ```ts twoslash
 import { secp256k1 } from "@noble/curves/secp256k1.js"
 import { keccak_256 } from "@noble/hashes/sha3.js"
-import { getPolkadotSigner } from "polkadot-api/signer"
+import { getTxCreator } from "polkadot-api/tx-creator"
 
 const SECRET_KEY = new Uint8Array() // get your key
 
-const signer = getPolkadotSigner(
+const txCreator = getTxCreator(
   keccak_256(secp256k1.getPublicKey(SECRET_KEY, false).slice(1)).slice(-20),
   "Ecdsa",
   (i) => {

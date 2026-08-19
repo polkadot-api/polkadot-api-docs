@@ -61,19 +61,22 @@ Both methods of creating transactions in PAPI output a `Transaction` type, that 
 
 ```ts
 type Transaction = {
-  // Sign the transaction using the signer, get the signed transaction
-  sign(from: PolkadotSigner, txOptions?: TxOptions): Promise<Uint8Array>
+  // Create the transaction using the TxCreator, get the transaction ready to broadcast
+  create<T extends TxCreator>(
+    creator: T,
+    txOptions?: TxCreatorOptions<T, Chain>,
+  ): Promise<Uint8Array>
 
-  // Sign the transaction using the signer, submit it and get submission progress events
-  signSubmitAndWatch(
-    from: PolkadotSigner,
-    txOptions?: TxOptions,
+  // Create the transaction using the TxCreator, submit it and get submission progress events
+  createSubmitAndWatch<T extends TxCreator>(
+    creator: T,
+    txOptions?: TxCreatorOptions<T, Chain>,
   ): Observable<TxEvent>
 
-  // Sign the transaction using the signer, submit it and get the finalized result.
-  signAndSubmit(
-    from: PolkadotSigner,
-    txOptions?: TxOptions,
+  // Create the transaction using the TxCreator, submit it and get the finalized result.
+  createAndSubmit<T extends TxCreator>(
+    creator: T,
+    txOptions?: TxCreatorOptions<T, Chain>,
   ): Promise<TxFinalizedPayload>
 
   // Get the callData encoded in SCALE using the chain's metadata
@@ -83,16 +86,16 @@ type Transaction = {
   getBareTx(): Promise<Uint8Array>
 
   // Get the estimated weight, class, fees, etc. of the transaction
-  getPaymentInfo: (
-    from: Uint8Array | SS58String,
-    txOptions?: TxOptions<Asset, Ext>,
-  ) => Promise<PaymentInfo>
+  getPaymentInfo<T extends TxCreator>(
+    creator: T,
+    txOptions?: TxCreatorOptions<T, Chain>,
+  ): Promise<PaymentInfo>
 
   // Get the estimated fees of the transaction
-  getEstimatedFees: (
-    from: Uint8Array | SS58String,
-    txOptions?: TxOptions,
-  ) => Promise<bigint>
+  getEstimatedFees<T extends TxCreator>(
+    creator: T,
+    txOptions?: TxCreatorOptions<T, Chain>,
+  ): Promise<bigint>
 
   // Decoded call data: { type: string, value: { type: string, value: T }}
   decodedCall: TxCallData
@@ -100,6 +103,8 @@ type Transaction = {
 ```
 
 We will see item by item its content.
+
+In the snippets of this page, `Chain` stands for the chain extension information generated in the descriptors. When using it, TypeScript infers it from the typed API.
 
 ### `decodedCall`
 
@@ -122,7 +127,7 @@ const proxyTx = typedApi.tx.Proxy.proxy({
 
 ### `getEncodedData`
 
-`getEncodedData`, instead, packs the call data (without signed extensions, of course!) as a SCALE-encoded blob. Let's see an example:
+`getEncodedData`, instead, packs the call data (without transaction extensions, of course!) as a SCALE-encoded blob. Let's see an example:
 
 ```ts
 import { MultiAddress } from "@polkadot-api/descriptors"
@@ -137,43 +142,57 @@ const encodedTx = await tx.getEncodedData()
 
 A synchronous version of this method is available in [Static APIs](/static#tx).
 
-### `TxOptions`
+### `TxCreatorOptions`
 
-All the methods that will follow sign the transaction (or fake-sign in the case of `getEncodedFees`). When signing a transaction, some optional `TxOptions` could be passed. Every one of them as a default, so it's not needed to pass them. Let's see and discuss them one by one:
+All the methods that create an extrinsic take a [`TxCreator`](/signers/tx-creator). The options accepted by those methods are inferred from two things: the chain extensions in the generated descriptors, and the extensions handled by the `TxCreator`.
 
 ```ts
-type TxOptions<Asset> = Partial<{
-  at: HexString
-  tip: bigint
-  mortality: { mortal: false } | { mortal: true; period: number }
-  asset: Asset
-  nonce: number
-  customSignedExtensions: Record<
-    string,
-    {
-      value?: any
-      additionalSigned?: any
-    }
-  >
-}>
+type TxCreateFn = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
+) => Promise<Uint8Array>
 ```
+
+The `TxCreator` sets which options it takes. For most cases, these options look familiar, though the exact type changes per chain and per creator.
 
 - `at`: gives the option to choose which block to target the mortality when creating the transaction. This means that the transaction will be valid only on descendants of that block. Defaults to the latest finalized block.
 - `mortality`: gives the option to choose the mortality for the transaction. Default: `{ mortal: true, period: 64 }`. The `period` will be rounded to the first power of two greater or equal to it.
 - `nonce`: this is meant for advanced users that submit several transactions in a row, it allows to modify the default `nonce`. Default: highest nonce found in any known block.
 - `tip`: add tip to transaction. Default: `0`
 - `asset`: there're several chains that allow you to choose which asset to use to pay for the fees and tip. This field will be strongly typed as well and will adapt to every chain used in the `dApp`. Default: `undefined`. This means to use the native token from the chain.
-- `customSignedExtensions`: gives the option to define the value of "custom" signed extensions, understood as signed extensions that PAPI is not aware of. One can define either one of `value` or `additionalSigned`, or both of them.
+
+If a chain has transaction extensions that the `TxCreator` does not handle, PAPI will ask for those values through `customSignedExtensions`:
+
+```ts
+type CustomSignedExtensions = Record<
+  string,
+  {
+    value?: unknown
+    additionalSigned?: unknown
+  }
+>
+```
+
+This is fully typed from the generated descriptors, so custom extension values are required only when the selected `TxCreator` does not already know how to provide them.
 
 ### `getEstimatedFees`
 
-With `getEstimatedFees` we make a call to the runtime and check how much would it cost to run a specific transaction. We need the address of the sender (or public key) and the `TxOptions` to construct a fake-signed transaction. We'll check the fees against the latest known `finalizedBlock`. Its interface is as follows:
+With `getEstimatedFees` we make a call to the runtime and check how much would it cost to run a specific transaction. We need a `TxCreator` because the fee depends on the transaction extensions and authorization method. The creator will be asked to mock the authorization, so the user does not need to approve a real transaction just to estimate fees. We'll check the fees against the latest known `finalizedBlock`. Its interface is as follows:
 
 ```ts
-type TxEstimateFees = (
-  from: Uint8Array | SS58String,
-  txOptions?: TxOptions<Asset>,
+type TxEstimateFees = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
 ) => Promise<bigint>
+```
+
+`getPaymentInfo` works the same way, but returns the full payment information including weight and class:
+
+```ts
+type TxGetPaymentInfo = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
+) => Promise<PaymentInfo>
 ```
 
 ### `getBareTx`
@@ -188,24 +207,24 @@ interface TxBare {
 
 It'll get back the `BareExtrinsic` ready to be broadcasted as a `Uint8Array`. Extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
-### `sign`
+### `create`
 
-This method packs the transaction, sends it to the signer, and receives the signature. It requires a [`PolkadotSigner`](/signers), we saw them in another section of the docs. Let's see its interface:
+This method packs the transaction and sends it to the [`TxCreator`](/signers). For account-based creators, this usually means signing. For general transactions, the authorization method depends on the transaction extensions. Let's see its interface:
 
 ```ts
-type TxSignFn = (
-  from: PolkadotSigner,
-  txOptions?: TxOptions,
+type TxCreateFn = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
 ) => Promise<Uint8Array>
 ```
 
-It'll get back the whole `SignedExtrinsic` as a `Uint8Array` that needs to be broadcasted. If the signer fails (or the user cancels the signature) it'll throw an error.
+It'll get back the whole extrinsic as a `Uint8Array` that needs to be broadcasted. If the creator fails (or the user cancels the authorization) it'll throw an error.
 
-Signed extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
+Created extrinsics can be submitted separately through [client.submit](/client#submit) or [client.submitAndWatch](/client#submitAndWatch)
 
-### `signAndSubmit`
+### `createAndSubmit`
 
-`signAndSubmit` will sign (exactly the same way as `sign`). After signing it will validate the transaction against the block specified in `txOptions` and broadcast the transaction if it is valid. If it is not it will throw an [`InvalidTxError`](#invalidtxerror).
+`createAndSubmit` will create the transaction (exactly the same way as [`create`](#create)). After creating it will validate the transaction against the block specified in `txOptions` and broadcast the transaction if it is valid. If it is not it will throw an [`InvalidTxError`](#invalidtxerror).
 
 - The promise will resolve as soon as the transaction is found in a finalized block.
 - The promise will reject if the transaction is invalid at any finalized block after broadcasting. It will throw as well an [`InvalidTxError`](#invalidtxerror).
@@ -213,9 +232,9 @@ Signed extrinsics can be submitted separately through [client.submit](/client#su
 Note that this promise is not abortable. Let's see the interface:
 
 ```ts
-type TxSignAndSubmitFn = (
-  from: PolkadotSigner,
-  txOptions?: TxOptions,
+type TxCreateAndSubmitFn = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
 ) => Promise<TxFinalized>
 
 type TxFinalized = {
@@ -229,79 +248,45 @@ type TxFinalized = {
 
 You get the `txHash`; the bunch of `events` that this extrinsic emitted (see [this section](/typed/events) to see what to do with them); `ok` which simply tells if the extrinsic was successful (i.e. event `System.ExtrinsicSuccess` is found), with its [`dispatchError`](#dispatcherror) and the `block` information where the tx is found.
 
-### `signSubmitAndWatch`
+### `createSubmitAndWatch`
 
-`signSubmitAndWatch` is the Observable-based version of `signAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized or definitely invalid. Let's see its interface:
+`createSubmitAndWatch` is the Observable-based version of `createAndSubmit`. The function returns an Observable and will emit a bunch of events giving information about the status of transaction in the chain, until it'll be eventually finalized or definitely invalid. Let's see its interface:
 
 :::warning
-The Observable is single cast, and it's not stateful. The transaction will be sent to signature, broadcasted, etc on every single subscription individually. If you want to share the subscription, you could craft an observable using `shareLatest`.
+The Observable is single cast, and it's not stateful. The transaction will be sent to the creator, broadcasted, etc on every single subscription individually. If you want to share the subscription, you could craft an observable using `shareLatest`.
 :::
 
 ```ts
-export type TxObservable = (
-  from: PolkadotSigner,
-  txOptions?: TxOptions,
+export type TxObservable = <T extends TxCreator>(
+  creator: T,
+  txOptions?: TxCreatorOptions<T, Chain>,
 ) => Observable<TxEvent>
 ```
 
-`TxEvent` is divided in 4 different events:
+`TxEvent` is divided in 5 different events:
 
 ```ts
-type TxEvent = TxSigned | TxBroadcasted | TxBestBlocksState | TxFinalized
+type TxEvent =
+  TxCreated | TxBroadcasted | TxInBestBlock | TxNotInBestBlock | TxFinalized
 ```
 
 The first two are fairly straight-forward. Let's see them.
 
-First of all, the transaction will be signed (exactly the same way as [`sign`](#sign)) and the event `TxSigned` will be emitted. As soon as the transaction gets signed, the transaction will be validated aganst the block specified in `txOptions` and, if it is valid, the transaction will be broadcasted and `TxBroadcasted` will be emitted then. If the transaction is invalid the observable will error with an [`InvalidTxError`](#invalidtxerror).
+First of all, the transaction will be created (exactly the same way as [`create`](#create)) and the event `TxCreated` will be emitted. As soon as the transaction gets created, the transaction will be validated against the block specified in `txOptions` and, if it is valid, the transaction will be broadcasted and `TxBroadcasted` will be emitted then. If the transaction is invalid the observable will error with an [`InvalidTxError`](#invalidtxerror).
 
-This two events can only be emitted once each:
+These two events can only be emitted once each:
 
 ```ts
-type TxSigned = { type: "signed"; txHash: HexString }
+type TxCreated = { type: "created"; txHash: HexString }
 type TxBroadcasted = { type: "broadcasted"; txHash: HexString }
 ```
 
-Then, as soon as the block is found in a `bestBlock` or if the transaction is not valid in one of the best blocks the following event will be emitted:
+After the broadcast, the library will start verifying the state of the transaction against some best blocks in a smart way. Then, as soon as the block is found in a `bestBlock` the following event will be emitted:
 
 ```ts
-type TxBestBlocksState = {
-  type: "txBestBlocksState"
+type TxInBestBlock = {
+  type: "inBestBlock"
   txHash: HexString
-} & (
-  | {
-      found: false
-      isValid: boolean
-    }
-  | {
-      found: true
-      ok: boolean
-      events: Array<SystemEvent["event"]>
-      dispatchError?: DispatchError
-      block: { hash: string; number: number; index: number }
-    }
-)
-```
-
-We can see that this is a 2-in-1 event. After the broadcast, the library will start verifying the state of the transaction against some best blocks in a smart way. Then, two main situations could happen:
-
-- The transaction is not found in any block in the latest known `bestBlock` branch. If this is the case, `polkadot-api` will check if the transaction is still valid in the block. The event received in this case will be
-
-```ts
-interface TxBestBlockNotFound {
-  type: "txBestBlocksState"
-  txHash: HexString
-  found: false
-  isValid: boolean
-}
-```
-
-- The transaction is found in a `bestBlock`. We already infer that the transaction is valid in this block (otherwise it wouldn't get inside it). Therefore, we align the payload to the finalized event, and the event received is as follows. See the finalized event for more info on the fields.
-
-```ts
-interface TxBestBlockFound {
-  type: "txBestBlocksState"
-  txHash: HexString
-  found: true
   ok: boolean
   events: Array<SystemEvent["event"]>
   dispatchError?: DispatchError
@@ -309,9 +294,17 @@ interface TxBestBlockFound {
 }
 ```
 
-This event will be emitted any number of times. It might happen that the tx is found in a best block, then this block gets pruned and is not anymore in the new best block branch, comes back, etc. We'll pass all that information to the consumer.
+The best block isn't finalized yet, so re-orgs might happen. In case this happens after the transaction was found in a best block, the observable will emit a `notInBestBlock` event:
 
-Here two things can happen. The first one is that the tx gets in a block that becomes finalized. In this case we will emit the following event once and will complete the subscription.
+```ts
+type TxNotInBestBlock = { type: "notInBestBlock"; txHash: HexString }
+```
+
+And the broadcast / search will resume, emitting a new `inBestBlock` event if the transaction is included in a different new best block.
+
+These events might be emitted any number of times. It might happen that the tx is found in a best block, then this block gets pruned and is not anymore in the new best block branch, comes back, etc. PAPI passes all that information to the consumer.
+
+Lastly, two things can happen. The first one is that the tx gets in a block that becomes finalized. In this case we will emit the following event once and will complete the subscription.
 
 ```ts
 type TxFinalized = {
@@ -341,7 +334,7 @@ When a transaction is deemed as invalid (due to, for example, wrong nonce, expir
 import { InvalidTxError, TransactionValidityError } from "polkadot-api"
 import { myChain } from "@polkadot-api/descriptors"
 
-tx.signAndSubmit(signer)
+tx.createAndSubmit(txCreator)
   .then(() => "tx went well")
   .catch((err) => {
     if (err instanceof InvalidTxError) {
@@ -351,7 +344,7 @@ tx.signAndSubmit(signer)
   })
 
 // it is available, of course, for observable-based broadcasting
-tx.signSubmitAndWatch(signer).subscribe({
+tx.createSubmitAndWatch(txCreator).subscribe({
   error: (err) => {
     if (err instanceof InvalidTxError) {
       const typedErr: TransactionValidityError<typeof myChain> = err.error
@@ -377,11 +370,8 @@ In Polkadot, a transaction can be valid (and therefore not to throw the `Invalid
 // `Chain` will change depending on the name you gave the chain
 // in the codegen
 import { ChainDispatchError } from "@polkadot-api/descriptors"
-tx.signSubmitAndWatch(signer).subscribe((ev) => {
-  if (
-    ev.type === "finalized" ||
-    (ev.type === "txBestBlocksState" && ev.found)
-  ) {
+tx.createSubmitAndWatch(txCreator).subscribe((ev) => {
+  if (ev.type === "finalized" || ev.type === "inBestBlock") {
     // here we are sure that the transaction is in a block (whether finalized or bestBlock)
     // with `ok` we know the extrinsic failed
     if (!ev.ok) {

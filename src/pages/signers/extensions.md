@@ -1,4 +1,4 @@
-# Extension-based signers
+# Extension-based TxCreators
 
 In order to use an extension-based wallet, you can use the utilities exported at `polkadot-api/pjs-signer`.
 
@@ -19,7 +19,7 @@ Once we get the available extensions by name, we can connect to them.
 
 ## Connect to extension
 
-The extension will provide with a list of accounts available for usage. Note that, generally, the user will control which addresses are available.
+The extension will provide a list of accounts available for usage. Note that, generally, the user will control which addresses are available.
 
 ```ts twoslash
 import { getInjectedExtensions } from "polkadot-api/pjs-signer"
@@ -34,18 +34,18 @@ const selectedExtension = await connectInjectedExtension(extensions[0]) // [!cod
 
 This returns a type `InjectedExtension`, with the following fields:
 
-- `name`: `string`. Wallet identified, same one returned in `getInjectedExtensions`
+- `name`: `string`. Wallet identifier, same one returned in `getInjectedExtensions`
 - `disconnect`: `() => void`. Callback to close connection with the wallet.
-- `getAccounts`: `() => InjectedPolkadotAccount[]{:ts}`. Get accounts available in that moment in time. [`InjectedPolkadotAccount`](/signers/extensions#use-polkadotsigner)
-- `subscribe`: `(cb: (accounts: InjectedPolkadotAccount[]) => void) => () => void{:ts}`. Subscribe function accepting a callback that will be called every time the wallet announces account changes. Returns a function to unsubscribe. [`InjectedPolkadotAccount`](/signers/extensions#use-polkadotsigner)
+- `getAccounts`: `() => InjectedPolkadotAccount[]{:ts}`. Get accounts available at that moment in time. [`InjectedPolkadotAccount`](/signers/extensions#use-txcreator)
+- `subscribe`: `(cb: (accounts: InjectedPolkadotAccount[]) => void) => () => void{:ts}`. Subscribe function accepting a callback that will be called every time the wallet announces account changes. It returns a function to unsubscribe. [`InjectedPolkadotAccount`](/signers/extensions#use-txcreator)
 
-## Use `PolkadotSigner`
+## Use `TxCreator`
 
 Once we connected to the extension, we can get the accounts available through `getAccounts` or `subscribe` functions.
 
 These accounts have `InjectedPolkadotAccount` type, with the following fields:
 
-- `polkadotSigner`: [`PolkadotSigner`](/signers/polkadot-signer) ready to use.
+- `txCreator`: [`TxCreator`](/signers/tx-creator) ready to use.
 - `address`: `string`. This comes from the wallet, it generally is an `AccountId32` (i.e. regular Polkadot accounts) or an `AccountId20` (i.e. Ethereum-like account).
 - `genesisHash`: `(string | null)?`. The wallet optionally informs which `genesisHash` is supported for this address.
 - `name`: `string?`. Optional name given by the wallet to the account (e.g. human-readable name given by the user).
@@ -64,9 +64,9 @@ const unsubscribe = selectedExtension.subscribe((newAccounts) => {
   accountList = newAccounts
 })
 
-const firstSigner = accountList[0].polkadotSigner
-const mySignature = await firstSigner.signBytes(Uint8Array.from([0, 1, 2, 3]))
+const myTxCreator = accountList[0].txCreator
+const mySignature = await myTxCreator.signBytes(Uint8Array.from([0, 1, 2, 3]))
 
-// we call it if don't want to track account changes anymore
+// we call it if we don't want to track account changes anymore
 unsubscribe()
 ```

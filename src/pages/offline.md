@@ -31,7 +31,7 @@ const tx2 = offline.tx.Utility.batch({
 })
 
 // we can sign txs, but we need to add more stuff than usual!
-const signedTx = await tx2.sign(signer, {
+const signedTx = await tx2.create(txCreator, {
   nonce: 24, // nonce is always compulsory
   mortality: { mortal: false }, // and mortality!
 })
@@ -43,14 +43,14 @@ Constants can be accessed easily having the metadata. `offline.constants.Pallet.
 
 ## Transactions
 
-This is the main usecase of offline api. It allows to create and encode transactions, and even sign them.
+This is the main usecase of offline api. It allows to create and encode transactions, and even create full extrinsics through a [`TxCreator`](/signers/tx-creator).
 The transactions are created in the exact same way as in the regular API ([see docs](/typed/tx)). Nevertheless, only a subset of the fields are exposed:
 
 - `decodedCall`: it enables to get the _PAPI decoded_ transaction. It is helpful to create other txs that require them as a parameter (e.g. `Utility.batch`).
 - `encodedData`: a `Uint8Array` with the encoded call data.
-- `sign`: it takes the same arguments as the regular API, but there are two compulsory signed extensions:
+- `create`: it takes the same arguments as the regular API, but there are two compulsory transaction extension values:
   - `nonce`: nonce cannot be retrieved anymore from the chain, and therefore has to be passed
-  - `mortality`: transactions can be signed either mortal or immortal. In case the tx were to be mortal, the block information has to be passed as well.
+  - `mortality`: transactions can be created either mortal or immortal. In case the tx were to be mortal, the block information has to be passed as well.
   ```typescript
   type Mortality =
     | { mortal: false }
