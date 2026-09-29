@@ -13,6 +13,12 @@
       "metadata": ".papi/metadata/dotRelay.scale",
       "genesis": "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
       "codeHash": "0xf77ad7a9fd6b985eb278204dc2964bc37c5d7d24ed9b08df38c4b629720d6d11"
+    },
+    "peopleNext": {
+      "wsUrl": "wss://polkadot-test.substrate.dev/people",
+      "metadata": ".papi/metadata/peopleNext.scale",
+      "genesis": "0x67fa177a097bfa18f77ea95ab56e9bcdfeb0e5b8a40e46298bb93e16b6fc5008",
+      "codeHash": "0xc0f0bfb48cbeab25d02e268579e178ca5e2226a37e38916f14a82e61261a44e8"
     }
   }
 }

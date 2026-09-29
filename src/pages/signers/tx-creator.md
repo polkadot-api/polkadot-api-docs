@@ -161,3 +161,5 @@ const getMyCreator = (publicKey: Uint8Array) => {
   return creatorWithCommonExtensions
 }
 ```
+
+For a complete example of a TxCreator, check out [Custom transaction extensions](/recipes/custom-transaction-extensions)
