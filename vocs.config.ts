@@ -170,6 +170,10 @@ export default defineConfig({
           link: "/recipes/upgrade",
         },
         {
+          text: "Custom transaction extensions",
+          link: "/recipes/custom-transaction-extensions",
+        },
+        {
           text: "Caching the metadata",
           link: "/recipes/metadata-caching",
         },
